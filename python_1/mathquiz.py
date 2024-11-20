@@ -3,6 +3,10 @@ import random
 def generate_problem():
     """Generate a challenging math problem with integers only."""
     operators = ['+', '-', '*', '/']
+
+    for operator in operators:
+        print operator
+
     operator = random.choice(operators)
     num1 = random.randint(10, 50)  # Larger integers for difficulty
     num2 = random.randint(2, 10)   # Manageable numbers for division
@@ -54,6 +58,8 @@ def math_quiz():
         print("Congratulations! You scored 10/10!")
     else:
         print(f"Good Effort! You scored {score}/10.")
+
+    
 
 # Run the quiz
 if __name__ == "__main__":
