@@ -1,0 +1,26 @@
+﻿1. What is the technology?
+The technology that is required in my light switch is IoT which specifically is Circuits and Electronics. 
+
+
+
+
+2. What does it do?
+You can turn you lights on and off from your phone. 
+
+
+
+
+3. Why is it important in the development of that track?
+It is important in the development for homeowners of that track because it will be convenient for anyone to use and you don’t have to get up and go across the room to turn your light off, it can help reduce energy if you forget to turn your lights off in the office or you can not go in the office and turn off the lights yourself. This is also easier for people to use due to efficiency because you can just click a button on your phone. 
+
+
+
+
+
+
+
+
+4. What is the good resource students can use it?
+https://learn.sparkfun.com/tutorials/
+           All About Circuits
+           Adafruit Learning System
