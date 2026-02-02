@@ -6,9 +6,9 @@ h1 {
     text-align: left;
     font-family: 'Papyrus', serif;
 }
-p {
-    color: white;
-    font-family: 'Papyrus', serif;
+.li { 
+    color: whitesmoke;
+    font-family: Georgia, 'Times New Roman', Times, serif;
 }
 
 img {
