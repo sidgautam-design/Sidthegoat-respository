@@ -6,7 +6,7 @@ h1 {
     text-align: left;
     font-family: 'Papyrus', serif;
 }
-.li { 
+li { 
     color: whitesmoke;
     font-family: Georgia, 'Times New Roman', Times, serif;
 }
@@ -14,4 +14,16 @@ h1 {
 img {
     height: 300px;
     width: 200px;
+}
+#textbold{
+ font-weight: bold;
+}
+
+footer{
+    color: white 
+}
+
+#window.location {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    color:crimson
 }
