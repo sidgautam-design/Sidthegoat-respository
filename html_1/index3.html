@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cybersecurity Education Simulator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #00ff00;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #00ff00;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #00ff00;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #00ddff;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .challenge-card {
+            background: rgba(0, 50, 0, 0.5);
+            border: 2px solid #00ff00;
+            border-radius: 8px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .challenge-card:hover {
+            background: rgba(0, 100, 0, 0.7);
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0, 255, 0, 0.4);
+        }
+
+        .challenge-card h3 {
+            color: #00ffff;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .challenge-card p {
+            color: #aaffaa;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
+        .btn {
+            background: #00ff00;
+            color: #000;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 10px 5px;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #00dd00;
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.6);
+        }
+
+        .btn-back {
+            background: #ff3333;
+            color: white;
+        }
+
+        .btn-back:hover {
+            background: #dd0000;
+        }
+
+        .email-container {
+            background: white;
+            color: black;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .email-header {
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .email-from {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .email-subject {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .email-body {
+            line-height: 1.6;
+        }
+
+        .suspicious-link {
+            color: #0066cc;
+            text-decoration: underline;
+            cursor: pointer;
+            padding: 8px 15px;
+            background: #f0f0f0;
+            display: inline-block;
+            margin: 15px 0;
+            border-radius: 3px;
+        }
+
+        .warning-box {
+            background: #ff3333;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 3px solid #ff0000;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 10px #ff0000; }
+            50% { box-shadow: 0 0 30px #ff0000; }
+        }
+
+        .success-box {
+            background: #00aa00;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 3px solid #00ff00;
+        }
+
+        .info-box {
+            background: rgba(0, 150, 255, 0.2);
+            border: 2px solid #00aaff;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            color: #aaffff;
+        }
+
+        .terminal {
+            background: #000;
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            min-height: 300px;
+            border: 2px solid #00ff00;
+        }
+
+        .terminal-input {
+            display: flex;
+            margin-top: 10px;
+        }
+
+        .terminal-prompt {
+            color: #00ff00;
+            margin-right: 10px;
+        }
+
+        .terminal-input input {
+            background: transparent;
+            border: none;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            flex: 1;
+            outline: none;
+            font-size: 1em;
+        }
+
+        .terminal-output {
+            margin-bottom: 10px;
+        }
+
+        .highlight {
+            background: yellow;
+            color: black;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+
+        ul {
+            margin-left: 20px;
+            line-height: 1.8;
+        }
+
+        .desktop-sim {
+            background: #2874a6;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            min-height: 400px;
+            position: relative;
+        }
+
+        .desktop-icon {
+            text-align: center;
+            color: white;
+            cursor: pointer;
+            padding: 10px;
+            margin: 10px;
+            display: inline-block;
+            width: 100px;
+        }
+
+        .desktop-icon:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+        }
+
+        .vulnerability-alert {
+            background: #ff9933;
+            color: black;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px;
+            border: 2px solid #ff6600;
+            font-family: Arial, sans-serif;
+        }
+
+        .hacker-view {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 2px solid #ff0000;
+        }
+
+        .typing-effect {
+            overflow: hidden;
+            white-space: nowrap;
+            animation: typing 2s steps(40);
+        }
+
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+
+        .button-group {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Home Screen -->
+        <div id="home" class="screen active">
+            <h1>🔒 CYBERSECURITY EDUCATION LAB</h1>
+            <p class="subtitle">Learn how hackers work and how to protect yourself</p>
+            
+            <div class="info-box">
+                <strong>⚠️ EDUCATIONAL PURPOSE ONLY</strong><br>
+                These simulations teach you about cybersecurity threats. Everything here is fake and safe. No real hacking is occurring.
+            </div>
+
+            <div class="menu-grid">
+                <div class="challenge-card" onclick="startChallenge('phishing')">
+                    <h3>📧 Phishing Attack</h3>
+                    <p>Learn how hackers trick people into revealing passwords through fake emails and websites.</p>
+                </div>
+
+                <div class="challenge-card" onclick="startChallenge('os-hack')">
+                    <h3>💻 OS Exploitation</h3>
+                    <p>See how attackers exploit vulnerabilities in outdated operating systems to gain access.</p>
+                </div>
+
+                <div class="challenge-card" onclick="startChallenge('password')">
+                    <h3>🔑 Password Cracking</h3>
+                    <p>Understand why strong passwords matter by trying to crack weak ones.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phishing Challenge -->
+        <div id="phishing" class="screen">
+            <h1>📧 Phishing Attack Simulation</h1>
+            
+            <div id="phishing-step1">
+                <div class="info-box">
+                    <strong>Scenario:</strong> You receive an email. Read it carefully and decide what to do.
+                </div>
+
+                <div class="email-container">
+                    <div class="email-header">
+                        <div class="email-from">From: <span class="highlight">security@paypa1-verify.com</span></div>
+                        <div class="email-subject">URGENT: Your PayPal Account Has Been Limited</div>
+                    </div>
+                    <div class="email-body">
+                        <p>Dear Valued Customer,</p>
+                        <p>We have detected unusual activity on your account. Your account has been temporarily limited for your security.</p>
+                        <p><strong>You must verify your identity within 24 hours or your account will be permanently suspended.</strong></p>
+                        <p>Click below to verify your account immediately:</p>
+                        <div class="suspicious-link" onclick="clickPhishingLink()">
+                            🔒 VERIFY MY ACCOUNT NOW
+                        </div>
+                        <p>Thank you for your prompt attention to this matter.</p>
+                        <p>The PayPal Security Team</p>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn" onclick="showPhishingExplanation()">I'm suspicious - Show me the red flags</button>
+                </div>
+            </div>
+
+            <div id="phishing-caught" style="display: none;">
+                <div class="warning-box">
+                    <h2>🚨 YOU JUST GOT PHISHED! 🚨</h2>
+                    <p>If this were real, a hacker would now have access to your account credentials!</p>
+                </div>
+
+                <div class="info-box">
+                    <h3>What Just Happened?</h3>
+                    <p>When you clicked that link, you would have been taken to a fake website that looks exactly like PayPal's login page. When you enter your username and password, the hacker captures them.</p>
+                    
+                    <h3>🚩 Red Flags You Missed:</h3>
+                    <ul>
+                        <li><strong>Email address:</strong> Look closely - it's "paypa1-verify.com" (with a number 1 instead of letter L). Real PayPal uses @paypal.com</li>
+                        <li><strong>Urgency tactics:</strong> "24 hours or permanent suspension" - creating panic so you don't think clearly</li>
+                        <li><strong>Generic greeting:</strong> "Dear Valued Customer" instead of your actual name</li>
+                        <li><strong>Suspicious link:</strong> The button doesn't show the actual URL destination</li>
+                        <li><strong>Grammar issues:</strong> Legitimate companies proofread their emails</li>
+                    </ul>
+
+                    <h3>🛡️ How To Protect Yourself:</h3>
+                    <ul>
+                        <li>Never click links in unexpected emails</li>
+                        <li>Always check the sender's email address carefully</li>
+                        <li>Type URLs directly into your browser instead of clicking links</li>
+                        <li>Enable two-factor authentication on all accounts</li>
+                        <li>If suspicious, contact the company directly using official contact info</li>
+                    </ul>
+                </div>
+            </div>
+
+            <button class="btn btn-back" onclick="goHome()">← Back to Menu</button>
+        </div>
+
+        <!-- OS Hacking Challenge -->
+        <div id="os-hack" class="screen">
+            <h1>💻 Operating System Exploitation</h1>
+            
+            <div id="os-step1">
+                <div class="info-box">
+                    <strong>Scenario:</strong> You're about to see how a black hat hacker exploits an outdated operating system. This computer hasn't been updated in months.
+                </div>
+
+                <div class="desktop-sim">
+                    <div class="vulnerability-alert">
+                        ⚠️ Windows Update<br>
+                        Your system is out of date. 15 critical security updates available.<br>
+                        <small>(User keeps clicking "Remind me later")</small>
+                    </div>
+                    
+                    <div class="desktop-icon">
+                        <div style="font-size: 40px;">📁</div>
+                        My Documents
+                    </div>
+                    <div class="desktop-icon">
+                        <div style="font-size: 40px;">🌐</div>
+                        Browser
+                    </div>
+                    <div class="desktop-icon">
+                        <div style="font-size: 40px;">💼</div>
+                        Work Files
+                    </div>
+                </div>
+
+                <button class="btn" onclick="startOSHack()">▶️ Start Hacker's Perspective</button>
+            </div>
+
+            <div id="os-step2" style="display: none;">
+                <div class="hacker-view">
+                    <h3 style="color: #ff0000;">🎯 HACKER'S VIEW - TARGETING SYSTEM</h3>
+                    <div class="terminal">
+                        <div id="hack-output"></div>
+                    </div>
+                </div>
+
+                <div id="os-explanation" style="display: none;">
+                    <div class="warning-box">
+                        <h2>🚨 SYSTEM COMPROMISED! 🚨</h2>
+                        <p>The hacker now has complete control over this computer!</p>
+                    </div>
+
+                    <div class="info-box">
+                        <h3>What Just Happened?</h3>
+                        <p><strong>Step 1 - Reconnaissance:</strong> The hacker scanned the network and found your computer's IP address.</p>
+                        
+                        <p><strong>Step 2 - Vulnerability Discovery:</strong> They detected you're running an outdated version of Windows with unpatched security holes.</p>
+                        
+                        <p><strong>Step 3 - Exploitation:</strong> They used a known exploit (EternalBlue or similar) to break through your defenses.</p>
+                        
+                        <p><strong>Step 4 - Access Gained:</strong> They installed a backdoor, giving them permanent access to your system.</p>
+
+                        <h3>💀 What Can They Do Now?</h3>
+                        <ul>
+                            <li>Steal all your files, photos, and documents</li>
+                            <li>Install ransomware and hold your data hostage</li>
+                            <li>Use your computer for criminal activities</li>
+                            <li>Access your saved passwords and financial information</li>
+                            <li>Turn on your webcam and microphone</li>
+                            <li>Use your computer to attack others</li>
+                        </ul>
+
+                        <h3>🛡️ How To Prevent This:</h3>
+                        <ul>
+                            <li><strong>ALWAYS install security updates immediately</strong> - they patch vulnerabilities</li>
+                            <li>Use a firewall (Windows Defender Firewall is built-in)</li>
+                            <li>Install antivirus software and keep it updated</li>
+                            <li>Don't click suspicious links or download unknown files</li>
+                            <li>Use strong, unique passwords for everything</li>
+                            <li>Enable automatic updates so you don't forget</li>
+                        </ul>
+
+                        <h3>⚡ Key Lesson:</h3>
+                        <p style="font-size: 1.2em;"><strong>Those "Remind me later" update notifications? They're your computer screaming "I have security holes!" Hackers love outdated systems because they're easy targets.</strong></p>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-back" onclick="goHome()">← Back to Menu</button>
+        </div>
+
+        <!-- Password Cracking Challenge -->
+        <div id="password" class="screen">
+            <h1>🔑 Password Strength Demonstration</h1>
+            
+            <div class="info-box">
+                <strong>Challenge:</strong> Try different passwords and see how quickly a hacker's computer could crack them using brute force attacks.
+            </div>
+
+            <div class="terminal">
+                <div style="color: #00ffff; margin-bottom: 20px;">
+                    <strong>SIMULATED PASSWORD CRACKER v2.0</strong><br>
+                    Testing password strength against brute force attack...<br><br>
+                </div>
+
+                <div class="terminal-input" style="margin-bottom: 20px;">
+                    <span class="terminal-prompt">Enter password to test:</span>
+                    <input type="text" id="password-input" placeholder="Type a password...">
+                </div>
+
+                <button class="btn" onclick="crackPassword()">🔓 Test Password Strength</button>
+
+                <div id="crack-result" style="margin-top: 20px;"></div>
+            </div>
+
+            <div class="info-box">
+                <h3>Try These Examples:</h3>
+                <ul>
+                    <li><strong>"password"</strong> - Very common weak password</li>
+                    <li><strong>"john123"</strong> - Name + numbers</li>
+                    <li><strong>"P@ssw0rd"</strong> - Common substitutions</li>
+                    <li><strong>"MyD0g$Nam3"</strong> - Better but still guessable</li>
+                    <li><strong>"Tr0pic@lSt0rm#92"</strong> - Strong password</li>
+                    <li><strong>"correct-horse-battery-staple-2024"</strong> - Passphrase method</li>
+                </ul>
+            </div>
+
+            <button class="btn btn-back" onclick="goHome()">← Back to Menu</button>
+        </div>
+    </div>
+
+    <script>
+        // Navigation functions
+        function startChallenge(challengeId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(challengeId).classList.add('active');
+        }
+
+        function goHome() {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById('home').classList.add('active');
+            
+            // Reset challenges
+            document.getElementById('phishing-step1').style.display = 'block';
+            document.getElementById('phishing-caught').style.display = 'none';
+            document.getElementById('os-step1').style.display = 'block';
+            document.getElementById('os-step2').style.display = 'none';
+            document.getElementById('hack-output').innerHTML = '';
+            document.getElementById('crack-result').innerHTML = '';
+        }
+
+        // Phishing challenge functions
+        function clickPhishingLink() {
+            document.getElementById('phishing-step1').style.display = 'none';
+            document.getElementById('phishing-caught').style.display = 'block';
+        }
+
+        function showPhishingExplanation() {
+            alert("Good instincts! Let's look at the red flags together...");
+            document.getElementById('phishing-step1').style.display = 'none';
+            document.getElementById('phishing-caught').style.display = 'block';
+            document.querySelector('.warning-box h2').textContent = '✅ GOOD JOB! YOU AVOIDED THE PHISH!';
+            document.querySelector('.warning-box p').textContent = 'Your suspicion saved you! Here are the red flags you might have noticed:';
+        }
+
+        // OS Hacking simulation
+        function startOSHack() {
+            document.getElementById('os-step1').style.display = 'none';
+            document.getElementById('os-step2').style.display = 'block';
+            
+            const output = document.getElementById('hack-output');
+            const commands = [
+                { text: '> nmap -sV 192.168.1.0/24', delay: 1000 },
+                { text: 'Scanning network for vulnerable hosts...', delay: 2000 },
+                { text: 'Found target: 192.168.1.105 [Windows 10 - Unpatched]', delay: 3000 },
+                { text: '> exploit -t 192.168.1.105 -v EternalBlue', delay: 4500 },
+                { text: 'Exploiting SMB vulnerability CVE-2017-0144...', delay: 6000 },
+                { text: '[✓] Exploit successful! Gained SYSTEM access', delay: 7500 },
+                { text: '> download_files C:\\Users\\*\\Documents', delay: 9000 },
+                { text: 'Downloading: tax_returns_2023.pdf', delay: 10000 },
+                { text: 'Downloading: passwords.txt', delay: 10500 },
+                { text: 'Downloading: family_photos.zip', delay: 11000 },
+                { text: '[✓] Backdoor installed. Maintaining persistent access...', delay: 12500 },
+                { text: '[✓] Mission complete. Full system control achieved.', delay: 14000 }
+            ];
+
+            commands.forEach(cmd => {
+                setTimeout(() => {
+                    const line = document.createElement('div');
+                    line.className = 'terminal-output';
+                    line.textContent = cmd.text;
+                    if (cmd.text.includes('[✓]')) {
+                        line.style.color = '#ff3333';
+                        line.style.fontWeight = 'bold';
+                    }
+                    output.appendChild(line);
+                    output.parentElement.scrollTop = output.parentElement.scrollHeight;
+                }, cmd.delay);
+            });
+
+            setTimeout(() => {
+                document.getElementById('os-explanation').style.display = 'block';
+            }, 15000);
+        }
+
+        // Password cracking simulation
+        function crackPassword() {
+            const password = document.getElementById('password-input').value;
+            const resultDiv = document.getElementById('crack-result');
+            
+            if (!password) {
+                resultDiv.innerHTML = '<div style="color: #ff3333;">Please enter a password to test!</div>';
+                return;
+            }
+
+            let crackTime, strength, color, advice;
+
+            // Simple password strength calculation
+            const length = password.length;
+            const hasUpper = /[A-Z]/.test(password);
+            const hasLower = /[a-z]/.test(password);
+            const hasNumber = /[0-9]/.test(password);
+            const hasSymbol = /[^A-Za-z0-9]/.test(password);
+            
+            const complexity = [hasUpper, hasLower, hasNumber, hasSymbol].filter(Boolean).length;
+
+            // Common passwords check
+            const commonPasswords = ['password', '123456', 'qwerty', 'abc123', 'letmein', '12345678'];
+            const isCommon = commonPasswords.some(p => password.toLowerCase().includes(p));
+
+            if (isCommon || length < 6) {
+                crackTime = 'INSTANT (less than 1 second)';
+                strength = 'EXTREMELY WEAK 💀';
+                color = '#ff0000';
+                advice = 'This password would be cracked immediately! Never use common words or short passwords.';
+            } else if (length < 8 || complexity < 2) {
+                crackTime = 'Few seconds to minutes';
+                strength = 'VERY WEAK 🔴';
+                color = '#ff3333';
+                advice = 'Still way too weak. Add more length and use different character types.';
+            } else if (length < 10 || complexity < 3) {
+                crackTime = 'Hours to days';
+                strength = 'WEAK ⚠️';
+                color = '#ff9933';
+                advice = 'Getting better, but could be cracked with enough time. Make it longer and more complex.';
+            } else if (length < 12 || complexity < 4) {
+                crackTime = 'Weeks to months';
+                strength = 'MODERATE 🟡';
+                color = '#ffff00';
+                advice = 'Decent password, but could still be improved with more length or complexity.';
+            } else if (length < 16) {
+                crackTime = 'Years to decades';
+                strength = 'STRONG 💪';
+                color = '#00ff00';
+                advice = 'Good password! This would take a very long time to crack.';
+            } else {
+                crackTime = 'Centuries (essentially uncrackable)';
+                strength = 'EXTREMELY STRONG 🛡️';
+                color = '#00ff00';
+                advice = 'Excellent password! This is virtually uncrackable with current technology.';
+            }
+
+            resultDiv.innerHTML = `
+                <div style="border: 2px solid ${color}; padding: 15px; border-radius: 5px; background: rgba(0,0,0,0.5);">
+                    <div style="color: ${color}; font-size: 1.5em; margin-bottom: 10px;">
+                        <strong>${strength}</strong>
+                    </div>
+                    <div style="color: #00ffff; margin-bottom: 10px;">
+                        <strong>Time to crack with modern hardware:</strong><br>
+                        ${crackTime}
+                    </div>
+                    <div style="color: #aaffaa; margin-bottom: 10px;">
+                        <strong>Password Stats:</strong><br>
+                        Length: ${length} characters<br>
+                        Uses uppercase: ${hasUpper ? 'Yes ✓' : 'No ✗'}<br>
+                        Uses lowercase: ${hasLower ? 'Yes ✓' : 'No ✗'}<br>
+                        Uses numbers: ${hasNumber ? 'Yes ✓' : 'No ✗'}<br>
+                        Uses symbols: ${hasSymbol ? 'Yes ✓' : 'No ✗'}
+                    </div>
+                    <div style="color: #ffff99;">
+                        <strong>Advice:</strong> ${advice}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Allow Enter key for password input
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordInput = document.getElementById('password-input');
+            if (passwordInput) {
+                passwordInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        crackPassword();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

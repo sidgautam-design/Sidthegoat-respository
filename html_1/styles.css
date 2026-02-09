@@ -26,4 +26,13 @@ footer{
 #window.location {
     font-family: Verdana, Geneva, Tahoma, sans-serif;
     color:crimson
+} 
+ul {
+   font-family: fantasy;
+    color: whitesmoke 
+    
+}
+
+footer {
+    color:gainsboro
 }

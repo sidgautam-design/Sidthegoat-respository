@@ -1,8 +1,29 @@
 body {
-    background-color: darkorange;
-} 
+    background-color: #00008B; 
+}
+h1 {
+    color: #FFD700;
+    text-align: left;
+    font-family: 'Papyrus', serif;
+}
+li { 
+    color: whitesmoke;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+}
 
-h1 { 
-    color:salmon;
-    text-align: center;
+img {
+    height: 300px;
+    width: 200px;
+}
+#textbold{
+ font-weight: bold;
+}
+
+footer{
+    color: white 
+}
+
+#window.location {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    color:crimson
 }
