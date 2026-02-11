@@ -3,7 +3,7 @@ body {
 }
 h1 {
     color: #FFD700;
-    text-align: left;
+    text-indent: center;
     font-family: 'Papyrus', serif;
 }
 li { 
@@ -29,10 +29,14 @@ footer{
 } 
 ul {
    font-family: fantasy;
-    color: whitesmoke 
+    color: whitesmoke; 
     
 }
 
 footer {
     color:gainsboro
-}
+} 
+
+.button {
+    font-style: initial;
+} 
