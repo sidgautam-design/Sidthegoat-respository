@@ -1,539 +1,152 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cybersecurity Education Simulator</title>
-    <!-- Link to external CSS file -->
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Password Cracker — CyberSim</title>
+  <link rel="stylesheet" href="styles3.css">
 </head>
 <body>
-    <div class="container">
-        
-        <!-- ==================== HOME SCREEN ==================== -->
-        <div id="home" class="screen active">
-            <!-- Animated header with glitch effect -->
-            <div class="header-container">
-                <h1 class="glitch" data-text="CYBERSECURITY LAB">🔒 CYBERSECURITY LAB</h1>
-                <div class="scanner-line"></div>
-                <p class="subtitle">
-                    <span class="typing-text">Learn how hackers work and how to protect yourself</span>
-                </p>
-            </div>
-            
-            <!-- Warning banner with animation -->
-            <div class="warning-banner">
-                <div class="warning-icon">⚠️</div>
-                <div class="warning-content">
-                    <strong>EDUCATIONAL PURPOSE ONLY</strong>
-                    <p>These simulations teach you about cybersecurity threats. Everything here is safe and fake.</p>
-                </div>
-            </div>
 
-            <!-- Challenge cards with enhanced design -->
-            <div class="menu-grid">
-                <!-- Phishing Card -->
-                <div class="challenge-card phishing-card" onclick="startChallenge('phishing')">
-                    <div class="card-header">
-                        <div class="card-icon">📧</div>
-                        <div class="difficulty-badge easy">BEGINNER</div>
-                    </div>
-                    <h3>Phishing Attack</h3>
-                    <p>Learn how hackers trick people into revealing passwords through fake emails and websites.</p>
-                    <div class="card-footer">
-                        <span class="card-stats">⏱️ 5 min</span>
-                        <span class="card-arrow">→</span>
-                    </div>
-                </div>
+  <header>
+    <div class="logo">CYBER<span>SIM</span></div>
+    <nav>
+      <a href="index.html">HOME</a>
+      <a href="password.html" class="active">PASSWORD</a>
+      <a href="network.html">NETWORK</a>
+      <a href="phishing.html">PHISHING</a>
+    </nav>
+    <div class="status-bar">
+      <span>MODULE: <span style="color:var(--green)">PWDCRACK</span></span>
+      <span id="clock">--:--:--</span>
+    </div>
+  </header>
 
-                <!-- OS Exploitation Card -->
-                <div class="challenge-card os-card" onclick="startChallenge('os-hack')">
-                    <div class="card-header">
-                        <div class="card-icon">💻</div>
-                        <div class="difficulty-badge medium">INTERMEDIATE</div>
-                    </div>
-                    <h3>OS Exploitation</h3>
-                    <p>See how attackers exploit vulnerabilities in outdated operating systems to gain access.</p>
-                    <div class="card-footer">
-                        <span class="card-stats">⏱️ 6 min</span>
-                        <span class="card-arrow">→</span>
-                    </div>
-                </div>
+  <main>
+    <a href="index.html" class="back-link">← BACK TO MENU</a>
 
-                <!-- Password Cracking Card -->
-                <div class="challenge-card password-card" onclick="startChallenge('password')">
-                    <div class="card-header">
-                        <div class="card-icon">🔑</div>
-                        <div class="difficulty-badge easy">BEGINNER</div>
-                    </div>
-                    <h3>Password Cracking</h3>
-                    <p>Understand why strong passwords matter by trying to crack weak ones.</p>
-                    <div class="card-footer">
-                        <span class="card-stats">⏱️ 4 min</span>
-                        <span class="card-arrow">→</span>
-                    </div>
-                </div>
+    <div class="sim-title">PASSWORD CRACKER</div>
+    <div class="sim-subtitle">BRUTE-FORCE SIMULATION MODULE v2.4</div>
 
-                <!-- SQL Injection Card -->
-                <div class="challenge-card sql-card" onclick="startChallenge('sql-injection')">
-                    <div class="card-header">
-                        <div class="card-icon">💉</div>
-                        <div class="difficulty-badge hard">ADVANCED</div>
-                    </div>
-                    <h3>SQL Injection</h3>
-                    <p>Hack into a database by injecting malicious SQL code into a login form.</p>
-                    <div class="card-footer">
-                        <span class="card-stats">⏱️ 7 min</span>
-                        <span class="card-arrow">→</span>
-                    </div>
-                </div>
-            </div>
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-value" id="attempts-count">0</div>
+        <div class="stat-label">ATTEMPTS</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value" id="speed-display">0</div>
+        <div class="stat-label">KEYS/SEC</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value" id="time-display">0.0s</div>
+        <div class="stat-label">ELAPSED</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value" id="progress-pct">0%</div>
+        <div class="stat-label">COMPLETE</div>
+      </div>
+    </div>
 
-            <!-- Stats section -->
-            <div class="stats-container">
-                <div class="stat-box">
-                    <div class="stat-number">4</div>
-                    <div class="stat-label">Simulations Available</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-number">100%</div>
-                    <div class="stat-label">Safe Learning</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-number">0</div>
-                    <div class="stat-label">Real Threats</div>
-                </div>
-            </div>
+    <div class="two-col">
+
+      <div class="panel">
+        <div class="panel-header">
+          <span>TARGET CONFIGURATION</span>
+          <div class="dots">
+            <span class="dot-red"></span>
+            <span class="dot-yellow"></span>
+            <span class="dot-green"></span>
+          </div>
         </div>
 
-        <!-- ==================== PHISHING SIMULATION ==================== -->
-        <div id="phishing" class="screen">
-            <div class="screen-header">
-                <button class="btn-back-top" onclick="goHome()">← Back</button>
-                <h1>📧 PHISHING ATTACK SIMULATION</h1>
-            </div>
-            
-            <div id="phishing-step1">
-                <div class="scenario-box">
-                    <div class="scenario-label">🎯 SCENARIO</div>
-                    <p>You receive an email. Read it carefully and decide what to do.</p>
-                </div>
-
-                <div class="email-container">
-                    <div class="email-header">
-                        <div class="email-from">From: <span class="highlight">security@paypa1-verify.com</span></div>
-                        <div class="email-subject">⚠️ URGENT: Your PayPal Account Has Been Limited</div>
-                    </div>
-                    <div class="email-body">
-                        <p>Dear Valued Customer,</p>
-                        <p>We have detected unusual activity on your account. Your account has been temporarily limited for your security.</p>
-                        <p class="urgent-text"><strong>You must verify your identity within 24 hours or your account will be permanently suspended.</strong></p>
-                        <p>Click below to verify your account immediately:</p>
-                        <div class="suspicious-link" onclick="clickPhishingLink()">
-                            🔒 VERIFY MY ACCOUNT NOW
-                        </div>
-                        <p>Thank you for your prompt attention to this matter.</p>
-                        <p>The PayPal Security Team</p>
-                    </div>
-                </div>
-
-                <div class="button-group">
-                    <button class="btn btn-large btn-warning" onclick="showPhishingExplanation()">
-                        <span class="btn-icon">🕵️</span>
-                        I'm Suspicious - Show Red Flags
-                    </button>
-                </div>
-            </div>
-
-            <div id="phishing-caught" style="display: none;">
-                <div class="alert-box danger">
-                    <div class="alert-icon">🚨</div>
-                    <div class="alert-content">
-                        <h2>YOU JUST GOT PHISHED!</h2>
-                        <p>If this were real, a hacker would now have access to your account credentials!</p>
-                    </div>
-                </div>
-
-                <div class="explanation-box">
-                    <h3>📖 What Just Happened?</h3>
-                    <p>When you clicked that link, you would have been taken to a fake website that looks exactly like PayPal's login page. When you enter your credentials, the hacker captures them.</p>
-                    
-                    <h3 class="section-title">🚩 Red Flags You Missed:</h3>
-                    <div class="red-flags-grid">
-                        <div class="flag-item">
-                            <div class="flag-icon">📧</div>
-                            <div class="flag-content">
-                                <strong>Suspicious Email</strong>
-                                <p>"paypa1-verify.com" uses number 1 instead of letter L</p>
-                            </div>
-                        </div>
-                        <div class="flag-item">
-                            <div class="flag-icon">⏰</div>
-                            <div class="flag-content">
-                                <strong>Urgency Tactics</strong>
-                                <p>"24 hours or permanent suspension" creates panic</p>
-                            </div>
-                        </div>
-                        <div class="flag-item">
-                            <div class="flag-icon">👤</div>
-                            <div class="flag-content">
-                                <strong>Generic Greeting</strong>
-                                <p>"Dear Valued Customer" instead of your name</p>
-                            </div>
-                        </div>
-                        <div class="flag-item">
-                            <div class="flag-icon">🔗</div>
-                            <div class="flag-content">
-                                <strong>Hidden URL</strong>
-                                <p>Button doesn't show the actual destination</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <h3 class="section-title">🛡️ Protection Tips:</h3>
-                    <ul class="protection-list">
-                        <li><span class="check-icon">✓</span> Never click links in unexpected emails</li>
-                        <li><span class="check-icon">✓</span> Always check sender's email address carefully</li>
-                        <li><span class="check-icon">✓</span> Type URLs directly into your browser</li>
-                        <li><span class="check-icon">✓</span> Enable two-factor authentication on all accounts</li>
-                    </ul>
-                </div>
-            </div>
-
-            <button class="btn btn-back-bottom" onclick="goHome()">← Back to Menu</button>
+        <label style="font-size:0.8rem; color:var(--green-dim); letter-spacing:2px;">TARGET HASH:</label>
+        <div style="margin: 8px 0 20px; font-size:0.8rem; color:#558855; word-break:break-all;" id="target-hash">
+          5f4dcc3b5aa765d61d8327deb882cf99
         </div>
 
-        <!-- ==================== OS EXPLOITATION ==================== -->
-        <div id="os-hack" class="screen">
-            <div class="screen-header">
-                <button class="btn-back-top" onclick="goHome()">← Back</button>
-                <h1>💻 OS EXPLOITATION SIMULATION</h1>
-            </div>
-            
-            <div id="os-step1">
-                <div class="scenario-box">
-                    <div class="scenario-label">🎯 SCENARIO</div>
-                    <p>A user is browsing online with an outdated, unpatched operating system.</p>
-                </div>
+        <label style="font-size:0.8rem; color:var(--green-dim); letter-spacing:2px;">SELECT TARGET:</label>
+        <select id="difficulty-select" style="
+          background:#000; color:var(--green); border:1px solid var(--border);
+          font-family:'Share Tech Mono',monospace; font-size:0.85rem;
+          padding:10px; width:100%; margin:8px 0 20px; border-radius:2px; outline:none;">
+          <option value="easy">password (4 chars — EASY)</option>
+          <option value="medium">dragon7 (6 chars — MEDIUM)</option>
+          <option value="hard">Tr0ub4d (7 chars — HARD)</option>
+        </select>
 
-                <div class="desktop-sim">
-                    <div class="desktop-header">
-                        <div class="window-controls">
-                            <span class="control-btn red"></span>
-                            <span class="control-btn yellow"></span>
-                            <span class="control-btn green"></span>
-                        </div>
-                        <span class="desktop-title">Windows 10</span>
-                    </div>
-                    <div class="vulnerability-alert">
-                        ⚠️ Windows Update<br>
-                        Your system is out of date. 15 critical security updates available.<br>
-                        <small>(User keeps clicking "Remind me later")</small>
-                    </div>
-                    <div class="desktop-icons">
-                        <div class="desktop-icon">
-                            <div class="icon-img">📁</div>
-                            My Documents
-                        </div>
-                        <div class="desktop-icon">
-                            <div class="icon-img">🌐</div>
-                            Browser
-                        </div>
-                        <div class="desktop-icon">
-                            <div class="icon-img">💼</div>
-                            Work Files
-                        </div>
-                    </div>
-                </div>
+        <label style="font-size:0.8rem; color:var(--green-dim); letter-spacing:2px;">ATTACK METHOD:</label>
+        <select id="method-select" style="
+          background:#000; color:var(--green); border:1px solid var(--border);
+          font-family:'Share Tech Mono',monospace; font-size:0.85rem;
+          padding:10px; width:100%; margin:8px 0 20px; border-radius:2px; outline:none;">
+          <option value="dictionary">Dictionary Attack</option>
+          <option value="brute">Brute Force</option>
+        </select>
 
-                <button class="btn btn-large btn-danger" onclick="startOSHack()">
-                    <span class="btn-icon">▶️</span>
-                    Start Hacker's Perspective
-                </button>
-            </div>
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-primary" id="start-btn" onclick="startCrack()">▶ START ATTACK</button>
+          <button class="btn btn-danger" id="stop-btn" onclick="stopCrack()" disabled>■ ABORT</button>
+        </div>
+      </div>
 
-            <div id="os-step2" style="display: none;">
-                <div class="hacker-view">
-                    <h3 class="hacker-title">🎯 HACKER'S VIEW - TARGETING SYSTEM</h3>
-                    <div class="terminal">
-                        <div class="terminal-header">
-                            <span>●</span> <span>●</span> <span>●</span>
-                            <span class="terminal-title">root@kali:~#</span>
-                        </div>
-                        <div id="hack-output" class="terminal-content"></div>
-                    </div>
-                </div>
-
-                <div id="os-explanation" style="display: none;">
-                    <div class="alert-box danger">
-                        <div class="alert-icon">🚨</div>
-                        <div class="alert-content">
-                            <h2>SYSTEM COMPROMISED!</h2>
-                            <p>The hacker now has complete control over this computer!</p>
-                        </div>
-                    </div>
-
-                    <div class="explanation-box">
-                        <h3>📖 What Just Happened?</h3>
-                        <div class="attack-steps">
-                            <div class="attack-step">
-                                <div class="step-number">1</div>
-                                <div class="step-content">
-                                    <strong>Reconnaissance</strong>
-                                    <p>Hacker scanned the network and found your IP address</p>
-                                </div>
-                            </div>
-                            <div class="attack-step">
-                                <div class="step-number">2</div>
-                                <div class="step-content">
-                                    <strong>Vulnerability Discovery</strong>
-                                    <p>Detected outdated Windows with unpatched security holes</p>
-                                </div>
-                            </div>
-                            <div class="attack-step">
-                                <div class="step-number">3</div>
-                                <div class="step-content">
-                                    <strong>Exploitation</strong>
-                                    <p>Used known exploit to break through defenses</p>
-                                </div>
-                            </div>
-                            <div class="attack-step">
-                                <div class="step-number">4</div>
-                                <div class="step-content">
-                                    <strong>Access Gained</strong>
-                                    <p>Installed backdoor for permanent access</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <h3 class="section-title danger-text">💀 What Can They Do Now?</h3>
-                        <ul class="danger-list">
-                            <li>Steal all files, photos, and documents</li>
-                            <li>Install ransomware and hold data hostage</li>
-                            <li>Access saved passwords and financial information</li>
-                            <li>Turn on webcam and microphone</li>
-                            <li>Use your computer to attack others</li>
-                        </ul>
-
-                        <h3 class="section-title">🛡️ Prevention Tips:</h3>
-                        <ul class="protection-list">
-                            <li><span class="check-icon">✓</span> <strong>ALWAYS install security updates immediately</strong></li>
-                            <li><span class="check-icon">✓</span> Use a firewall (Windows Defender is built-in)</li>
-                            <li><span class="check-icon">✓</span> Install antivirus software and keep it updated</li>
-                            <li><span class="check-icon">✓</span> Enable automatic updates so you don't forget</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <button class="btn btn-back-bottom" onclick="goHome()">← Back to Menu</button>
+      <div class="panel">
+        <div class="panel-header">
+          <span>CRACK PROGRESS</span>
+          <span id="status-badge" class="badge badge-warn">IDLE</span>
         </div>
 
-        <!-- ==================== PASSWORD CRACKING ==================== -->
-        <div id="password" class="screen">
-            <div class="screen-header">
-                <button class="btn-back-top" onclick="goHome()">← Back</button>
-                <h1>🔑 PASSWORD STRENGTH DEMONSTRATION</h1>
-            </div>
-            
-            <div class="scenario-box">
-                <div class="scenario-label">🎯 CHALLENGE</div>
-                <p>Try different passwords and see how quickly a hacker's computer could crack them using brute force attacks.</p>
-            </div>
+        <div style="font-size:0.8rem; color:var(--green-dim); margin-bottom:6px;">CURRENT ATTEMPT:</div>
+        <div style="font-family:'Orbitron',monospace; font-size:1.2rem; color:var(--green); height:30px; margin-bottom:15px;" id="current-attempt">---</div>
 
-            <div class="terminal">
-                <div class="terminal-header">
-                    <span>●</span> <span>●</span> <span>●</span>
-                    <span class="terminal-title">Password Cracker v2.0</span>
-                </div>
-                <div class="terminal-content">
-                    <div style="color: #00ffff; margin-bottom: 20px;">
-                        <strong>⚡ SIMULATED PASSWORD CRACKER v2.0</strong><br>
-                        Testing password strength against brute force attack...<br><br>
-                    </div>
-
-                    <div class="password-input-container">
-                        <label class="terminal-label">Enter password to test:</label>
-                        <input type="text" id="password-input" class="terminal-input" placeholder="Type a password...">
-                    </div>
-
-                    <button class="btn btn-large btn-success" onclick="crackPassword()">
-                        <span class="btn-icon">🔓</span>
-                        Test Password Strength
-                    </button>
-
-                    <div id="crack-result" style="margin-top: 20px;"></div>
-                </div>
-            </div>
-
-            <div class="examples-box">
-                <h3>💡 Try These Examples:</h3>
-                <div class="examples-grid">
-                    <div class="example-item weak" onclick="document.getElementById('password-input').value='password'; crackPassword();">
-                        <div class="example-strength">WEAK</div>
-                        <div class="example-pwd">"password"</div>
-                        <div class="example-desc">Very common</div>
-                    </div>
-                    <div class="example-item weak" onclick="document.getElementById('password-input').value='john123'; crackPassword();">
-                        <div class="example-strength">WEAK</div>
-                        <div class="example-pwd">"john123"</div>
-                        <div class="example-desc">Name + numbers</div>
-                    </div>
-                    <div class="example-item medium" onclick="document.getElementById('password-input').value='P@ssw0rd'; crackPassword();">
-                        <div class="example-strength">MEDIUM</div>
-                        <div class="example-pwd">"P@ssw0rd"</div>
-                        <div class="example-desc">Substitutions</div>
-                    </div>
-                    <div class="example-item strong" onclick="document.getElementById('password-input').value='Tr0pic@lSt0rm#92'; crackPassword();">
-                        <div class="example-strength">STRONG</div>
-                        <div class="example-pwd">"Tr0pic@lSt0rm#92"</div>
-                        <div class="example-desc">Complex mix</div>
-                    </div>
-                </div>
-            </div>
-
-            <button class="btn btn-back-bottom" onclick="goHome()">← Back to Menu</button>
+        <div class="progress-wrap">
+          <div class="progress-bar" id="crack-progress"></div>
         </div>
+        <div style="font-size:0.75rem; color:var(--green-dim); margin-bottom:20px;" id="progress-label">0 / 0 combinations</div>
 
-        <!-- ==================== SQL INJECTION ==================== -->
-        <div id="sql-injection" class="screen">
-            <div class="screen-header">
-                <button class="btn-back-top" onclick="goHome()">← Back</button>
-                <h1>💉 SQL INJECTION SIMULATION</h1>
-            </div>
-            
-            <div id="sql-step1">
-                <div class="scenario-box">
-                    <div class="scenario-label">🎯 SCENARIO</div>
-                    <p>You've found a poorly secured login form. Try to hack your way in without knowing the password!</p>
-                </div>
-
-                <div class="login-container">
-                    <div class="login-box">
-                        <div class="login-header">
-                            <div class="lock-icon">🏦</div>
-                            <h2>SecureBank Login</h2>
-                            <p>Customer Portal</p>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Username</label>
-                            <input type="text" id="sql-username" placeholder="Enter username" class="form-input">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Password</label>
-                            <input type="password" id="sql-password" placeholder="Enter password" class="form-input">
-                        </div>
-                        
-                        <button class="btn btn-large btn-primary" onclick="attemptSQLLogin()">
-                            <span class="btn-icon">🔓</span>
-                            Login
-                        </button>
-                    </div>
-                </div>
-
-                <div class="hint-box">
-                    <h3>💡 Hacking Hint:</h3>
-                    <p>This login form is vulnerable to SQL injection. The backend code looks like this:</p>
-                    <div class="code-block">
-                        <div class="code-header">
-                            <span>●</span> <span>●</span> <span>●</span>
-                            <span>vulnerable_code.php</span>
-                        </div>
-                        <code>
-                            SELECT * FROM users<br>
-                            WHERE username = '<span class="code-highlight">[YOUR INPUT]</span>'<br>
-                            AND password = '<span class="code-highlight">[YOUR INPUT]</span>'
-                        </code>
-                    </div>
-                    <div class="injection-example">
-                        <strong>💉 Try this injection:</strong>
-                        <div class="injection-code" onclick="document.getElementById('sql-username').value=this.textContent.trim()">
-                            admin' OR '1'='1
-                        </div>
-                        <small>Click to copy ↑ (Leave password empty or put anything)</small>
-                    </div>
-                </div>
-            </div>
-
-            <div id="sql-hacked" style="display: none;">
-                <div class="alert-box success">
-                    <div class="alert-icon">🚨</div>
-                    <div class="alert-content">
-                        <h2>YOU'RE IN! DATABASE COMPROMISED!</h2>
-                        <p>You just bypassed authentication without knowing any passwords!</p>
-                    </div>
-                </div>
-
-                <div class="explanation-box">
-                    <h3>📖 What Your Injection Did:</h3>
-                    <div class="sql-comparison">
-                        <div class="sql-box intended">
-                            <div class="sql-label">Original Query (Developer's Intent)</div>
-                            <code>SELECT * FROM users<br>WHERE username = 'john'<br>AND password = 'secret123'</code>
-                        </div>
-                        <div class="sql-arrow">→</div>
-                        <div class="sql-box injected">
-                            <div class="sql-label">Injected Query (What Actually Ran)</div>
-                            <code>SELECT * FROM users<br>WHERE username = 'admin' OR '1'='1'<br>AND password = ''</code>
-                        </div>
-                    </div>
-                    <div class="explanation-highlight">
-                        The <strong>OR '1'='1'</strong> is always true, so the database returns all users and logs you in as the first one (usually admin)!
-                    </div>
-
-                    <h3 class="section-title danger-text">💀 What Could a Real Attacker Do?</h3>
-                    <div class="attack-capabilities">
-                        <div class="capability-item">
-                            <div class="capability-icon">🔓</div>
-                            <strong>Bypass Authentication</strong>
-                            <p>Log in as any user without passwords</p>
-                        </div>
-                        <div class="capability-item">
-                            <div class="capability-icon">📂</div>
-                            <strong>Dump Database</strong>
-                            <p>Steal all user data, emails, passwords</p>
-                        </div>
-                        <div class="capability-item">
-                            <div class="capability-icon">🗑️</div>
-                            <strong>Delete Data</strong>
-                            <p>Drop tables with <code>'; DROP TABLE users; --</code></p>
-                        </div>
-                        <div class="capability-item">
-                            <div class="capability-icon">✏️</div>
-                            <strong>Modify Data</strong>
-                            <p>Change prices, balances, permissions</p>
-                        </div>
-                    </div>
-
-                    <h3 class="section-title">🛡️ How Developers Prevent This:</h3>
-                    <ul class="protection-list">
-                        <li><span class="check-icon">✓</span> <strong>Use parameterized queries</strong> - Never concatenate user input into SQL</li>
-                        <li><span class="check-icon">✓</span> <strong>Input validation</strong> - Reject suspicious characters and SQL keywords</li>
-                        <li><span class="check-icon">✓</span> <strong>Least privilege</strong> - Database accounts with minimal permissions</li>
-                        <li><span class="check-icon">✓</span> <strong>Web Application Firewall (WAF)</strong> - Detects and blocks SQL injection</li>
-                    </ul>
-
-                    <div class="key-lesson">
-                        <div class="lesson-icon">⚡</div>
-                        <div class="lesson-content">
-                            <strong>Key Lesson:</strong>
-                            <p>SQL Injection has been on the OWASP Top 10 list for decades, yet it's still one of the most common web vulnerabilities. Always use parameterized queries!</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <button class="btn btn-back-bottom" onclick="goHome()">← Back to Menu</button>
-        </div>
+        <div style="font-size:0.8rem; color:var(--green-dim); margin-bottom:6px;">CRACKED PASSWORD:</div>
+        <div style="font-family:'Orbitron',monospace; font-size:1.5rem; height:36px; color:var(--green);" id="cracked-display"> </div>
+      </div>
 
     </div>
 
-    <!-- Matrix-style background animation -->
-    <canvas id="matrix-bg"></canvas>
+    <div class="panel">
+      <div class="panel-header">
+        <span>ATTACK LOG</span>
+        <button class="btn btn-back" onclick="document.getElementById('log-output').innerHTML=''">CLEAR</button>
+      </div>
+      <div class="terminal-output" id="log-output">
+        <div class="log-dim">[SYS] Password cracker module loaded.</div>
+        <div class="log-dim">[SYS] Select a target and click START ATTACK to begin.</div>
+      </div>
+    </div>
 
-    <!-- Link to external JavaScript file -->
-    <script src="script.js"></script>
+    <div class="panel" style="margin-top:20px;">
+      <div class="panel-header"><span>EDUCATION: WHY THIS MATTERS</span></div>
+      <p style="font-size:0.82rem; color:var(--green-dim); line-height:1.9;">
+        This simulation shows how attackers crack weak passwords using dictionary and brute-force attacks.
+        <br><br>
+        <span style="color:var(--green)">DICTIONARY ATTACK:</span> Tests thousands of common passwords from a wordlist. The word "password" is cracked almost instantly.
+        <br><br>
+        <span style="color:var(--green)">BRUTE FORCE:</span> Tries every possible combination of characters. Gets exponentially slower as password length increases.
+        <br><br>
+        <span style="color:var(--yellow)">DEFENSE:</span> Use passwords 12+ characters long with mixed case, numbers, and symbols. Use a password manager.
+      </p>
+    </div>
+  </main>
+
+  <!-- Result Overlay -->
+  <div class="result-overlay" id="result-overlay">
+    <div class="result-box" id="result-box">
+      <h2 id="result-title">ACCESS GRANTED</h2>
+      <p id="result-msg">Password cracked successfully.</p>
+      <div style="display:flex; gap:15px; justify-content:center;">
+        <button class="btn btn-primary" onclick="resetSim()">TRY AGAIN</button>
+        <button class="btn btn-back" onclick="window.location.href='index.html'">MAIN MENU</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/main.js"></script>
+  <script src="js/password.js"></script>
 </body>
 </html>
