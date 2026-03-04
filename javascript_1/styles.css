@@ -1,0 +1,47 @@
+body {
+    background-color: #00008B; 
+}
+h1 {
+    color: #FFD700;
+    text-indent: center;
+    font-family: 'Papyrus', serif;
+}
+li { 
+    color: whitesmoke;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+img {
+    height: 300px;
+    width: 200px;
+}
+#textbold{
+ font-weight: bold;
+}
+
+footer{
+    color: white 
+}
+
+#window.location {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    color:crimson
+} 
+ul {
+   font-family: fantasy;
+    color: whitesmoke; 
+    
+}
+
+footer {
+    color:gainsboro
+} 
+
+.button {
+    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif; 
+} 
+
+#footer{
+    font-style: normal; 
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}

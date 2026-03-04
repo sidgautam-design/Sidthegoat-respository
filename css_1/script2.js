@@ -1,6 +1,6 @@
 let isloggedin = true;
 let level = 5
-if(isloggedin && level>=5) {
+if(isloggedin && level>=5) { 
     console.log("User can play level 5 or more");
 }
 else{
@@ -23,4 +23,10 @@ if(!isbanned && isloggedin){
 }
 else{
     console.log("The user is not logged in")
-}
+} 
+let premiumPassCost = 2500;
+if(ispremiumuser || coins >= premiumPassCost) {
+    coins = coins - premiumPassCost;
+    console.log("Premium unlocked! Coins left: " + coins);
+} else 
+    console.log("Not enough coins to unlock premium."); 
