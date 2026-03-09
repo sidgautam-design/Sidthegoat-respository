@@ -37,12 +37,20 @@ a{
     
 } 
 
-#cybersecurity{
-    font-family: sans-serif; 
+#window.location {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    color:crimson
 }
 
-
-#bullet{
-    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+.container {
+    display: flex;              /* Places items next to each other */
+    justify-content:space-evenly; /* Equal spacing */
+    gap:10px;                  /* Space between boxes */
 }
-    
+
+.box {
+    flex: 1;                    /* Equal width */
+    padding: 60px;
+    text-align: left;
+    gap: 10px;
+}

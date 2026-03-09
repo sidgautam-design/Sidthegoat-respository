@@ -20,7 +20,7 @@ img {
 }
 #textbold{
  font-weight: bold;
-      background-color: blueviolet;
+      background-color: navy;
 }
 
 footer{
@@ -41,9 +41,7 @@ footer {
     color:gainsboro
 } 
 
-.button {
 
-} 
 
 #footer{
     font-style: normal; 
@@ -54,3 +52,5 @@ footer {
     color: white; 
     font-family:cursive;
 }
+
+

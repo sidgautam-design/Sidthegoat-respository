@@ -1,539 +1,977 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cybersecurity Education Simulator</title>
-    <!-- Link to external CSS file -->
-    <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CyberSec Lab — Attack Simulation</title> 
+<button onclick="window.location= 'index.html'">Homepage</button>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #00ff41;
+    --green-dim: #00aa2b;
+    --green-faint: #003a0e;
+    --red: #ff3131;
+    --amber: #ffb700;
+    --cyan: #00e5ff;
+    --bg: #020c03;
+    --panel: #050f06;
+    --border: #0a2a0e;
+    --text: #b0ffb8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* CRT scanline overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0,0,0,0.07) 0px,
+      rgba(0,0,0,0.07) 1px,
+      transparent 1px,
+      transparent 2px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* CRT flicker */
+  @keyframes flicker {
+    0%,100% { opacity: 1; }
+    92% { opacity: 1; }
+    93% { opacity: 0.92; }
+    94% { opacity: 1; }
+    96% { opacity: 0.95; }
+    97% { opacity: 1; }
+  }
+  body { animation: flicker 6s infinite; }
+
+  /* HEADER */
+  header {
+    border-bottom: 1px solid var(--green-dim);
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(180deg, #030e04, var(--bg));
+    position: sticky; top: 0; z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: var(--green);
+    letter-spacing: 3px;
+    text-shadow: 0 0 20px var(--green);
+  }
+
+  .logo span { color: var(--red); }
+
+  .header-status {
+    font-size: 0.72rem;
+    color: var(--green-dim);
+    text-align: right;
+    line-height: 1.7;
+  }
+
+  .status-dot {
+    display: inline-block;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse 1.5s infinite;
+    margin-right: 6px;
+  }
+  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+
+  /* WARNING BANNER */
+  .warning-banner {
+    background: repeating-linear-gradient(45deg, #1a0000, #1a0000 10px, #0d0000 10px, #0d0000 20px);
+    border-top: 2px solid var(--red);
+    border-bottom: 2px solid var(--red);
+    padding: 10px 32px;
+    text-align: center;
+    color: var(--red);
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px var(--red);
+  }
+
+  /* MAIN LAYOUT */
+  main {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 28px 24px;
+  }
+
+  /* SECTION TITLES */
+  .section-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 4px;
+    color: var(--green-dim);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border), transparent);
+  }
+
+  /* ATTACK GRID */
+  .attack-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .attack-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 20px;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+  .attack-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--green-dim);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .attack-card:hover {
+    border-color: var(--green-dim);
+    box-shadow: 0 0 20px rgba(0,255,65,0.08);
+    transform: translateY(-2px);
+  }
+  .attack-card:hover::before { opacity: 1; }
+  .attack-card.active {
+    border-color: var(--green);
+    box-shadow: 0 0 30px rgba(0,255,65,0.15);
+  }
+  .attack-card.active::before { opacity: 1; background: var(--green); }
+
+  .card-threat {
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+  .threat-critical { color: var(--red); }
+  .threat-high { color: var(--amber); }
+  .threat-medium { color: var(--cyan); }
+
+  .card-icon { font-size: 1.8rem; margin-bottom: 10px; }
+
+  .card-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.8rem;
+    color: var(--green);
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+  }
+
+  .card-desc {
+    font-size: 0.72rem;
+    color: #5a8c60;
+    line-height: 1.6;
+  }
+
+  .card-btn {
+    margin-top: 14px;
+    display: inline-block;
+    border: 1px solid var(--green-dim);
+    color: var(--green);
+    padding: 6px 14px;
+    font-size: 0.68rem;
+    font-family: 'Share Tech Mono', monospace;
+    letter-spacing: 2px;
+    border-radius: 2px;
+    transition: background 0.2s, box-shadow 0.2s;
+  }
+  .attack-card:hover .card-btn {
+    background: rgba(0,255,65,0.08);
+    box-shadow: 0 0 10px rgba(0,255,65,0.2);
+  }
+
+  /* SIMULATION TERMINAL */
+  .sim-wrapper {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-bottom: 32px;
+    overflow: hidden;
+    display: none;
+    animation: slideDown 0.3s ease;
+  }
+  .sim-wrapper.visible { display: block; }
+  @keyframes slideDown { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+
+  .sim-titlebar {
+    background: #030f04;
+    border-bottom: 1px solid var(--border);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .sim-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-red { background: #ff5f56; }
+  .dot-yellow { background: #ffbd2e; }
+  .dot-green { background: #27c93f; }
+  .sim-titlebar-text {
+    flex: 1;
+    text-align: center;
+    font-size: 0.72rem;
+    color: var(--green-dim);
+    letter-spacing: 2px;
+  }
+
+  .sim-body {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    min-height: 420px;
+  }
+
+  @media(max-width: 768px) {
+    .sim-body { grid-template-columns: 1fr; }
+  }
+
+  /* TERMINAL OUTPUT */
+  .terminal {
+    padding: 16px;
+    font-family: 'VT323', monospace;
+    font-size: 1.05rem;
+    line-height: 1.5;
+    overflow-y: auto;
+    max-height: 420px;
+    border-right: 1px solid var(--border);
+  }
+
+  .terminal-line { margin-bottom: 2px; }
+  .t-prompt { color: var(--green-dim); }
+  .t-cmd { color: var(--green); }
+  .t-output { color: #7aad7e; }
+  .t-success { color: var(--green); text-shadow: 0 0 8px var(--green); }
+  .t-error { color: var(--red); }
+  .t-warning { color: var(--amber); }
+  .t-info { color: var(--cyan); }
+  .t-data { color: #c8ffc8; }
+  .t-dim { color: #2a5c2e; }
+
+  .cursor {
+    display: inline-block;
+    width: 9px; height: 16px;
+    background: var(--green);
+    animation: blink 0.9s steps(1) infinite;
+    vertical-align: middle;
+    box-shadow: 0 0 6px var(--green);
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* SIDEBAR */
+  .sim-sidebar {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    overflow-y: auto;
+    max-height: 420px;
+  }
+
+  .info-block {
+    background: #030a04;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 12px;
+  }
+
+  .info-block-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.62rem;
+    letter-spacing: 2px;
+    color: var(--green-dim);
+    margin-bottom: 8px;
+  }
+
+  .info-block p, .info-block li {
+    font-size: 0.75rem;
+    color: #5a8060;
+    line-height: 1.6;
+  }
+  .info-block li { margin-left: 14px; margin-bottom: 3px; }
+  .info-block strong { color: var(--text); }
+
+  .defense-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-size: 0.73rem;
+    color: #5a8060;
+  }
+  .defense-item::before { content: '▸'; color: var(--green); flex-shrink: 0; }
+
+  .progress-bar {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 6px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--green-dim), var(--green));
+    border-radius: 3px;
+    width: 0;
+    transition: width 0.5s ease;
+    box-shadow: 0 0 8px var(--green);
+  }
+
+  /* CONTROLS */
+  .sim-controls {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 2px;
+    padding: 8px 18px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid;
+  }
+  .btn-primary {
+    background: transparent;
+    border-color: var(--green);
+    color: var(--green);
+  }
+  .btn-primary:hover {
+    background: var(--green);
+    color: var(--bg);
+    box-shadow: 0 0 20px rgba(0,255,65,0.4);
+  }
+  .btn-secondary {
+    background: transparent;
+    border-color: var(--border);
+    color: var(--green-dim);
+  }
+  .btn-secondary:hover {
+    border-color: var(--green-dim);
+    color: var(--text);
+  }
+  .btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  /* NETWORK MAP */
+  .network-map {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 32px;
+  }
+
+  #netCanvas {
+    width: 100%;
+    height: 220px;
+    display: block;
+  }
+
+  /* STATS ROW */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .stat-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 14px;
+    text-align: center;
+  }
+  .stat-num {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.6rem;
+    color: var(--green);
+    text-shadow: 0 0 15px var(--green);
+  }
+  .stat-label {
+    font-size: 0.65rem;
+    color: var(--green-dim);
+    letter-spacing: 2px;
+    margin-top: 4px;
+  }
+
+  /* TICKER */
+  .ticker-wrap {
+    overflow: hidden;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: #030a04;
+    padding: 8px 0;
+    margin-bottom: 32px;
+  }
+  .ticker {
+    white-space: nowrap;
+    display: inline-block;
+    animation: ticker 35s linear infinite;
+    font-size: 0.72rem;
+    color: var(--green-dim);
+  }
+  @keyframes ticker { from{transform:translateX(100vw)} to{transform:translateX(-100%)} }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 18px 32px;
+    text-align: center;
+    font-size: 0.68rem;
+    color: #2a5c2e;
+    letter-spacing: 1px;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--green-faint); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--green-dim); }
+</style>
 </head>
 <body>
-    <div class="container">
-        
-        <!-- ==================== HOME SCREEN ==================== -->
-        <div id="home" class="screen active">
-            <!-- Animated header with glitch effect -->
-            <div class="header-container">
-                <h1 class="glitch" data-text="CYBERSECURITY LAB">🔒 CYBERSECURITY LAB</h1>
-                <div class="scanner-line"></div>
-                <p class="subtitle">
-                    <span class="typing-text">Learn how hackers work and how to protect yourself</span>
-                </p>
-            </div>
-            
-            <!-- Warning banner with animation -->
-            <div class="warning-banner">
-                <div class="warning-icon">⚠️</div>
-                <div class="warning-content">
-                    <strong>EDUCATIONAL PURPOSE ONLY</strong>
-                    <p>These simulations teach you about cybersecurity threats. Everything here is safe and fake.</p>
-                </div>
-            </div>
 
-            <!-- Challenge cards with enhanced design -->
-            <div class="menu-grid">
-                <!-- Phishing Card -->
-                <div class="challenge-card phishing-card" onclick="startChallenge('phishing')">
-                    <div class="card-header">
-                        <div class="card-icon">📧</div>
-                        <div class="difficulty-badge easy">BEGINNER</div>
-                    </div>
-                    <h3>Phishing Attack</h3>
-                    <p>Learn how hackers trick people into revealing passwords through fake emails and websites.</p>
-                    <div class="card-footer">
-                        <span class="card-stats">⏱️ 5 min</span>
-                        <span class="card-arrow">→</span>
-                    </div>
-                </div>
+<header>
+  <div class="logo">CYBER<span>SEC</span> LAB</div>
+  <div class="header-status">
+    <div><span class="status-dot"></span>SIMULATION MODE — NO REAL ATTACKS</div>
+    <div>SESSION: EDU-2024 | CLEARANCE: PUBLIC</div>
+  </div>
+</header>
 
-                <!-- OS Exploitation Card -->
-                <div class="challenge-card os-card" onclick="startChallenge('os-hack')">
-                    <div class="card-header">
-                        <div class="card-icon">💻</div>
-                        <div class="difficulty-badge medium">INTERMEDIATE</div>
-                    </div>
-                    <h3>OS Exploitation</h3>
-                    <p>See how attackers exploit vulnerabilities in outdated operating systems to gain access.</p>
-                    <div class="card-footer">
-                        <span class="card-stats">⏱️ 6 min</span>
-                        <span class="card-arrow">→</span>
-                    </div>
-                </div>
+<div class="warning-banner">
+  ⚠ EDUCATIONAL SIMULATION ONLY — ALL SCENARIOS ARE FICTIONAL & SANDBOXED — FOR LEARNING PURPOSES ⚠
+</div>
 
-                <!-- Password Cracking Card -->
-                <div class="challenge-card password-card" onclick="startChallenge('password')">
-                    <div class="card-header">
-                        <div class="card-icon">🔑</div>
-                        <div class="difficulty-badge easy">BEGINNER</div>
-                    </div>
-                    <h3>Password Cracking</h3>
-                    <p>Understand why strong passwords matter by trying to crack weak ones.</p>
-                    <div class="card-footer">
-                        <span class="card-stats">⏱️ 4 min</span>
-                        <span class="card-arrow">→</span>
-                    </div>
-                </div>
+<main>
 
-                <!-- SQL Injection Card -->
-                <div class="challenge-card sql-card" onclick="startChallenge('sql-injection')">
-                    <div class="card-header">
-                        <div class="card-icon">💉</div>
-                        <div class="difficulty-badge hard">ADVANCED</div>
-                    </div>
-                    <h3>SQL Injection</h3>
-                    <p>Hack into a database by injecting malicious SQL code into a login form.</p>
-                    <div class="card-footer">
-                        <span class="card-stats">⏱️ 7 min</span>
-                        <span class="card-arrow">→</span>
-                    </div>
-                </div>
-            </div>
+  <!-- TICKER -->
+  <div class="ticker-wrap">
+    <span class="ticker">
+      [ALERT] Simulated brute force detected on NODE-07 &nbsp;///&nbsp; [INFO] SQL injection pattern identified &nbsp;///&nbsp; [ALERT] Phishing payload staged for demo &nbsp;///&nbsp; [INFO] Man-in-the-middle scenario loaded &nbsp;///&nbsp; [WARN] Ransomware simulation ready &nbsp;///&nbsp; [INFO] Port scan sequence initialized &nbsp;///&nbsp; [ALERT] Zero-day exploit demo available &nbsp;///&nbsp; [INFO] All attacks are simulated — no real systems at risk &nbsp;///&nbsp;
+    </span>
+  </div>
 
-            <!-- Stats section -->
-            <div class="stats-container">
-                <div class="stat-box">
-                    <div class="stat-number">4</div>
-                    <div class="stat-label">Simulations Available</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-number">100%</div>
-                    <div class="stat-label">Safe Learning</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-number">0</div>
-                    <div class="stat-label">Real Threats</div>
-                </div>
-            </div>
-        </div>
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-num" id="statSims">0</div>
+      <div class="stat-label">SIMS RUN</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">6</div>
+      <div class="stat-label">ATTACK TYPES</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statThreats">0</div>
+      <div class="stat-label">THREATS SHOWN</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">100%</div>
+      <div class="stat-label">SANDBOXED</div>
+    </div>
+  </div>
 
-        <!-- ==================== PHISHING SIMULATION ==================== -->
-        <div id="phishing" class="screen">
-            <div class="screen-header">
-                <button class="btn-back-top" onclick="goHome()">← Back</button>
-                <h1>📧 PHISHING ATTACK SIMULATION</h1>
-            </div>
-            
-            <div id="phishing-step1">
-                <div class="scenario-box">
-                    <div class="scenario-label">🎯 SCENARIO</div>
-                    <p>You receive an email. Read it carefully and decide what to do.</p>
-                </div>
+  <!-- NETWORK MAP -->
+  <div class="section-title">// NETWORK TOPOLOGY</div>
+  <div class="network-map">
+    <canvas id="netCanvas"></canvas>
+  </div>
 
-                <div class="email-container">
-                    <div class="email-header">
-                        <div class="email-from">From: <span class="highlight">security@paypa1-verify.com</span></div>
-                        <div class="email-subject">⚠️ URGENT: Your PayPal Account Has Been Limited</div>
-                    </div>
-                    <div class="email-body">
-                        <p>Dear Valued Customer,</p>
-                        <p>We have detected unusual activity on your account. Your account has been temporarily limited for your security.</p>
-                        <p class="urgent-text"><strong>You must verify your identity within 24 hours or your account will be permanently suspended.</strong></p>
-                        <p>Click below to verify your account immediately:</p>
-                        <div class="suspicious-link" onclick="clickPhishingLink()">
-                            🔒 VERIFY MY ACCOUNT NOW
-                        </div>
-                        <p>Thank you for your prompt attention to this matter.</p>
-                        <p>The PayPal Security Team</p>
-                    </div>
-                </div>
+  <!-- ATTACK SCENARIOS -->
+  <div class="section-title">// SELECT ATTACK SIMULATION</div>
+  <div class="attack-grid">
 
-                <div class="button-group">
-                    <button class="btn btn-large btn-warning" onclick="showPhishingExplanation()">
-                        <span class="btn-icon">🕵️</span>
-                        I'm Suspicious - Show Red Flags
-                    </button>
-                </div>
-            </div>
-
-            <div id="phishing-caught" style="display: none;">
-                <div class="alert-box danger">
-                    <div class="alert-icon">🚨</div>
-                    <div class="alert-content">
-                        <h2>YOU JUST GOT PHISHED!</h2>
-                        <p>If this were real, a hacker would now have access to your account credentials!</p>
-                    </div>
-                </div>
-
-                <div class="explanation-box">
-                    <h3>📖 What Just Happened?</h3>
-                    <p>When you clicked that link, you would have been taken to a fake website that looks exactly like PayPal's login page. When you enter your credentials, the hacker captures them.</p>
-                    
-                    <h3 class="section-title">🚩 Red Flags You Missed:</h3>
-                    <div class="red-flags-grid">
-                        <div class="flag-item">
-                            <div class="flag-icon">📧</div>
-                            <div class="flag-content">
-                                <strong>Suspicious Email</strong>
-                                <p>"paypa1-verify.com" uses number 1 instead of letter L</p>
-                            </div>
-                        </div>
-                        <div class="flag-item">
-                            <div class="flag-icon">⏰</div>
-                            <div class="flag-content">
-                                <strong>Urgency Tactics</strong>
-                                <p>"24 hours or permanent suspension" creates panic</p>
-                            </div>
-                        </div>
-                        <div class="flag-item">
-                            <div class="flag-icon">👤</div>
-                            <div class="flag-content">
-                                <strong>Generic Greeting</strong>
-                                <p>"Dear Valued Customer" instead of your name</p>
-                            </div>
-                        </div>
-                        <div class="flag-item">
-                            <div class="flag-icon">🔗</div>
-                            <div class="flag-content">
-                                <strong>Hidden URL</strong>
-                                <p>Button doesn't show the actual destination</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <h3 class="section-title">🛡️ Protection Tips:</h3>
-                    <ul class="protection-list">
-                        <li><span class="check-icon">✓</span> Never click links in unexpected emails</li>
-                        <li><span class="check-icon">✓</span> Always check sender's email address carefully</li>
-                        <li><span class="check-icon">✓</span> Type URLs directly into your browser</li>
-                        <li><span class="check-icon">✓</span> Enable two-factor authentication on all accounts</li>
-                    </ul>
-                </div>
-            </div>
-
-            <button class="btn btn-back-bottom" onclick="goHome()">← Back to Menu</button>
-        </div>
-
-        <!-- ==================== OS EXPLOITATION ==================== -->
-        <div id="os-hack" class="screen">
-            <div class="screen-header">
-                <button class="btn-back-top" onclick="goHome()">← Back</button>
-                <h1>💻 OS EXPLOITATION SIMULATION</h1>
-            </div>
-            
-            <div id="os-step1">
-                <div class="scenario-box">
-                    <div class="scenario-label">🎯 SCENARIO</div>
-                    <p>A user is browsing online with an outdated, unpatched operating system.</p>
-                </div>
-
-                <div class="desktop-sim">
-                    <div class="desktop-header">
-                        <div class="window-controls">
-                            <span class="control-btn red"></span>
-                            <span class="control-btn yellow"></span>
-                            <span class="control-btn green"></span>
-                        </div>
-                        <span class="desktop-title">Windows 10</span>
-                    </div>
-                    <div class="vulnerability-alert">
-                        ⚠️ Windows Update<br>
-                        Your system is out of date. 15 critical security updates available.<br>
-                        <small>(User keeps clicking "Remind me later")</small>
-                    </div>
-                    <div class="desktop-icons">
-                        <div class="desktop-icon">
-                            <div class="icon-img">📁</div>
-                            My Documents
-                        </div>
-                        <div class="desktop-icon">
-                            <div class="icon-img">🌐</div>
-                            Browser
-                        </div>
-                        <div class="desktop-icon">
-                            <div class="icon-img">💼</div>
-                            Work Files
-                        </div>
-                    </div>
-                </div>
-
-                <button class="btn btn-large btn-danger" onclick="startOSHack()">
-                    <span class="btn-icon">▶️</span>
-                    Start Hacker's Perspective
-                </button>
-            </div>
-
-            <div id="os-step2" style="display: none;">
-                <div class="hacker-view">
-                    <h3 class="hacker-title">🎯 HACKER'S VIEW - TARGETING SYSTEM</h3>
-                    <div class="terminal">
-                        <div class="terminal-header">
-                            <span>●</span> <span>●</span> <span>●</span>
-                            <span class="terminal-title">root@kali:~#</span>
-                        </div>
-                        <div id="hack-output" class="terminal-content"></div>
-                    </div>
-                </div>
-
-                <div id="os-explanation" style="display: none;">
-                    <div class="alert-box danger">
-                        <div class="alert-icon">🚨</div>
-                        <div class="alert-content">
-                            <h2>SYSTEM COMPROMISED!</h2>
-                            <p>The hacker now has complete control over this computer!</p>
-                        </div>
-                    </div>
-
-                    <div class="explanation-box">
-                        <h3>📖 What Just Happened?</h3>
-                        <div class="attack-steps">
-                            <div class="attack-step">
-                                <div class="step-number">1</div>
-                                <div class="step-content">
-                                    <strong>Reconnaissance</strong>
-                                    <p>Hacker scanned the network and found your IP address</p>
-                                </div>
-                            </div>
-                            <div class="attack-step">
-                                <div class="step-number">2</div>
-                                <div class="step-content">
-                                    <strong>Vulnerability Discovery</strong>
-                                    <p>Detected outdated Windows with unpatched security holes</p>
-                                </div>
-                            </div>
-                            <div class="attack-step">
-                                <div class="step-number">3</div>
-                                <div class="step-content">
-                                    <strong>Exploitation</strong>
-                                    <p>Used known exploit to break through defenses</p>
-                                </div>
-                            </div>
-                            <div class="attack-step">
-                                <div class="step-number">4</div>
-                                <div class="step-content">
-                                    <strong>Access Gained</strong>
-                                    <p>Installed backdoor for permanent access</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <h3 class="section-title danger-text">💀 What Can They Do Now?</h3>
-                        <ul class="danger-list">
-                            <li>Steal all files, photos, and documents</li>
-                            <li>Install ransomware and hold data hostage</li>
-                            <li>Access saved passwords and financial information</li>
-                            <li>Turn on webcam and microphone</li>
-                            <li>Use your computer to attack others</li>
-                        </ul>
-
-                        <h3 class="section-title">🛡️ Prevention Tips:</h3>
-                        <ul class="protection-list">
-                            <li><span class="check-icon">✓</span> <strong>ALWAYS install security updates immediately</strong></li>
-                            <li><span class="check-icon">✓</span> Use a firewall (Windows Defender is built-in)</li>
-                            <li><span class="check-icon">✓</span> Install antivirus software and keep it updated</li>
-                            <li><span class="check-icon">✓</span> Enable automatic updates so you don't forget</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <button class="btn btn-back-bottom" onclick="goHome()">← Back to Menu</button>
-        </div>
-
-        <!-- ==================== PASSWORD CRACKING ==================== -->
-        <div id="password" class="screen">
-            <div class="screen-header">
-                <button class="btn-back-top" onclick="goHome()">← Back</button>
-                <h1>🔑 PASSWORD STRENGTH DEMONSTRATION</h1>
-            </div>
-            
-            <div class="scenario-box">
-                <div class="scenario-label">🎯 CHALLENGE</div>
-                <p>Try different passwords and see how quickly a hacker's computer could crack them using brute force attacks.</p>
-            </div>
-
-            <div class="terminal">
-                <div class="terminal-header">
-                    <span>●</span> <span>●</span> <span>●</span>
-                    <span class="terminal-title">Password Cracker v2.0</span>
-                </div>
-                <div class="terminal-content">
-                    <div style="color: #00ffff; margin-bottom: 20px;">
-                        <strong>⚡ SIMULATED PASSWORD CRACKER v2.0</strong><br>
-                        Testing password strength against brute force attack...<br><br>
-                    </div>
-
-                    <div class="password-input-container">
-                        <label class="terminal-label">Enter password to test:</label>
-                        <input type="text" id="password-input" class="terminal-input" placeholder="Type a password...">
-                    </div>
-
-                    <button class="btn btn-large btn-success" onclick="crackPassword()">
-                        <span class="btn-icon">🔓</span>
-                        Test Password Strength
-                    </button>
-
-                    <div id="crack-result" style="margin-top: 20px;"></div>
-                </div>
-            </div>
-
-            <div class="examples-box">
-                <h3>💡 Try These Examples:</h3>
-                <div class="examples-grid">
-                    <div class="example-item weak" onclick="document.getElementById('password-input').value='password'; crackPassword();">
-                        <div class="example-strength">WEAK</div>
-                        <div class="example-pwd">"password"</div>
-                        <div class="example-desc">Very common</div>
-                    </div>
-                    <div class="example-item weak" onclick="document.getElementById('password-input').value='john123'; crackPassword();">
-                        <div class="example-strength">WEAK</div>
-                        <div class="example-pwd">"john123"</div>
-                        <div class="example-desc">Name + numbers</div>
-                    </div>
-                    <div class="example-item medium" onclick="document.getElementById('password-input').value='P@ssw0rd'; crackPassword();">
-                        <div class="example-strength">MEDIUM</div>
-                        <div class="example-pwd">"P@ssw0rd"</div>
-                        <div class="example-desc">Substitutions</div>
-                    </div>
-                    <div class="example-item strong" onclick="document.getElementById('password-input').value='Tr0pic@lSt0rm#92'; crackPassword();">
-                        <div class="example-strength">STRONG</div>
-                        <div class="example-pwd">"Tr0pic@lSt0rm#92"</div>
-                        <div class="example-desc">Complex mix</div>
-                    </div>
-                </div>
-            </div>
-
-            <button class="btn btn-back-bottom" onclick="goHome()">← Back to Menu</button>
-        </div>
-
-        <!-- ==================== SQL INJECTION ==================== -->
-        <div id="sql-injection" class="screen">
-            <div class="screen-header">
-                <button class="btn-back-top" onclick="goHome()">← Back</button>
-                <h1>💉 SQL INJECTION SIMULATION</h1>
-            </div>
-            
-            <div id="sql-step1">
-                <div class="scenario-box">
-                    <div class="scenario-label">🎯 SCENARIO</div>
-                    <p>You've found a poorly secured login form. Try to hack your way in without knowing the password!</p>
-                </div>
-
-                <div class="login-container">
-                    <div class="login-box">
-                        <div class="login-header">
-                            <div class="lock-icon">🏦</div>
-                            <h2>SecureBank Login</h2>
-                            <p>Customer Portal</p>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Username</label>
-                            <input type="text" id="sql-username" placeholder="Enter username" class="form-input">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>Password</label>
-                            <input type="password" id="sql-password" placeholder="Enter password" class="form-input">
-                        </div>
-                        
-                        <button class="btn btn-large btn-primary" onclick="attemptSQLLogin()">
-                            <span class="btn-icon">🔓</span>
-                            Login
-                        </button>
-                    </div>
-                </div>
-
-                <div class="hint-box">
-                    <h3>💡 Hacking Hint:</h3>
-                    <p>This login form is vulnerable to SQL injection. The backend code looks like this:</p>
-                    <div class="code-block">
-                        <div class="code-header">
-                            <span>●</span> <span>●</span> <span>●</span>
-                            <span>vulnerable_code.php</span>
-                        </div>
-                        <code>
-                            SELECT * FROM users<br>
-                            WHERE username = '<span class="code-highlight">[YOUR INPUT]</span>'<br>
-                            AND password = '<span class="code-highlight">[YOUR INPUT]</span>'
-                        </code>
-                    </div>
-                    <div class="injection-example">
-                        <strong>💉 Try this injection:</strong>
-                        <div class="injection-code" onclick="document.getElementById('sql-username').value=this.textContent.trim()">
-                            admin' OR '1'='1
-                        </div>
-                        <small>Click to copy ↑ (Leave password empty or put anything)</small>
-                    </div>
-                </div>
-            </div>
-
-            <div id="sql-hacked" style="display: none;">
-                <div class="alert-box success">
-                    <div class="alert-icon">🚨</div>
-                    <div class="alert-content">
-                        <h2>YOU'RE IN! DATABASE COMPROMISED!</h2>
-                        <p>You just bypassed authentication without knowing any passwords!</p>
-                    </div>
-                </div>
-
-                <div class="explanation-box">
-                    <h3>📖 What Your Injection Did:</h3>
-                    <div class="sql-comparison">
-                        <div class="sql-box intended">
-                            <div class="sql-label">Original Query (Developer's Intent)</div>
-                            <code>SELECT * FROM users<br>WHERE username = 'john'<br>AND password = 'secret123'</code>
-                        </div>
-                        <div class="sql-arrow">→</div>
-                        <div class="sql-box injected">
-                            <div class="sql-label">Injected Query (What Actually Ran)</div>
-                            <code>SELECT * FROM users<br>WHERE username = 'admin' OR '1'='1'<br>AND password = ''</code>
-                        </div>
-                    </div>
-                    <div class="explanation-highlight">
-                        The <strong>OR '1'='1'</strong> is always true, so the database returns all users and logs you in as the first one (usually admin)!
-                    </div>
-
-                    <h3 class="section-title danger-text">💀 What Could a Real Attacker Do?</h3>
-                    <div class="attack-capabilities">
-                        <div class="capability-item">
-                            <div class="capability-icon">🔓</div>
-                            <strong>Bypass Authentication</strong>
-                            <p>Log in as any user without passwords</p>
-                        </div>
-                        <div class="capability-item">
-                            <div class="capability-icon">📂</div>
-                            <strong>Dump Database</strong>
-                            <p>Steal all user data, emails, passwords</p>
-                        </div>
-                        <div class="capability-item">
-                            <div class="capability-icon">🗑️</div>
-                            <strong>Delete Data</strong>
-                            <p>Drop tables with <code>'; DROP TABLE users; --</code></p>
-                        </div>
-                        <div class="capability-item">
-                            <div class="capability-icon">✏️</div>
-                            <strong>Modify Data</strong>
-                            <p>Change prices, balances, permissions</p>
-                        </div>
-                    </div>
-
-                    <h3 class="section-title">🛡️ How Developers Prevent This:</h3>
-                    <ul class="protection-list">
-                        <li><span class="check-icon">✓</span> <strong>Use parameterized queries</strong> - Never concatenate user input into SQL</li>
-                        <li><span class="check-icon">✓</span> <strong>Input validation</strong> - Reject suspicious characters and SQL keywords</li>
-                        <li><span class="check-icon">✓</span> <strong>Least privilege</strong> - Database accounts with minimal permissions</li>
-                        <li><span class="check-icon">✓</span> <strong>Web Application Firewall (WAF)</strong> - Detects and blocks SQL injection</li>
-                    </ul>
-
-                    <div class="key-lesson">
-                        <div class="lesson-icon">⚡</div>
-                        <div class="lesson-content">
-                            <strong>Key Lesson:</strong>
-                            <p>SQL Injection has been on the OWASP Top 10 list for decades, yet it's still one of the most common web vulnerabilities. Always use parameterized queries!</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <button class="btn btn-back-bottom" onclick="goHome()">← Back to Menu</button>
-        </div>
-
+    <div class="attack-card" onclick="loadSim('bruteforce')">
+      <div class="card-threat threat-critical">■ CRITICAL THREAT</div>
+      <div class="card-icon">🔓</div>
+      <div class="card-title">BRUTE FORCE ATTACK</div>
+      <div class="card-desc">Dictionary and credential stuffing attack against a login system. Demonstrates why password complexity matters.</div>
+      <span class="card-btn">► RUN SIMULATION</span>
     </div>
 
-    <!-- Matrix-style background animation -->
-    <canvas id="matrix-bg"></canvas>
+    <div class="attack-card" onclick="loadSim('sqli')">
+      <div class="card-threat threat-critical">■ CRITICAL THREAT</div>
+      <div class="card-icon">💉</div>
+      <div class="card-title">SQL INJECTION</div>
+      <div class="card-desc">Malicious SQL inserted into input fields to bypass authentication and exfiltrate database records.</div>
+      <span class="card-btn">► RUN SIMULATION</span>
+    </div>
 
-    <!-- Link to external JavaScript file -->
-    <script src="script.js"></script>
+    <div class="attack-card" onclick="loadSim('phishing')">
+      <div class="card-threat threat-high">▲ HIGH THREAT</div>
+      <div class="card-icon">🎣</div>
+      <div class="card-title">PHISHING ATTACK</div>
+      <div class="card-desc">Social engineering via spoofed emails and fake login pages to harvest credentials from unsuspecting users.</div>
+      <span class="card-btn">► RUN SIMULATION</span>
+    </div>
+
+    <div class="attack-card" onclick="loadSim('mitm')">
+      <div class="card-threat threat-high">▲ HIGH THREAT</div>
+      <div class="card-icon">👁️</div>
+      <div class="card-title">MAN-IN-THE-MIDDLE</div>
+      <div class="card-desc">Attacker intercepts traffic between client and server on an unsecured network to eavesdrop or tamper with data.</div>
+      <span class="card-btn">► RUN SIMULATION</span>
+    </div>
+
+    <div class="attack-card" onclick="loadSim('ransomware')">
+      <div class="card-threat threat-critical">■ CRITICAL THREAT</div>
+      <div class="card-icon">🔒</div>
+      <div class="card-title">RANSOMWARE</div>
+      <div class="card-desc">Malware that encrypts victim's files and demands payment. Simulates infection vector, propagation, and encryption phase.</div>
+      <span class="card-btn">► RUN SIMULATION</span>
+    </div>
+
+    <div class="attack-card" onclick="loadSim('portscan')">
+      <div class="card-threat threat-medium">◆ MEDIUM THREAT</div>
+      <div class="card-icon">📡</div>
+      <div class="card-title">PORT SCANNING</div>
+      <div class="card-desc">Reconnaissance technique to map open ports and services on a target system — the first step in most attacks.</div>
+      <span class="card-btn">► RUN SIMULATION</span>
+    </div>
+
+  </div>
+
+  <!-- SIMULATION TERMINAL -->
+  <div class="sim-wrapper" id="simWrapper">
+    <div class="sim-titlebar">
+      <div class="sim-dot dot-red"></div>
+      <div class="sim-dot dot-yellow"></div>
+      <div class="sim-dot dot-green"></div>
+      <div class="sim-titlebar-text" id="simTitle">SIMULATION TERMINAL</div>
+    </div>
+    <div class="sim-body">
+      <div class="terminal" id="terminal"></div>
+      <div class="sim-sidebar" id="sidebar"></div>
+    </div>
+    <div class="sim-controls">
+      <button class="btn btn-primary" id="btnRun" onclick="runCurrentSim()">► RUN ATTACK</button>
+      <button class="btn btn-secondary" onclick="clearSim()">✕ CLEAR</button>
+      <button class="btn btn-secondary" onclick="closeSim()">← BACK</button>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  CYBERSEC LAB v1.0 — EDUCATIONAL USE ONLY — ALL SIMULATIONS ARE FICTIONAL AND SANDBOXED<br>
+  No real networks, systems, or data are affected. Use this knowledge to <strong style="color:var(--green-dim)">defend</strong>, not attack.
+</footer>
+
+<script>
+// ── Network Canvas ──────────────────────────────────────────────
+const canvas = document.getElementById('netCanvas');
+const ctx = canvas.getContext('2d');
+
+const nodes = [
+  {x:0.1, y:0.5, label:'ATTACKER', color:'#ff3131', size:12},
+  {x:0.3, y:0.2, label:'ROUTER', color:'#ffb700', size:9},
+  {x:0.3, y:0.8, label:'SWITCH', color:'#ffb700', size:9},
+  {x:0.55, y:0.3, label:'WEB SERVER', color:'#00e5ff', size:10},
+  {x:0.55, y:0.7, label:'DB SERVER', color:'#00e5ff', size:10},
+  {x:0.75, y:0.15, label:'CLIENT A', color:'#00ff41', size:8},
+  {x:0.75, y:0.45, label:'CLIENT B', color:'#00ff41', size:8},
+  {x:0.75, y:0.75, label:'CLIENT C', color:'#00ff41', size:8},
+  {x:0.9, y:0.5, label:'FIREWALL', color:'#ff3131', size:10},
+];
+
+const edges = [
+  [0,1],[0,2],[1,3],[2,4],[3,5],[3,6],[4,7],[3,4],[1,2],[6,8],[4,8]
+];
+
+let packets = [];
+let animFrame;
+
+function drawNetwork() {
+  canvas.width = canvas.offsetWidth;
+  canvas.height = canvas.offsetHeight;
+  const W = canvas.width, H = canvas.height;
+
+  ctx.clearRect(0,0,W,H);
+
+  // Draw edges
+  edges.forEach(([a,b]) => {
+    const na = nodes[a], nb = nodes[b];
+    ctx.beginPath();
+    ctx.moveTo(na.x*W, na.y*H);
+    ctx.lineTo(nb.x*W, nb.y*H);
+    ctx.strokeStyle = 'rgba(0,170,43,0.25)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  });
+
+  // Draw packets
+  packets.forEach(p => {
+    ctx.beginPath();
+    ctx.arc(p.x*W, p.y*H, 4, 0, Math.PI*2);
+    ctx.fillStyle = p.color || '#00ff41';
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = p.color || '#00ff41';
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  });
+
+  // Draw nodes
+  nodes.forEach(n => {
+    ctx.beginPath();
+    ctx.arc(n.x*W, n.y*H, n.size, 0, Math.PI*2);
+    ctx.fillStyle = n.color + '22';
+    ctx.strokeStyle = n.color;
+    ctx.lineWidth = 1.5;
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = n.color;
+    ctx.fill();
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    ctx.fillStyle = n.color;
+    ctx.font = `${Math.max(9, n.size*0.75)}px 'Share Tech Mono'`;
+    ctx.textAlign = 'center';
+    ctx.fillText(n.label, n.x*W, n.y*H + n.size + 11);
+  });
+}
+
+function spawnPacket() {
+  const edge = edges[Math.floor(Math.random()*edges.length)];
+  const from = nodes[edge[0]], to = nodes[edge[1]];
+  const isAttack = Math.random() < 0.15;
+  packets.push({
+    x: from.x, y: from.y,
+    tx: to.x, ty: to.y,
+    speed: 0.01 + Math.random()*0.015,
+    color: isAttack ? '#ff3131' : '#00ff41',
+    t: 0
+  });
+}
+
+function animNet() {
+  packets.forEach(p => {
+    p.t += p.speed;
+    p.x = lerp(p.x, p.tx, p.speed*1.2);
+    p.y = lerp(p.y, p.ty, p.speed*1.2);
+  });
+  packets = packets.filter(p => {
+    const dx = p.x - p.tx, dy = p.y - p.ty;
+    return Math.sqrt(dx*dx+dy*dy) > 0.01;
+  });
+  if (Math.random() < 0.12) spawnPacket();
+  drawNetwork();
+  animFrame = requestAnimationFrame(animNet);
+}
+
+function lerp(a,b,t){ return a+(b-a)*t; }
+
+animNet();
+window.addEventListener('resize', drawNetwork);
+
+// ── Stats Counter ──────────────────────────────────────────────
+let simsRun = 0, threatsShown = 0;
+function incStats() {
+  simsRun++; threatsShown++;
+  document.getElementById('statSims').textContent = simsRun;
+  document.getElementById('statThreats').textContent = threatsShown;
+}
+
+// ── Simulation Engine ──────────────────────────────────────────
+let currentSim = null;
+let simRunning = false;
+let simTimers = [];
+
+const simData = {
+  bruteforce: {
+    title: '[ BRUTE FORCE LOGIN ATTACK ]',
+    sidebar: {
+      overview: 'A brute force attack systematically tries username/password combinations until access is gained. Attackers use wordlists, previously leaked databases, and automated tools.',
+      impact: ['Account takeover', 'Privilege escalation', 'Data breach', 'Lateral movement'],
+      defenses: ['Strong password policies', 'Account lockout after N attempts', 'Multi-factor authentication (MFA)', 'IP rate limiting & CAPTCHA', 'Monitoring & alerting'],
+    },
+    steps: [
+      { delay: 0,    type: 'prompt', text: 'hydra -l admin -P /wordlists/rockyou.txt 192.168.1.105 http-post' },
+      { delay: 600,  type: 'output', text: 'Hydra v9.4 starting — target: 192.168.1.105' },
+      { delay: 1000, type: 'output', text: 'Attempting credential pairs from rockyou.txt (14M entries)...' },
+      { delay: 1400, type: 'dim',    text: '[ATTEMPT] admin:password → 401 Unauthorized' },
+      { delay: 1700, type: 'dim',    text: '[ATTEMPT] admin:123456 → 401 Unauthorized' },
+      { delay: 2000, type: 'dim',    text: '[ATTEMPT] admin:qwerty → 401 Unauthorized' },
+      { delay: 2300, type: 'dim',    text: '[ATTEMPT] admin:letmein → 401 Unauthorized' },
+      { delay: 2600, type: 'dim',    text: '[ATTEMPT] admin:monkey → 401 Unauthorized' },
+      { delay: 2900, type: 'dim',    text: '[ATTEMPT] admin:dragon → 401 Unauthorized' },
+      { delay: 3200, type: 'dim',    text: '[ATTEMPT] admin:master → 401 Unauthorized' },
+      { delay: 3500, type: 'dim',    text: '[ATTEMPT] admin:sunshine → 401 Unauthorized' },
+      { delay: 3800, type: 'dim',    text: '[ATTEMPT] admin:princess → 401 Unauthorized' },
+      { delay: 4100, type: 'dim',    text: '[ATTEMPT] admin:admin123 → 401 Unauthorized' },
+      { delay: 4400, type: 'warning',text: '[ATTEMPT] admin:P@ssw0rd! → checking...' },
+      { delay: 4900, type: 'success', text: '[✓ SUCCESS] admin:P@ssw0rd! → 200 OK — SESSION COOKIE OBTAINED' },
+      { delay: 5400, type: 'error',   text: '>>> AUTHENTICATED AS: admin | Role: SUPERUSER <<<' },
+      { delay: 5900, type: 'info',    text: 'Session token: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiYWRtaW4ifQ...' },
+      { delay: 6400, type: 'output',  text: '⚠ 1 of 14,344,391 passwords tested. Elapsed: 4.2s' },
+    ]
+  },
+
+  sqli: {
+    title: '[ SQL INJECTION ATTACK ]',
+    sidebar: {
+      overview: 'SQL Injection exploits unsanitized user input by inserting SQL commands into query parameters. This can bypass authentication, extract data, and in some cases execute OS commands.',
+      impact: ['Authentication bypass', 'Full database dump', 'Data modification/deletion', 'OS command execution (stacked queries)'],
+      defenses: ['Parameterized queries / prepared statements', 'ORM frameworks', 'Input validation & sanitization', 'Web Application Firewall (WAF)', 'Least privilege DB accounts'],
+    },
+    steps: [
+      { delay: 0,    type: 'prompt', text: 'sqlmap -u "http://target.com/login" --data="user=admin&pass=x" --dbs' },
+      { delay: 600,  type: 'output', text: 'sqlmap 1.7.8 — testing connection to target...' },
+      { delay: 1000, type: 'output', text: 'Testing parameter: user → GET/POST injection points' },
+      { delay: 1500, type: 'info',   text: 'Payload: admin\' OR \'1\'=\'1\'--' },
+      { delay: 1900, type: 'info',   text: 'Query becomes: SELECT * FROM users WHERE user=\'admin\' OR \'1\'=\'1\'--\'' },
+      { delay: 2400, type: 'success',text: '[✓] Parameter "user" is INJECTABLE (boolean-blind)' },
+      { delay: 2900, type: 'output', text: 'Backend DBMS: MySQL 8.0.28 (Ubuntu)' },
+      { delay: 3300, type: 'output', text: 'Enumerating databases...' },
+      { delay: 3700, type: 'data',   text: '  [*] information_schema' },
+      { delay: 3900, type: 'data',   text: '  [*] appdb' },
+      { delay: 4100, type: 'data',   text: '  [*] users_production' },
+      { delay: 4400, type: 'output', text: 'Dumping table: users_production.accounts' },
+      { delay: 4900, type: 'data',   text: '  id | username | password_hash | email' },
+      { delay: 5100, type: 'data',   text: '  1  | admin    | $2b$12$9FzK... | admin@corp.com' },
+      { delay: 5300, type: 'data',   text: '  2  | jsmith   | $2b$12$xMqP... | j.smith@corp.com' },
+      { delay: 5500, type: 'data',   text: '  3  | mlee     | $2b$12$3TrW... | m.lee@corp.com' },
+      { delay: 5800, type: 'error',  text: '>>> 847 rows exfiltrated. Entire user table dumped. <<<' },
+    ]
+  },
+
+  phishing: {
+    title: '[ PHISHING CAMPAIGN SIMULATION ]',
+    sidebar: {
+      overview: 'Phishing uses deceptive emails that impersonate trusted organizations to trick users into revealing credentials. Spear-phishing targets specific individuals with personalized content.',
+      impact: ['Credential theft', 'Malware delivery', 'Account compromise', 'Corporate espionage'],
+      defenses: ['Email filtering & SPF/DKIM/DMARC', 'Security awareness training', 'Verify sender before clicking', 'Use password managers (detect fakes)', 'Report suspicious emails'],
+    },
+    steps: [
+      { delay: 0,    type: 'prompt', text: 'gophish --config phish_campaign.json --target corp_employees.csv' },
+      { delay: 500,  type: 'output', text: 'GoPhish Campaign Manager initializing...' },
+      { delay: 900,  type: 'output', text: 'Spoofing sender: it-helpdesk@c0rp-secure.com (corp.com lookalike)' },
+      { delay: 1300, type: 'info',   text: 'Subject: [URGENT] Password Reset Required — IT Security Team' },
+      { delay: 1700, type: 'output', text: 'Sending to 250 employees in target organization...' },
+      { delay: 2200, type: 'dim',    text: '[SENT] → j.anderson@corp.com' },
+      { delay: 2400, type: 'dim',    text: '[SENT] → m.chen@corp.com' },
+      { delay: 2600, type: 'dim',    text: '[SENT] → r.williams@corp.com' },
+      { delay: 3000, type: 'warning',text: '[OPENED] → j.anderson@corp.com (11:42 AM) — link clicked!' },
+      { delay: 3400, type: 'warning',text: '[CREDS] → j.anderson entered: janderson / Summer2024!' },
+      { delay: 3800, type: 'warning',text: '[OPENED] → m.chen@corp.com (11:44 AM) — link clicked!' },
+      { delay: 4200, type: 'warning',text: '[CREDS] → m.chen entered: mchen / Corp#9821' },
+      { delay: 4700, type: 'output', text: 'Fake login page visits: 47 / 250 (18.8% click rate)' },
+      { delay: 5200, type: 'error',  text: '>>> 23 credentials harvested from 250 targets (9.2% yield) <<<' },
+      { delay: 5800, type: 'info',   text: 'Industry avg phishing success: 7–15%. This campaign: above avg.' },
+    ]
+  },
+
+  mitm: {
+    title: '[ MAN-IN-THE-MIDDLE ATTACK ]',
+    sidebar: {
+      overview: 'In a MITM attack, the attacker secretly intercepts and relays communications between two parties. Common on public Wi-Fi using ARP spoofing or rogue access points.',
+      impact: ['Session hijacking', 'Credential interception', 'Traffic manipulation', 'SSL stripping'],
+      defenses: ['Always use HTTPS (check padlock)', 'Use VPN on public Wi-Fi', 'Certificate pinning in apps', 'HSTS (HTTP Strict Transport Security)', 'Avoid public Wi-Fi for sensitive tasks'],
+    },
+    steps: [
+      { delay: 0,    type: 'prompt', text: 'arpspoof -i wlan0 -t 192.168.1.10 192.168.1.1 &' },
+      { delay: 500,  type: 'output', text: 'ARP spoofing started — poisoning victim cache...' },
+      { delay: 1000, type: 'info',   text: 'Victim (192.168.1.10) now thinks attacker is the router' },
+      { delay: 1500, type: 'prompt', text: 'ettercap -T -q -i wlan0 -M arp:remote /192.168.1.10// /192.168.1.1//' },
+      { delay: 2000, type: 'output', text: 'Ettercap 0.8.3 — sniffing all traffic on wlan0...' },
+      { delay: 2500, type: 'dim',    text: '[PKT] TCP 192.168.1.10:52341 → 74.125.199.99:443 (HTTPS — encrypted)' },
+      { delay: 2900, type: 'dim',    text: '[PKT] TCP 192.168.1.10:52342 → 93.184.216.34:80 (HTTP — plaintext!)' },
+      { delay: 3300, type: 'warning',text: '[HTTP INTERCEPT] GET http://login.example.com/auth' },
+      { delay: 3700, type: 'warning',text: '[HTTP INTERCEPT] POST data: username=alice&password=hunter2' },
+      { delay: 4200, type: 'success',text: '[✓ CAPTURED] alice / hunter2 @ login.example.com' },
+      { delay: 4700, type: 'info',   text: 'Injecting malicious JS into HTTP response...' },
+      { delay: 5200, type: 'error',  text: '>>> Traffic intercepted, credentials stolen, JS injected <<<' },
+      { delay: 5700, type: 'output', text: 'Note: HTTPS would have prevented credential interception' },
+    ]
+  },
+
+  ransomware: {
+    title: '[ RANSOMWARE INFECTION SIMULATION ]',
+    sidebar: {
+      overview: 'Ransomware encrypts victim files and demands cryptocurrency payment for the decryption key. Often delivered via phishing or exploiting vulnerabilities. Causes billions in damages annually.',
+      impact: ['Complete data loss if no backup', 'Business operations halted', 'Ransom payments ($10k–$5M+)', 'Reputational damage'],
+      defenses: ['Regular offline backups (3-2-1 rule)', 'Keep systems patched', 'Disable macros in Office docs', 'Endpoint Detection & Response (EDR)', 'Network segmentation'],
+    },
+    steps: [
+      { delay: 0,    type: 'output', text: '[STAGE 1] User opened: Invoice_Q4_2024.docx (macro enabled)' },
+      { delay: 700,  type: 'warning',text: 'Macro executed — downloading payload from C2 server...' },
+      { delay: 1300, type: 'output', text: '[STAGE 2] Dropper installed to %APPDATA%/svchost32.exe' },
+      { delay: 1800, type: 'info',   text: 'Establishing persistence: HKCU\\Run registry key added' },
+      { delay: 2300, type: 'output', text: '[STAGE 3] Killing backup processes: vssadmin, wbadmin...' },
+      { delay: 2800, type: 'error',  text: 'Shadow copies deleted — recovery via Windows Restore: DISABLED' },
+      { delay: 3300, type: 'output', text: '[STAGE 4] Encryption phase initiated (AES-256 + RSA-2048)' },
+      { delay: 3700, type: 'dim',    text: 'Encrypting: C:\\Users\\alice\\Documents\\*.* [████████░░] 82%' },
+      { delay: 4100, type: 'dim',    text: 'Encrypting: C:\\Users\\alice\\Desktop\\*.* [██████████] 100%' },
+      { delay: 4500, type: 'dim',    text: 'Encrypting: mapped network drives... Z:\\ ████████████' },
+      { delay: 5000, type: 'error',  text: '>>> 47,382 files encrypted. Extensions renamed to .l0ck3d <<<' },
+      { delay: 5500, type: 'warning',text: 'Dropping ransom note: README_DECRYPT.txt on all drives' },
+      { delay: 6000, type: 'error',  text: 'Demand: 3.5 BTC (~$210,000) to wallet: bc1q...x7k2' },
+    ]
+  },
+
+  portscan: {
+    title: '[ PORT SCAN RECONNAISSANCE ]',
+    sidebar: {
+      overview: 'Port scanning maps which services are running on a target. It is usually the first step of any attack — attackers probe for open ports to identify attack surfaces before exploitation.',
+      impact: ['Exposes running services', 'Reveals OS fingerprint', 'Identifies vulnerable software versions', 'Maps network topology'],
+      defenses: ['Firewall — block unnecessary ports', 'Intrusion Detection System (IDS)', 'Close unused services', 'Use non-default ports', 'Monitor for scan patterns'],
+    },
+    steps: [
+      { delay: 0,    type: 'prompt', text: 'nmap -sV -sC -O -p- --min-rate 1000 192.168.1.105' },
+      { delay: 500,  type: 'output', text: 'Starting Nmap 7.94 — full port scan (65535 ports)' },
+      { delay: 1000, type: 'output', text: 'Scanning 192.168.1.105...' },
+      { delay: 1600, type: 'data',   text: 'PORT      STATE  SERVICE        VERSION' },
+      { delay: 1900, type: 'data',   text: '21/tcp    open   ftp            vsftpd 3.0.3' },
+      { delay: 2100, type: 'warning',text: '22/tcp    open   ssh            OpenSSH 7.4 (OUTDATED!)' },
+      { delay: 2300, type: 'data',   text: '80/tcp    open   http           Apache 2.4.41' },
+      { delay: 2500, type: 'warning',text: '443/tcp   open   https          Apache — cert expires in 3 days!' },
+      { delay: 2700, type: 'error',  text: '3306/tcp  open   mysql          MySQL 5.7.32 (exposed to internet!)' },
+      { delay: 2900, type: 'data',   text: '8080/tcp  open   http-alt       Tomcat 9.0.45' },
+      { delay: 3100, type: 'error',  text: '27017/tcp open   mongodb        MongoDB (NO AUTH REQUIRED!)' },
+      { delay: 3400, type: 'output', text: 'OS detection: Linux 4.15-5.8 (Ubuntu 18.04–20.04)' },
+      { delay: 3900, type: 'info',   text: 'Vulnerability scan: CVE-2021-41617 (OpenSSH) — CRITICAL' },
+      { delay: 4300, type: 'info',   text: 'Vulnerability scan: CVE-2019-12815 (vsftpd) — HIGH' },
+      { delay: 4800, type: 'error',  text: '>>> 7 open ports, 2 critical misconfigs, 2 CVEs found <<<' },
+    ]
+  }
+};
+
+function loadSim(id) {
+  currentSim = id;
+  const sim = simData[id];
+  document.querySelectorAll('.attack-card').forEach(c => c.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  document.getElementById('simWrapper').classList.add('visible');
+  document.getElementById('simTitle').textContent = sim.title;
+  document.getElementById('btnRun').disabled = false;
+  buildSidebar(sim.sidebar);
+  document.getElementById('terminal').innerHTML = '<span class="t-dim">// simulation loaded — press RUN ATTACK to begin</span>\n<span class="cursor"></span>';
+  document.getElementById('simWrapper').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function buildSidebar(data) {
+  const sb = document.getElementById('sidebar');
+  sb.innerHTML = `
+    <div class="info-block">
+      <div class="info-block-title">// OVERVIEW</div>
+      <p>${data.overview}</p>
+    </div>
+    <div class="info-block">
+      <div class="info-block-title">// POTENTIAL IMPACT</div>
+      ${data.impact.map(i => `<div class="defense-item" style="color:var(--red)">${i}</div>`).join('')}
+    </div>
+    <div class="info-block">
+      <div class="info-block-title">// DEFENSES</div>
+      ${data.defenses.map(d => `<div class="defense-item">${d}</div>`).join('')}
+    </div>
+    <div class="info-block">
+      <div class="info-block-title">// SIMULATION PROGRESS</div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+  `;
+}
+
+function runCurrentSim() {
+  if (!currentSim || simRunning) return;
+  simRunning = true;
+  document.getElementById('btnRun').disabled = true;
+  incStats();
+  const term = document.getElementById('terminal');
+  term.innerHTML = '';
+  const steps = simData[currentSim].steps;
+  const totalTime = steps[steps.length-1].delay + 800;
+
+  steps.forEach((s, i) => {
+    const t = setTimeout(() => {
+      const line = document.createElement('div');
+      line.className = 'terminal-line';
+      const progress = ((i+1)/steps.length)*100;
+      const fill = document.getElementById('progressFill');
+      if (fill) fill.style.width = progress + '%';
+
+      if (s.type === 'prompt') {
+        line.innerHTML = `<span class="t-prompt">root@kali:~# </span><span class="t-cmd">${s.text}</span>`;
+      } else {
+        line.innerHTML = `<span class="t-${s.type}">${s.text}</span>`;
+      }
+      term.appendChild(line);
+      term.scrollTop = term.scrollHeight;
+    }, s.delay);
+    simTimers.push(t);
+  });
+
+  const done = setTimeout(() => {
+    simRunning = false;
+    document.getElementById('btnRun').disabled = false;
+    const cursor = document.createElement('span');
+    cursor.className = 'cursor';
+    term.appendChild(cursor);
+  }, totalTime);
+  simTimers.push(done);
+}
+
+function clearSim() {
+  simTimers.forEach(clearTimeout);
+  simTimers = [];
+  simRunning = false;
+  if (currentSim) {
+    document.getElementById('terminal').innerHTML = '<span class="t-dim">// cleared — press RUN ATTACK to restart</span>';
+    document.getElementById('btnRun').disabled = false;
+    const fill = document.getElementById('progressFill');
+    if (fill) fill.style.width = '0';
+  }
+}
+
+function closeSim() {
+  clearSim();
+  document.getElementById('simWrapper').classList.remove('visible');
+  document.querySelectorAll('.attack-card').forEach(c => c.classList.remove('active'));
+  currentSim = null;
+}
+</script>
 </body>
 </html>

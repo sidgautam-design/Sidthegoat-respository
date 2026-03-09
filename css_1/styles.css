@@ -1,14 +1,17 @@
 body {
-    background-color: #00008B; 
+    background-color: black;
 }
+
 h1 {
     color: #FFD700;
-    text-align: left;
+    text-indent: center;
     font-family: 'Papyrus', serif;
+         background-color: black;
 }
 li { 
     color: whitesmoke;
     font-family: Georgia, 'Times New Roman', Times, serif;
+    background-color:navy;
 }
 
 img {
@@ -17,6 +20,7 @@ img {
 }
 #textbold{
  font-weight: bold;
+      background-color: navy;
 }
 
 footer{
@@ -25,14 +29,31 @@ footer{
 
 #window.location {
     font-family: Verdana, Geneva, Tahoma, sans-serif;
-    color:crimson
+    color:crimson 
 } 
 ul {
    font-family: fantasy;
-    color: whitesmoke 
+    color: whitesmoke; 
     
 }
 
 footer {
     color:gainsboro
+} 
+
+.button{
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+
+} 
+
+#footer{
+    font-style: normal; 
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
+
+#output{
+    color: white; 
+    font-family:cursive;
+}
+
+

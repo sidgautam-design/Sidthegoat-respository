@@ -42,3 +42,17 @@ a{
     color:crimson
 }
 
+.container {
+    display: flex;              /* Places items next to each other */
+    justify-content:space-evenly; /* Equal spacing */
+    gap:10px;                  /* Space between boxes */
+}
+
+.box {
+    flex: 1;                    /* Equal width */
+    padding: 60px;
+    text-align: left;
+    gap: 10px;
+}
+
+
