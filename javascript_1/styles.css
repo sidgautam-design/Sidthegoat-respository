@@ -1,14 +1,17 @@
 body {
-    background-color: #00008B; 
+    background-color: black;
 }
+
 h1 {
     color: #FFD700;
     text-indent: center;
     font-family: 'Papyrus', serif;
+         background-color: black;
 }
 li { 
     color: whitesmoke;
     font-family: Georgia, 'Times New Roman', Times, serif;
+    background-color:navy;
 }
 
 img {
@@ -17,6 +20,7 @@ img {
 }
 #textbold{
  font-weight: bold;
+      background-color: blueviolet;
 }
 
 footer{
@@ -25,7 +29,7 @@ footer{
 
 #window.location {
     font-family: Verdana, Geneva, Tahoma, sans-serif;
-    color:crimson
+    color:crimson 
 } 
 ul {
    font-family: fantasy;
@@ -38,10 +42,15 @@ footer {
 } 
 
 .button {
-    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif; 
+
 } 
 
 #footer{
     font-style: normal; 
     font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+#output{
+    color: white; 
+    font-family:cursive;
 }
