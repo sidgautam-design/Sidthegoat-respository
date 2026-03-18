@@ -1,977 +1,1681 @@
 <!DOCTYPE html>
+<!--
+  ╔══════════════════════════════════════════════════════════╗
+  ║         CYBERSEC LAB — Attack Simulation Page            ║
+  ║  Written for 11th Grade Computer Science Understanding   ║
+  ║  Every section is commented so you can follow along!     ║
+  ╚══════════════════════════════════════════════════════════╝
+-->
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CyberSec Lab — Attack Simulation</title> 
-<button onclick="window.location= 'index.html'">Homepage</button>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=VT323&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --green: #00ff41;
-    --green-dim: #00aa2b;
-    --green-faint: #003a0e;
-    --red: #ff3131;
-    --amber: #ffb700;
-    --cyan: #00e5ff;
-    --bg: #020c03;
-    --panel: #050f06;
-    --border: #0a2a0e;
-    --text: #b0ffb8;
-  }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CyberSec Lab — Attack Simulation</title>
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  <!-- Google Fonts: terminal/hacker aesthetic fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=VT323&display=swap" rel="stylesheet">
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Share Tech Mono', monospace;
-    min-height: 100vh;
-    overflow-x: hidden;
-    cursor: default;
-  }
+  <style>
+    /* ══════════════════════════════════════════════════════
+       CSS VARIABLES — Edit colors here to retheme the whole page
+       ══════════════════════════════════════════════════════ */
+    :root {
+      --green:       #00ff41;
+      --green-dim:   #00aa2b;
+      --green-faint: #003a0e;
+      --red:         #ff3131;
+      --amber:       #ffb700;
+      --cyan:        #00e5ff;
+      --bg:          #020c03;
+      --panel:       #050f06;
+      --border:      #0a2a0e;
+      --text:        #b0ffb8;
+    }
 
-  /* CRT scanline overlay */
-  body::before {
-    content: '';
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: repeating-linear-gradient(
-      0deg,
-      rgba(0,0,0,0.07) 0px,
-      rgba(0,0,0,0.07) 1px,
-      transparent 1px,
-      transparent 2px
-    );
-    pointer-events: none;
-    z-index: 9999;
-  }
+    /* RESET — remove default browser spacing */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
 
-  /* CRT flicker */
-  @keyframes flicker {
-    0%,100% { opacity: 1; }
-    92% { opacity: 1; }
-    93% { opacity: 0.92; }
-    94% { opacity: 1; }
-    96% { opacity: 0.95; }
-    97% { opacity: 1; }
-  }
-  body { animation: flicker 6s infinite; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Share Tech Mono', monospace;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
 
-  /* HEADER */
-  header {
-    border-bottom: 1px solid var(--green-dim);
-    padding: 18px 32px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: linear-gradient(180deg, #030e04, var(--bg));
-    position: sticky; top: 0; z-index: 100;
-  }
+    /* CRT scanline overlay — the horizontal-stripe TV effect */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(0,0,0,0.07) 0px, rgba(0,0,0,0.07) 1px,
+        transparent 1px, transparent 2px
+      );
+      pointer-events: none;
+      z-index: 9999;
+    }
 
-  .logo {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 1.1rem;
-    font-weight: 900;
-    color: var(--green);
-    letter-spacing: 3px;
-    text-shadow: 0 0 20px var(--green);
-  }
+    /* Subtle screen flicker animation */
+    @keyframes flicker {
+      0%, 100% { opacity: 1; }
+      93%       { opacity: 0.92; }
+      96%       { opacity: 0.95; }
+    }
+    body { animation: flicker 6s infinite; }
 
-  .logo span { color: var(--red); }
+    /* ══ HEADER ══ */
+    header {
+      border-bottom: 1px solid var(--green-dim);
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(180deg, #030e04, var(--bg));
+      position: sticky;
+      top: 0;
+      z-index: 200;
+    }
 
-  .header-status {
-    font-size: 0.72rem;
-    color: var(--green-dim);
-    text-align: right;
-    line-height: 1.7;
-  }
+    .logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 900;
+      color: var(--green);
+      letter-spacing: 3px;
+      text-shadow: 0 0 20px var(--green);
+    }
+    .logo span { color: var(--red); }
 
-  .status-dot {
-    display: inline-block;
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: var(--green);
-    box-shadow: 0 0 8px var(--green);
-    animation: pulse 1.5s infinite;
-    margin-right: 6px;
-  }
-  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+    .header-status { font-size: 0.72rem; color: var(--green-dim); text-align: right; line-height: 1.7; }
 
-  /* WARNING BANNER */
-  .warning-banner {
-    background: repeating-linear-gradient(45deg, #1a0000, #1a0000 10px, #0d0000 10px, #0d0000 20px);
-    border-top: 2px solid var(--red);
-    border-bottom: 2px solid var(--red);
-    padding: 10px 32px;
-    text-align: center;
-    color: var(--red);
-    font-size: 0.75rem;
-    letter-spacing: 2px;
-    text-shadow: 0 0 10px var(--red);
-  }
+    /* Pulsing status dot */
+    .status-dot {
+      display: inline-block;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: pulse 1.5s infinite;
+      margin-right: 6px;
+    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-  /* MAIN LAYOUT */
-  main {
-    max-width: 1300px;
-    margin: 0 auto;
-    padding: 28px 24px;
-  }
+    /* Warning stripe banner */
+    .warning-banner {
+      background: repeating-linear-gradient(45deg, #1a0000, #1a0000 10px, #0d0000, #0d0000 20px);
+      border-top: 2px solid var(--red);
+      border-bottom: 2px solid var(--red);
+      padding: 10px 32px;
+      text-align: center;
+      color: var(--red);
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      text-shadow: 0 0 10px var(--red);
+    }
 
-  /* SECTION TITLES */
-  .section-title {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.75rem;
-    letter-spacing: 4px;
-    color: var(--green-dim);
-    margin-bottom: 18px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .section-title::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: linear-gradient(90deg, var(--border), transparent);
-  }
+    /* Back to homepage button */
+    .btn-home {
+      display: inline-block;
+      border: 1px solid var(--green-dim);
+      color: var(--green-dim);
+      padding: 6px 16px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 2px;
+      border-radius: 2px;
+      cursor: pointer;
+      background: transparent;
+      transition: all 0.2s;
+      text-decoration: none;
+      text-align: left;
+    }
+    .btn-home:hover { border-color: var(--green); color: var(--green); background: rgba(0,255,65,0.05); }
 
-  /* ATTACK GRID */
-  .attack-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 16px;
-    margin-bottom: 32px;
-  }
+    main { max-width: 1300px; margin: 0 auto; padding: 28px 24px; }
 
-  .attack-card {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 20px;
-    cursor: pointer;
-    transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
-    position: relative;
-    overflow: hidden;
-  }
-  .attack-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: var(--green-dim);
-    opacity: 0;
-    transition: opacity 0.2s;
-  }
-  .attack-card:hover {
-    border-color: var(--green-dim);
-    box-shadow: 0 0 20px rgba(0,255,65,0.08);
-    transform: translateY(-2px);
-  }
-  .attack-card:hover::before { opacity: 1; }
-  .attack-card.active {
-    border-color: var(--green);
-    box-shadow: 0 0 30px rgba(0,255,65,0.15);
-  }
-  .attack-card.active::before { opacity: 1; background: var(--green); }
+    /* Section title with auto-extending line */
+    .section-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 4px;
+      color: var(--green-dim);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .section-title::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--border), transparent); }
 
-  .card-threat {
-    font-size: 0.65rem;
-    letter-spacing: 2px;
-    margin-bottom: 8px;
-  }
-  .threat-critical { color: var(--red); }
-  .threat-high { color: var(--amber); }
-  .threat-medium { color: var(--cyan); }
+    /* ══ STATS ROW ══ */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+    .stat-card { background: var(--panel); border: 1px solid var(--border); border-radius: 4px; padding: 14px; text-align: center; }
+    .stat-num { font-family: 'Orbitron', sans-serif; font-size: 1.6rem; color: var(--green); text-shadow: 0 0 15px var(--green); }
+    .stat-label { font-size: 0.65rem; color: var(--green-dim); letter-spacing: 2px; margin-top: 4px; }
 
-  .card-icon { font-size: 1.8rem; margin-bottom: 10px; }
+    /* ══ NETWORK MAP ══ */
+    .network-map { background: var(--panel); border: 1px solid var(--border); border-radius: 4px; padding: 20px; margin-bottom: 32px; }
+    #netCanvas { width: 100%; height: 220px; display: block; }
 
-  .card-title {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.8rem;
-    color: var(--green);
-    margin-bottom: 6px;
-    letter-spacing: 1px;
-  }
+    /* ══ SCROLLING TICKER ══ */
+    .ticker-wrap { overflow: hidden; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: #030a04; padding: 8px 0; margin-bottom: 32px; }
+    .ticker { white-space: nowrap; display: inline-block; animation: ticker 35s linear infinite; font-size: 0.72rem; color: var(--green-dim); }
+    @keyframes ticker { from { transform: translateX(100vw); } to { transform: translateX(-100%); } }
 
-  .card-desc {
-    font-size: 0.72rem;
-    color: #5a8c60;
-    line-height: 1.6;
-  }
+    /* ══ ATTACK CARDS GRID ══ */
+    .attack-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
 
-  .card-btn {
-    margin-top: 14px;
-    display: inline-block;
-    border: 1px solid var(--green-dim);
-    color: var(--green);
-    padding: 6px 14px;
-    font-size: 0.68rem;
-    font-family: 'Share Tech Mono', monospace;
-    letter-spacing: 2px;
-    border-radius: 2px;
-    transition: background 0.2s, box-shadow 0.2s;
-  }
-  .attack-card:hover .card-btn {
-    background: rgba(0,255,65,0.08);
-    box-shadow: 0 0 10px rgba(0,255,65,0.2);
-  }
+    .attack-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 20px;
+      cursor: pointer;
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+      position: relative;
+      overflow: hidden;
+    }
+    .attack-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: var(--green-dim);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .attack-card:hover { border-color: var(--green-dim); box-shadow: 0 0 20px rgba(0,255,65,0.08); transform: translateY(-2px); }
+    .attack-card:hover::before { opacity: 1; }
+    .attack-card.active { border-color: var(--green); box-shadow: 0 0 30px rgba(0,255,65,0.15); }
+    .attack-card.active::before { opacity: 1; background: var(--green); }
 
-  /* SIMULATION TERMINAL */
-  .sim-wrapper {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    margin-bottom: 32px;
-    overflow: hidden;
-    display: none;
-    animation: slideDown 0.3s ease;
-  }
-  .sim-wrapper.visible { display: block; }
-  @keyframes slideDown { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+    .card-threat   { font-size: 0.65rem; letter-spacing: 2px; margin-bottom: 8px; }
+    .threat-critical { color: var(--red); }
+    .threat-high     { color: var(--amber); }
+    .threat-medium   { color: var(--cyan); }
+    .card-icon { font-size: 1.8rem; margin-bottom: 10px; }
+    .card-title { font-family: 'Orbitron', sans-serif; font-size: 0.8rem; color: var(--green); margin-bottom: 6px; letter-spacing: 1px; }
+    .card-desc { font-size: 0.72rem; color: #5a8c60; line-height: 1.6; }
+    .card-btn { margin-top: 14px; display: inline-block; border: 1px solid var(--green-dim); color: var(--green); padding: 6px 14px; font-size: 0.68rem; font-family: 'Share Tech Mono', monospace; letter-spacing: 2px; border-radius: 2px; transition: background 0.2s, box-shadow 0.2s; }
+    .attack-card:hover .card-btn { background: rgba(0,255,65,0.08); box-shadow: 0 0 10px rgba(0,255,65,0.2); }
 
-  .sim-titlebar {
-    background: #030f04;
-    border-bottom: 1px solid var(--border);
-    padding: 10px 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .sim-dot { width: 10px; height: 10px; border-radius: 50%; }
-  .dot-red { background: #ff5f56; }
-  .dot-yellow { background: #ffbd2e; }
-  .dot-green { background: #27c93f; }
-  .sim-titlebar-text {
-    flex: 1;
-    text-align: center;
-    font-size: 0.72rem;
-    color: var(--green-dim);
-    letter-spacing: 2px;
-  }
+    /* ════════════════════════════════════════════════════════
+       POPUP MODAL — the full-screen overlay simulation window
+       ════════════════════════════════════════════════════════ */
 
-  .sim-body {
-    display: grid;
-    grid-template-columns: 1fr 340px;
-    min-height: 420px;
-  }
+    /* Dark overlay behind the modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.88);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      backdrop-filter: blur(4px);
+    }
+    .modal-overlay.open { display: flex; }
 
-  @media(max-width: 768px) {
-    .sim-body { grid-template-columns: 1fr; }
-  }
+    /* The modal box itself */
+    .modal {
+      background: var(--panel);
+      border: 1px solid var(--green-dim);
+      border-radius: 6px;
+      width: 100%;
+      max-width: 1100px;
+      max-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 60px rgba(0,255,65,0.15), 0 0 120px rgba(0,255,65,0.05);
+      animation: modalIn 0.25s ease;
+      overflow: hidden;
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.96) translateY(20px); }
+      to   { opacity: 1; transform: scale(1)    translateY(0); }
+    }
 
-  /* TERMINAL OUTPUT */
-  .terminal {
-    padding: 16px;
-    font-family: 'VT323', monospace;
-    font-size: 1.05rem;
-    line-height: 1.5;
-    overflow-y: auto;
-    max-height: 420px;
-    border-right: 1px solid var(--border);
-  }
+    /* Modal title bar — mac-style traffic lights */
+    .modal-titlebar {
+      background: #030f04;
+      border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .modal-dot    { width: 10px; height: 10px; border-radius: 50%; cursor: pointer; }
+    .dot-red    { background: #ff5f56; }
+    .dot-yellow { background: #ffbd2e; }
+    .dot-green  { background: #27c93f; }
+    .modal-title { flex: 1; text-align: center; font-family: 'Orbitron', sans-serif; font-size: 0.72rem; color: var(--green-dim); letter-spacing: 3px; }
 
-  .terminal-line { margin-bottom: 2px; }
-  .t-prompt { color: var(--green-dim); }
-  .t-cmd { color: var(--green); }
-  .t-output { color: #7aad7e; }
-  .t-success { color: var(--green); text-shadow: 0 0 8px var(--green); }
-  .t-error { color: var(--red); }
-  .t-warning { color: var(--amber); }
-  .t-info { color: var(--cyan); }
-  .t-data { color: #c8ffc8; }
-  .t-dim { color: #2a5c2e; }
+    /* Modal body: visual canvas top, terminal bottom */
+    .modal-body {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+    }
 
-  .cursor {
-    display: inline-block;
-    width: 9px; height: 16px;
-    background: var(--green);
-    animation: blink 0.9s steps(1) infinite;
-    vertical-align: middle;
-    box-shadow: 0 0 6px var(--green);
-  }
-  @keyframes blink { 50% { opacity: 0; } }
+    /* ── VISUAL ATTACK CANVAS AREA ──
+       This is where the animated attack diagram lives.
+       Each attack type draws a different animation here. */
+    .attack-visual {
+      position: relative;
+      height: 260px;
+      flex-shrink: 0;
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+      background: #020a03;
+    }
+    #attackCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
 
-  /* SIDEBAR */
-  .sim-sidebar {
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    overflow-y: auto;
-    max-height: 420px;
-  }
+    /* Overlay label showing attack name */
+    .visual-label {
+      position: absolute;
+      top: 10px;
+      left: 14px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.6rem;
+      letter-spacing: 3px;
+      color: var(--green-dim);
+      opacity: 0.7;
+    }
 
-  .info-block {
-    background: #030a04;
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    padding: 12px;
-  }
+    /* Live status badge in top-right of visual */
+    .visual-status {
+      position: absolute;
+      top: 10px;
+      right: 14px;
+      font-size: 0.65rem;
+      color: var(--green);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
 
-  .info-block-title {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.62rem;
-    letter-spacing: 2px;
-    color: var(--green-dim);
-    margin-bottom: 8px;
-  }
+    /* Bottom half: terminal + info side by side */
+    .modal-bottom {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      flex: 1;
+      overflow: hidden;
+      min-height: 0;
+    }
+    @media (max-width: 700px) { .modal-bottom { grid-template-columns: 1fr; } }
 
-  .info-block p, .info-block li {
-    font-size: 0.75rem;
-    color: #5a8060;
-    line-height: 1.6;
-  }
-  .info-block li { margin-left: 14px; margin-bottom: 3px; }
-  .info-block strong { color: var(--text); }
+    /* Terminal text area */
+    .terminal {
+      padding: 14px 16px;
+      font-family: 'VT323', monospace;
+      font-size: 1rem;
+      line-height: 1.5;
+      overflow-y: auto;
+      border-right: 1px solid var(--border);
+    }
+    .terminal-line { margin-bottom: 2px; word-break: break-all; }
+    .t-prompt  { color: var(--green-dim); }
+    .t-cmd     { color: var(--green); }
+    .t-output  { color: #7aad7e; }
+    .t-success { color: var(--green); text-shadow: 0 0 8px var(--green); }
+    .t-error   { color: var(--red); }
+    .t-warning { color: var(--amber); }
+    .t-info    { color: var(--cyan); }
+    .t-data    { color: #c8ffc8; }
+    .t-dim     { color: #2a5c2e; }
 
-  .defense-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    margin-bottom: 6px;
-    font-size: 0.73rem;
-    color: #5a8060;
-  }
-  .defense-item::before { content: '▸'; color: var(--green); flex-shrink: 0; }
+    /* Blinking terminal cursor */
+    .cursor {
+      display: inline-block;
+      width: 9px; height: 16px;
+      background: var(--green);
+      animation: blink 0.9s steps(1) infinite;
+      vertical-align: middle;
+      box-shadow: 0 0 6px var(--green);
+    }
+    @keyframes blink { 50% { opacity: 0; } }
 
-  .progress-bar {
-    height: 6px;
-    background: var(--border);
-    border-radius: 3px;
-    overflow: hidden;
-    margin-top: 6px;
-  }
-  .progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--green-dim), var(--green));
-    border-radius: 3px;
-    width: 0;
-    transition: width 0.5s ease;
-    box-shadow: 0 0 8px var(--green);
-  }
+    /* ── INFO SIDEBAR inside modal ── */
+    .modal-sidebar {
+      padding: 14px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: #030a04;
+    }
 
-  /* CONTROLS */
-  .sim-controls {
-    padding: 12px 16px;
-    border-top: 1px solid var(--border);
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
+    .info-block { background: var(--panel); border: 1px solid var(--border); border-radius: 3px; padding: 11px; }
+    .info-block-title { font-family: 'Orbitron', sans-serif; font-size: 0.58rem; letter-spacing: 2px; color: var(--green-dim); margin-bottom: 7px; }
+    .info-block p { font-size: 0.72rem; color: #5a8060; line-height: 1.55; }
 
-  .btn {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.72rem;
-    letter-spacing: 2px;
-    padding: 8px 18px;
-    border-radius: 2px;
-    cursor: pointer;
-    transition: all 0.2s;
-    border: 1px solid;
-  }
-  .btn-primary {
-    background: transparent;
-    border-color: var(--green);
-    color: var(--green);
-  }
-  .btn-primary:hover {
-    background: var(--green);
-    color: var(--bg);
-    box-shadow: 0 0 20px rgba(0,255,65,0.4);
-  }
-  .btn-secondary {
-    background: transparent;
-    border-color: var(--border);
-    color: var(--green-dim);
-  }
-  .btn-secondary:hover {
-    border-color: var(--green-dim);
-    color: var(--text);
-  }
-  .btn:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-  }
+    .defense-item { display: flex; align-items: flex-start; gap: 6px; margin-bottom: 5px; font-size: 0.7rem; color: #5a8060; line-height: 1.4; }
+    .defense-item::before { content: '▸'; color: var(--green); flex-shrink: 0; }
 
-  /* NETWORK MAP */
-  .network-map {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 20px;
-    margin-bottom: 32px;
-  }
+    /* Progress bar */
+    .progress-bar { height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; margin-top: 6px; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--green-dim), var(--green)); border-radius: 3px; width: 0; transition: width 0.5s ease; box-shadow: 0 0 8px var(--green); }
 
-  #netCanvas {
-    width: 100%;
-    height: 220px;
-    display: block;
-  }
+    /* Modal control buttons */
+    .modal-controls {
+      padding: 10px 14px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+      background: #030f04;
+    }
+    .btn { font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; letter-spacing: 2px; padding: 7px 16px; border-radius: 2px; cursor: pointer; transition: all 0.2s; border: 1px solid; }
+    .btn-primary { background: transparent; border-color: var(--green); color: var(--green); }
+    .btn-primary:hover { background: var(--green); color: var(--bg); box-shadow: 0 0 20px rgba(0,255,65,0.4); }
+    .btn-secondary { background: transparent; border-color: var(--border); color: var(--green-dim); }
+    .btn-secondary:hover { border-color: var(--green-dim); color: var(--text); }
+    .btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-  /* STATS ROW */
-  .stats-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 12px;
-    margin-bottom: 32px;
-  }
+    /* Custom scrollbars */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--green-faint); border-radius: 2px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--green-dim); }
 
-  .stat-card {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 14px;
-    text-align: center;
-  }
-  .stat-num {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 1.6rem;
-    color: var(--green);
-    text-shadow: 0 0 15px var(--green);
-  }
-  .stat-label {
-    font-size: 0.65rem;
-    color: var(--green-dim);
-    letter-spacing: 2px;
-    margin-top: 4px;
-  }
-
-  /* TICKER */
-  .ticker-wrap {
-    overflow: hidden;
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-    background: #030a04;
-    padding: 8px 0;
-    margin-bottom: 32px;
-  }
-  .ticker {
-    white-space: nowrap;
-    display: inline-block;
-    animation: ticker 35s linear infinite;
-    font-size: 0.72rem;
-    color: var(--green-dim);
-  }
-  @keyframes ticker { from{transform:translateX(100vw)} to{transform:translateX(-100%)} }
-
-  /* FOOTER */
-  footer {
-    border-top: 1px solid var(--border);
-    padding: 18px 32px;
-    text-align: center;
-    font-size: 0.68rem;
-    color: #2a5c2e;
-    letter-spacing: 1px;
-  }
-
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: var(--green-faint); border-radius: 2px; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--green-dim); }
-</style>
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 18px 32px;
+      text-align: center;
+      font-size: 0.68rem;
+      color: #2a5c2e;
+      letter-spacing: 1px;
+    }
+  </style>
 </head>
+
 <body>
 
-<header>
-  <div class="logo">CYBER<span>SEC</span> LAB</div>
-  <div class="header-status">
-    <div><span class="status-dot"></span>SIMULATION MODE — NO REAL ATTACKS</div>
-    <div>SESSION: EDU-2024 | CLEARANCE: PUBLIC</div>
-  </div>
-</header>
+  <!-- ── HEADER ── -->
+  <header>
+    <div class="logo">CYBER<span>SEC</span> LAB</div>
+    <button class="btn-home" onclick="window.location='index.html'">← HOMEPAGE</button>
+    <div class="header-status">
+      <div><span class="status-dot"></span>SIMULATION MODE — NO REAL ATTACKS</div>
+      <div>SESSION: EDU-2024 | CLEARANCE: PUBLIC</div>
+    </div> 
+    <script src="script.js"></script>
+  </header>
 
-<div class="warning-banner">
-  ⚠ EDUCATIONAL SIMULATION ONLY — ALL SCENARIOS ARE FICTIONAL & SANDBOXED — FOR LEARNING PURPOSES ⚠
-</div>
-
-<main>
-
-  <!-- TICKER -->
-  <div class="ticker-wrap">
-    <span class="ticker">
-      [ALERT] Simulated brute force detected on NODE-07 &nbsp;///&nbsp; [INFO] SQL injection pattern identified &nbsp;///&nbsp; [ALERT] Phishing payload staged for demo &nbsp;///&nbsp; [INFO] Man-in-the-middle scenario loaded &nbsp;///&nbsp; [WARN] Ransomware simulation ready &nbsp;///&nbsp; [INFO] Port scan sequence initialized &nbsp;///&nbsp; [ALERT] Zero-day exploit demo available &nbsp;///&nbsp; [INFO] All attacks are simulated — no real systems at risk &nbsp;///&nbsp;
-    </span>
+  <!-- ── WARNING STRIPE ── -->
+  <div class="warning-banner">
+    ⚠ EDUCATIONAL SIMULATION ONLY — ALL SCENARIOS ARE FICTIONAL &amp; SANDBOXED — FOR LEARNING PURPOSES ⚠
   </div>
 
-  <!-- STATS -->
-  <div class="stats-row">
-    <div class="stat-card">
-      <div class="stat-num" id="statSims">0</div>
-      <div class="stat-label">SIMS RUN</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num">6</div>
-      <div class="stat-label">ATTACK TYPES</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num" id="statThreats">0</div>
-      <div class="stat-label">THREATS SHOWN</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num">100%</div>
-      <div class="stat-label">SANDBOXED</div>
-    </div>
-  </div>
+  <main>
 
-  <!-- NETWORK MAP -->
-  <div class="section-title">// NETWORK TOPOLOGY</div>
-  <div class="network-map">
-    <canvas id="netCanvas"></canvas>
-  </div>
-
-  <!-- ATTACK SCENARIOS -->
-  <div class="section-title">// SELECT ATTACK SIMULATION</div>
-  <div class="attack-grid">
-
-    <div class="attack-card" onclick="loadSim('bruteforce')">
-      <div class="card-threat threat-critical">■ CRITICAL THREAT</div>
-      <div class="card-icon">🔓</div>
-      <div class="card-title">BRUTE FORCE ATTACK</div>
-      <div class="card-desc">Dictionary and credential stuffing attack against a login system. Demonstrates why password complexity matters.</div>
-      <span class="card-btn">► RUN SIMULATION</span>
+    <!-- SCROLLING NEWS TICKER -->
+    <div class="ticker-wrap">
+      <span class="ticker">
+        [ALERT] Simulated brute force detected on NODE-07 &nbsp;///&nbsp;
+        [INFO] SQL injection pattern identified &nbsp;///&nbsp;
+        [ALERT] Phishing payload staged for demo &nbsp;///&nbsp;
+        [INFO] Man-in-the-middle scenario loaded &nbsp;///&nbsp;
+        [WARN] Ransomware simulation ready &nbsp;///&nbsp;
+        [INFO] Port scan sequence initialized &nbsp;///&nbsp;
+        [ALERT] Zero-day exploit demo available &nbsp;///&nbsp;
+        [INFO] All attacks are simulated — no real systems at risk &nbsp;///&nbsp;
+      </span>
     </div>
 
-    <div class="attack-card" onclick="loadSim('sqli')">
-      <div class="card-threat threat-critical">■ CRITICAL THREAT</div>
-      <div class="card-icon">💉</div>
-      <div class="card-title">SQL INJECTION</div>
-      <div class="card-desc">Malicious SQL inserted into input fields to bypass authentication and exfiltrate database records.</div>
-      <span class="card-btn">► RUN SIMULATION</span>
+    <!-- STATS COUNTERS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-num" id="statSims">0</div>
+        <div class="stat-label">SIMS RUN</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">6</div>
+        <div class="stat-label">ATTACK TYPES</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="statThreats">0</div>
+        <div class="stat-label">THREATS SHOWN</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">100%</div>
+        <div class="stat-label">SANDBOXED</div>
+      </div>
     </div>
 
-    <div class="attack-card" onclick="loadSim('phishing')">
-      <div class="card-threat threat-high">▲ HIGH THREAT</div>
-      <div class="card-icon">🎣</div>
-      <div class="card-title">PHISHING ATTACK</div>
-      <div class="card-desc">Social engineering via spoofed emails and fake login pages to harvest credentials from unsuspecting users.</div>
-      <span class="card-btn">► RUN SIMULATION</span>
+    <!-- NETWORK DIAGRAM -->
+    <div class="section-title">// LIVE NETWORK TOPOLOGY</div>
+    <div class="network-map">
+      <canvas id="netCanvas"></canvas>
     </div>
 
-    <div class="attack-card" onclick="loadSim('mitm')">
-      <div class="card-threat threat-high">▲ HIGH THREAT</div>
-      <div class="card-icon">👁️</div>
-      <div class="card-title">MAN-IN-THE-MIDDLE</div>
-      <div class="card-desc">Attacker intercepts traffic between client and server on an unsecured network to eavesdrop or tamper with data.</div>
-      <span class="card-btn">► RUN SIMULATION</span>
+    <!-- ATTACK CARDS -->
+    <div class="section-title">// SELECT ATTACK SIMULATION — CLICK ANY CARD TO LAUNCH</div>
+    <div class="attack-grid">
+
+      <div class="attack-card" onclick="openModal('bruteforce', this)">
+        <div class="card-threat threat-critical">■ CRITICAL THREAT</div>
+        <div class="card-icon">🔓</div>
+        <div class="card-title">BRUTE FORCE ATTACK</div>
+        <div class="card-desc">An automated program tries thousands of password guesses per second until it finds the right one.</div>
+        <span class="card-btn">► LAUNCH SIMULATION</span>
+      </div>
+
+      <div class="attack-card" onclick="openModal('sqli', this)">
+        <div class="card-threat threat-critical">■ CRITICAL THREAT</div>
+        <div class="card-icon">💉</div>
+        <div class="card-title">SQL INJECTION</div>
+        <div class="card-desc">Hackers type special code into login boxes that tricks the database into skipping the password check.</div>
+        <span class="card-btn">► LAUNCH SIMULATION</span>
+      </div>
+
+      <div class="attack-card" onclick="openModal('phishing', this)">
+        <div class="card-threat threat-high">▲ HIGH THREAT</div>
+        <div class="card-icon">🎣</div>
+        <div class="card-title">PHISHING ATTACK</div>
+        <div class="card-desc">Fake emails that look exactly like real ones, linking to convincing fake websites that steal your credentials.</div>
+        <span class="card-btn">► LAUNCH SIMULATION</span>
+      </div>
+
+      <div class="attack-card" onclick="openModal('mitm', this)">
+        <div class="card-threat threat-high">▲ HIGH THREAT</div>
+        <div class="card-icon">👁️</div>
+        <div class="card-title">MAN-IN-THE-MIDDLE</div>
+        <div class="card-desc">The attacker secretly sits between you and the website, reading everything you send in real time.</div>
+        <span class="card-btn">► LAUNCH SIMULATION</span>
+      </div>
+
+      <div class="attack-card" onclick="openModal('ransomware', this)">
+        <div class="card-threat threat-critical">■ CRITICAL THREAT</div>
+        <div class="card-icon">🔒</div>
+        <div class="card-title">RANSOMWARE</div>
+        <div class="card-desc">Malware that scrambles all your files with unbreakable encryption, then demands payment to unlock them.</div>
+        <span class="card-btn">► LAUNCH SIMULATION</span>
+      </div>
+
+      <div class="attack-card" onclick="openModal('portscan', this)">
+        <div class="card-threat threat-medium">◆ MEDIUM THREAT</div>
+        <div class="card-icon">📡</div>
+        <div class="card-title">PORT SCANNING</div>
+        <div class="card-desc">A reconnaissance tool that checks which "doors" on a computer are open — the first step in most attacks.</div>
+        <span class="card-btn">► LAUNCH SIMULATION</span>
+      </div>
+
     </div>
 
-    <div class="attack-card" onclick="loadSim('ransomware')">
-      <div class="card-threat threat-critical">■ CRITICAL THREAT</div>
-      <div class="card-icon">🔒</div>
-      <div class="card-title">RANSOMWARE</div>
-      <div class="card-desc">Malware that encrypts victim's files and demands payment. Simulates infection vector, propagation, and encryption phase.</div>
-      <span class="card-btn">► RUN SIMULATION</span>
-    </div>
+  </main>
 
-    <div class="attack-card" onclick="loadSim('portscan')">
-      <div class="card-threat threat-medium">◆ MEDIUM THREAT</div>
-      <div class="card-icon">📡</div>
-      <div class="card-title">PORT SCANNING</div>
-      <div class="card-desc">Reconnaissance technique to map open ports and services on a target system — the first step in most attacks.</div>
-      <span class="card-btn">► RUN SIMULATION</span>
-    </div>
+  <!-- ════════════════════════════════════════════════════════
+       POPUP MODAL — shown when user clicks an attack card
+       ════════════════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+    <div class="modal" id="modal">
 
-  </div>
+      <!-- Mac-style title bar -->
+      <div class="modal-titlebar">
+        <div class="modal-dot dot-red"    onclick="closeModal()"></div>
+        <div class="modal-dot dot-yellow" onclick="clearSim()"></div>
+        <div class="modal-dot dot-green"  onclick="runCurrentSim()"></div>
+        <div class="modal-title" id="modalTitle">SIMULATION TERMINAL</div>
+      </div>
 
-  <!-- SIMULATION TERMINAL -->
-  <div class="sim-wrapper" id="simWrapper">
-    <div class="sim-titlebar">
-      <div class="sim-dot dot-red"></div>
-      <div class="sim-dot dot-yellow"></div>
-      <div class="sim-dot dot-green"></div>
-      <div class="sim-titlebar-text" id="simTitle">SIMULATION TERMINAL</div>
-    </div>
-    <div class="sim-body">
-      <div class="terminal" id="terminal"></div>
-      <div class="sim-sidebar" id="sidebar"></div>
-    </div>
-    <div class="sim-controls">
-      <button class="btn btn-primary" id="btnRun" onclick="runCurrentSim()">► RUN ATTACK</button>
-      <button class="btn btn-secondary" onclick="clearSim()">✕ CLEAR</button>
-      <button class="btn btn-secondary" onclick="closeSim()">← BACK</button>
-    </div>
-  </div>
+      <div class="modal-body">
 
-</main>
+        <!-- ── VISUAL ATTACK DIAGRAM AREA ──
+             A canvas where we draw unique animations for each attack type -->
+        <div class="attack-visual">
+          <canvas id="attackCanvas"></canvas>
+          <div class="visual-label" id="visualLabel">ATTACK VISUALIZATION</div>
+          <div class="visual-status">
+            <span class="status-dot"></span>
+            <span id="visualStatusText">READY</span>
+          </div>
+        </div>
 
-<footer>
-  CYBERSEC LAB v1.0 — EDUCATIONAL USE ONLY — ALL SIMULATIONS ARE FICTIONAL AND SANDBOXED<br>
-  No real networks, systems, or data are affected. Use this knowledge to <strong style="color:var(--green-dim)">defend</strong>, not attack.
-</footer>
+        <!-- Terminal + sidebar -->
+        <div class="modal-bottom">
+          <div class="terminal" id="terminal">
+            <span class="t-dim">// Select an attack and press ► RUN ATTACK to begin simulation</span><br>
+            <span class="cursor"></span>
+          </div>
+          <div class="modal-sidebar" id="sidebar"></div>
+        </div>
 
+      </div><!-- end modal-body -->
+
+      <!-- Control buttons -->
+      <div class="modal-controls">
+        <button class="btn btn-primary" id="btnRun" onclick="runCurrentSim()">► RUN ATTACK</button>
+        <button class="btn btn-secondary" onclick="clearSim()">↺ RESET</button>
+        <button class="btn btn-secondary" onclick="closeModal()">✕ CLOSE</button>
+      </div>
+
+    </div><!-- end modal -->
+  </div><!-- end modal-overlay -->
+
+  <footer>
+    CYBERSEC LAB v2.0 — EDUCATIONAL USE ONLY — ALL SIMULATIONS ARE FICTIONAL AND SANDBOXED<br>
+    Use this knowledge to <strong style="color:var(--green-dim)">defend</strong>, not attack.
+  </footer>
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     JAVASCRIPT
+     ═══════════════════════════════════════════════════════════ -->
 <script>
-// ── Network Canvas ──────────────────────────────────────────────
-const canvas = document.getElementById('netCanvas');
-const ctx = canvas.getContext('2d');
 
-const nodes = [
-  {x:0.1, y:0.5, label:'ATTACKER', color:'#ff3131', size:12},
-  {x:0.3, y:0.2, label:'ROUTER', color:'#ffb700', size:9},
-  {x:0.3, y:0.8, label:'SWITCH', color:'#ffb700', size:9},
-  {x:0.55, y:0.3, label:'WEB SERVER', color:'#00e5ff', size:10},
-  {x:0.55, y:0.7, label:'DB SERVER', color:'#00e5ff', size:10},
-  {x:0.75, y:0.15, label:'CLIENT A', color:'#00ff41', size:8},
-  {x:0.75, y:0.45, label:'CLIENT B', color:'#00ff41', size:8},
-  {x:0.75, y:0.75, label:'CLIENT C', color:'#00ff41', size:8},
-  {x:0.9, y:0.5, label:'FIREWALL', color:'#ff3131', size:10},
-];
+  // ═══════════════════════════════════════════════════
+  // SECTION 1: BACKGROUND NETWORK MAP (bottom canvas)
+  // ═══════════════════════════════════════════════════
 
-const edges = [
-  [0,1],[0,2],[1,3],[2,4],[3,5],[3,6],[4,7],[3,4],[1,2],[6,8],[4,8]
-];
+  const bgCanvas = document.getElementById('netCanvas');
+  const bgCtx    = bgCanvas.getContext('2d');
 
-let packets = [];
-let animFrame;
+  // Network nodes — positions are 0-1 fractions of canvas size
+  const nodes = [
+    { x:0.1,  y:0.5,  label:'ATTACKER',  color:'#ff3131', size:12 },
+    { x:0.3,  y:0.2,  label:'ROUTER',    color:'#ffb700', size:9  },
+    { x:0.3,  y:0.8,  label:'SWITCH',    color:'#ffb700', size:9  },
+    { x:0.55, y:0.3,  label:'WEB SRV',   color:'#00e5ff', size:10 },
+    { x:0.55, y:0.7,  label:'DB SRV',    color:'#00e5ff', size:10 },
+    { x:0.75, y:0.15, label:'CLIENT A',  color:'#00ff41', size:8  },
+    { x:0.75, y:0.45, label:'CLIENT B',  color:'#00ff41', size:8  },
+    { x:0.75, y:0.75, label:'CLIENT C',  color:'#00ff41', size:8  },
+    { x:0.9,  y:0.5,  label:'FIREWALL',  color:'#ff3131', size:10 },
+  ];
+  const edges = [[0,1],[0,2],[1,3],[2,4],[3,5],[3,6],[4,7],[3,4],[1,2],[6,8],[4,8]];
+  let bgPackets = [];
 
-function drawNetwork() {
-  canvas.width = canvas.offsetWidth;
-  canvas.height = canvas.offsetHeight;
-  const W = canvas.width, H = canvas.height;
+  function drawBgNetwork() {
+    bgCanvas.width  = bgCanvas.offsetWidth;
+    bgCanvas.height = bgCanvas.offsetHeight;
+    const W = bgCanvas.width, H = bgCanvas.height;
+    bgCtx.clearRect(0, 0, W, H);
 
-  ctx.clearRect(0,0,W,H);
+    // Draw edges
+    edges.forEach(([a,b]) => {
+      bgCtx.beginPath();
+      bgCtx.moveTo(nodes[a].x*W, nodes[a].y*H);
+      bgCtx.lineTo(nodes[b].x*W, nodes[b].y*H);
+      bgCtx.strokeStyle = 'rgba(0,170,43,0.25)';
+      bgCtx.lineWidth = 1;
+      bgCtx.stroke();
+    });
 
-  // Draw edges
-  edges.forEach(([a,b]) => {
-    const na = nodes[a], nb = nodes[b];
-    ctx.beginPath();
-    ctx.moveTo(na.x*W, na.y*H);
-    ctx.lineTo(nb.x*W, nb.y*H);
-    ctx.strokeStyle = 'rgba(0,170,43,0.25)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-  });
+    // Draw packets
+    bgPackets.forEach(p => {
+      bgCtx.beginPath();
+      bgCtx.arc(p.x*W, p.y*H, 4, 0, Math.PI*2);
+      bgCtx.fillStyle  = p.color;
+      bgCtx.shadowBlur = 10;
+      bgCtx.shadowColor= p.color;
+      bgCtx.fill();
+      bgCtx.shadowBlur = 0;
+    });
 
-  // Draw packets
-  packets.forEach(p => {
-    ctx.beginPath();
-    ctx.arc(p.x*W, p.y*H, 4, 0, Math.PI*2);
-    ctx.fillStyle = p.color || '#00ff41';
-    ctx.shadowBlur = 10;
-    ctx.shadowColor = p.color || '#00ff41';
-    ctx.fill();
-    ctx.shadowBlur = 0;
-  });
-
-  // Draw nodes
-  nodes.forEach(n => {
-    ctx.beginPath();
-    ctx.arc(n.x*W, n.y*H, n.size, 0, Math.PI*2);
-    ctx.fillStyle = n.color + '22';
-    ctx.strokeStyle = n.color;
-    ctx.lineWidth = 1.5;
-    ctx.shadowBlur = 15;
-    ctx.shadowColor = n.color;
-    ctx.fill();
-    ctx.stroke();
-    ctx.shadowBlur = 0;
-
-    ctx.fillStyle = n.color;
-    ctx.font = `${Math.max(9, n.size*0.75)}px 'Share Tech Mono'`;
-    ctx.textAlign = 'center';
-    ctx.fillText(n.label, n.x*W, n.y*H + n.size + 11);
-  });
-}
-
-function spawnPacket() {
-  const edge = edges[Math.floor(Math.random()*edges.length)];
-  const from = nodes[edge[0]], to = nodes[edge[1]];
-  const isAttack = Math.random() < 0.15;
-  packets.push({
-    x: from.x, y: from.y,
-    tx: to.x, ty: to.y,
-    speed: 0.01 + Math.random()*0.015,
-    color: isAttack ? '#ff3131' : '#00ff41',
-    t: 0
-  });
-}
-
-function animNet() {
-  packets.forEach(p => {
-    p.t += p.speed;
-    p.x = lerp(p.x, p.tx, p.speed*1.2);
-    p.y = lerp(p.y, p.ty, p.speed*1.2);
-  });
-  packets = packets.filter(p => {
-    const dx = p.x - p.tx, dy = p.y - p.ty;
-    return Math.sqrt(dx*dx+dy*dy) > 0.01;
-  });
-  if (Math.random() < 0.12) spawnPacket();
-  drawNetwork();
-  animFrame = requestAnimationFrame(animNet);
-}
-
-function lerp(a,b,t){ return a+(b-a)*t; }
-
-animNet();
-window.addEventListener('resize', drawNetwork);
-
-// ── Stats Counter ──────────────────────────────────────────────
-let simsRun = 0, threatsShown = 0;
-function incStats() {
-  simsRun++; threatsShown++;
-  document.getElementById('statSims').textContent = simsRun;
-  document.getElementById('statThreats').textContent = threatsShown;
-}
-
-// ── Simulation Engine ──────────────────────────────────────────
-let currentSim = null;
-let simRunning = false;
-let simTimers = [];
-
-const simData = {
-  bruteforce: {
-    title: '[ BRUTE FORCE LOGIN ATTACK ]',
-    sidebar: {
-      overview: 'A brute force attack systematically tries username/password combinations until access is gained. Attackers use wordlists, previously leaked databases, and automated tools.',
-      impact: ['Account takeover', 'Privilege escalation', 'Data breach', 'Lateral movement'],
-      defenses: ['Strong password policies', 'Account lockout after N attempts', 'Multi-factor authentication (MFA)', 'IP rate limiting & CAPTCHA', 'Monitoring & alerting'],
-    },
-    steps: [
-      { delay: 0,    type: 'prompt', text: 'hydra -l admin -P /wordlists/rockyou.txt 192.168.1.105 http-post' },
-      { delay: 600,  type: 'output', text: 'Hydra v9.4 starting — target: 192.168.1.105' },
-      { delay: 1000, type: 'output', text: 'Attempting credential pairs from rockyou.txt (14M entries)...' },
-      { delay: 1400, type: 'dim',    text: '[ATTEMPT] admin:password → 401 Unauthorized' },
-      { delay: 1700, type: 'dim',    text: '[ATTEMPT] admin:123456 → 401 Unauthorized' },
-      { delay: 2000, type: 'dim',    text: '[ATTEMPT] admin:qwerty → 401 Unauthorized' },
-      { delay: 2300, type: 'dim',    text: '[ATTEMPT] admin:letmein → 401 Unauthorized' },
-      { delay: 2600, type: 'dim',    text: '[ATTEMPT] admin:monkey → 401 Unauthorized' },
-      { delay: 2900, type: 'dim',    text: '[ATTEMPT] admin:dragon → 401 Unauthorized' },
-      { delay: 3200, type: 'dim',    text: '[ATTEMPT] admin:master → 401 Unauthorized' },
-      { delay: 3500, type: 'dim',    text: '[ATTEMPT] admin:sunshine → 401 Unauthorized' },
-      { delay: 3800, type: 'dim',    text: '[ATTEMPT] admin:princess → 401 Unauthorized' },
-      { delay: 4100, type: 'dim',    text: '[ATTEMPT] admin:admin123 → 401 Unauthorized' },
-      { delay: 4400, type: 'warning',text: '[ATTEMPT] admin:P@ssw0rd! → checking...' },
-      { delay: 4900, type: 'success', text: '[✓ SUCCESS] admin:P@ssw0rd! → 200 OK — SESSION COOKIE OBTAINED' },
-      { delay: 5400, type: 'error',   text: '>>> AUTHENTICATED AS: admin | Role: SUPERUSER <<<' },
-      { delay: 5900, type: 'info',    text: 'Session token: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiYWRtaW4ifQ...' },
-      { delay: 6400, type: 'output',  text: '⚠ 1 of 14,344,391 passwords tested. Elapsed: 4.2s' },
-    ]
-  },
-
-  sqli: {
-    title: '[ SQL INJECTION ATTACK ]',
-    sidebar: {
-      overview: 'SQL Injection exploits unsanitized user input by inserting SQL commands into query parameters. This can bypass authentication, extract data, and in some cases execute OS commands.',
-      impact: ['Authentication bypass', 'Full database dump', 'Data modification/deletion', 'OS command execution (stacked queries)'],
-      defenses: ['Parameterized queries / prepared statements', 'ORM frameworks', 'Input validation & sanitization', 'Web Application Firewall (WAF)', 'Least privilege DB accounts'],
-    },
-    steps: [
-      { delay: 0,    type: 'prompt', text: 'sqlmap -u "http://target.com/login" --data="user=admin&pass=x" --dbs' },
-      { delay: 600,  type: 'output', text: 'sqlmap 1.7.8 — testing connection to target...' },
-      { delay: 1000, type: 'output', text: 'Testing parameter: user → GET/POST injection points' },
-      { delay: 1500, type: 'info',   text: 'Payload: admin\' OR \'1\'=\'1\'--' },
-      { delay: 1900, type: 'info',   text: 'Query becomes: SELECT * FROM users WHERE user=\'admin\' OR \'1\'=\'1\'--\'' },
-      { delay: 2400, type: 'success',text: '[✓] Parameter "user" is INJECTABLE (boolean-blind)' },
-      { delay: 2900, type: 'output', text: 'Backend DBMS: MySQL 8.0.28 (Ubuntu)' },
-      { delay: 3300, type: 'output', text: 'Enumerating databases...' },
-      { delay: 3700, type: 'data',   text: '  [*] information_schema' },
-      { delay: 3900, type: 'data',   text: '  [*] appdb' },
-      { delay: 4100, type: 'data',   text: '  [*] users_production' },
-      { delay: 4400, type: 'output', text: 'Dumping table: users_production.accounts' },
-      { delay: 4900, type: 'data',   text: '  id | username | password_hash | email' },
-      { delay: 5100, type: 'data',   text: '  1  | admin    | $2b$12$9FzK... | admin@corp.com' },
-      { delay: 5300, type: 'data',   text: '  2  | jsmith   | $2b$12$xMqP... | j.smith@corp.com' },
-      { delay: 5500, type: 'data',   text: '  3  | mlee     | $2b$12$3TrW... | m.lee@corp.com' },
-      { delay: 5800, type: 'error',  text: '>>> 847 rows exfiltrated. Entire user table dumped. <<<' },
-    ]
-  },
-
-  phishing: {
-    title: '[ PHISHING CAMPAIGN SIMULATION ]',
-    sidebar: {
-      overview: 'Phishing uses deceptive emails that impersonate trusted organizations to trick users into revealing credentials. Spear-phishing targets specific individuals with personalized content.',
-      impact: ['Credential theft', 'Malware delivery', 'Account compromise', 'Corporate espionage'],
-      defenses: ['Email filtering & SPF/DKIM/DMARC', 'Security awareness training', 'Verify sender before clicking', 'Use password managers (detect fakes)', 'Report suspicious emails'],
-    },
-    steps: [
-      { delay: 0,    type: 'prompt', text: 'gophish --config phish_campaign.json --target corp_employees.csv' },
-      { delay: 500,  type: 'output', text: 'GoPhish Campaign Manager initializing...' },
-      { delay: 900,  type: 'output', text: 'Spoofing sender: it-helpdesk@c0rp-secure.com (corp.com lookalike)' },
-      { delay: 1300, type: 'info',   text: 'Subject: [URGENT] Password Reset Required — IT Security Team' },
-      { delay: 1700, type: 'output', text: 'Sending to 250 employees in target organization...' },
-      { delay: 2200, type: 'dim',    text: '[SENT] → j.anderson@corp.com' },
-      { delay: 2400, type: 'dim',    text: '[SENT] → m.chen@corp.com' },
-      { delay: 2600, type: 'dim',    text: '[SENT] → r.williams@corp.com' },
-      { delay: 3000, type: 'warning',text: '[OPENED] → j.anderson@corp.com (11:42 AM) — link clicked!' },
-      { delay: 3400, type: 'warning',text: '[CREDS] → j.anderson entered: janderson / Summer2024!' },
-      { delay: 3800, type: 'warning',text: '[OPENED] → m.chen@corp.com (11:44 AM) — link clicked!' },
-      { delay: 4200, type: 'warning',text: '[CREDS] → m.chen entered: mchen / Corp#9821' },
-      { delay: 4700, type: 'output', text: 'Fake login page visits: 47 / 250 (18.8% click rate)' },
-      { delay: 5200, type: 'error',  text: '>>> 23 credentials harvested from 250 targets (9.2% yield) <<<' },
-      { delay: 5800, type: 'info',   text: 'Industry avg phishing success: 7–15%. This campaign: above avg.' },
-    ]
-  },
-
-  mitm: {
-    title: '[ MAN-IN-THE-MIDDLE ATTACK ]',
-    sidebar: {
-      overview: 'In a MITM attack, the attacker secretly intercepts and relays communications between two parties. Common on public Wi-Fi using ARP spoofing or rogue access points.',
-      impact: ['Session hijacking', 'Credential interception', 'Traffic manipulation', 'SSL stripping'],
-      defenses: ['Always use HTTPS (check padlock)', 'Use VPN on public Wi-Fi', 'Certificate pinning in apps', 'HSTS (HTTP Strict Transport Security)', 'Avoid public Wi-Fi for sensitive tasks'],
-    },
-    steps: [
-      { delay: 0,    type: 'prompt', text: 'arpspoof -i wlan0 -t 192.168.1.10 192.168.1.1 &' },
-      { delay: 500,  type: 'output', text: 'ARP spoofing started — poisoning victim cache...' },
-      { delay: 1000, type: 'info',   text: 'Victim (192.168.1.10) now thinks attacker is the router' },
-      { delay: 1500, type: 'prompt', text: 'ettercap -T -q -i wlan0 -M arp:remote /192.168.1.10// /192.168.1.1//' },
-      { delay: 2000, type: 'output', text: 'Ettercap 0.8.3 — sniffing all traffic on wlan0...' },
-      { delay: 2500, type: 'dim',    text: '[PKT] TCP 192.168.1.10:52341 → 74.125.199.99:443 (HTTPS — encrypted)' },
-      { delay: 2900, type: 'dim',    text: '[PKT] TCP 192.168.1.10:52342 → 93.184.216.34:80 (HTTP — plaintext!)' },
-      { delay: 3300, type: 'warning',text: '[HTTP INTERCEPT] GET http://login.example.com/auth' },
-      { delay: 3700, type: 'warning',text: '[HTTP INTERCEPT] POST data: username=alice&password=hunter2' },
-      { delay: 4200, type: 'success',text: '[✓ CAPTURED] alice / hunter2 @ login.example.com' },
-      { delay: 4700, type: 'info',   text: 'Injecting malicious JS into HTTP response...' },
-      { delay: 5200, type: 'error',  text: '>>> Traffic intercepted, credentials stolen, JS injected <<<' },
-      { delay: 5700, type: 'output', text: 'Note: HTTPS would have prevented credential interception' },
-    ]
-  },
-
-  ransomware: {
-    title: '[ RANSOMWARE INFECTION SIMULATION ]',
-    sidebar: {
-      overview: 'Ransomware encrypts victim files and demands cryptocurrency payment for the decryption key. Often delivered via phishing or exploiting vulnerabilities. Causes billions in damages annually.',
-      impact: ['Complete data loss if no backup', 'Business operations halted', 'Ransom payments ($10k–$5M+)', 'Reputational damage'],
-      defenses: ['Regular offline backups (3-2-1 rule)', 'Keep systems patched', 'Disable macros in Office docs', 'Endpoint Detection & Response (EDR)', 'Network segmentation'],
-    },
-    steps: [
-      { delay: 0,    type: 'output', text: '[STAGE 1] User opened: Invoice_Q4_2024.docx (macro enabled)' },
-      { delay: 700,  type: 'warning',text: 'Macro executed — downloading payload from C2 server...' },
-      { delay: 1300, type: 'output', text: '[STAGE 2] Dropper installed to %APPDATA%/svchost32.exe' },
-      { delay: 1800, type: 'info',   text: 'Establishing persistence: HKCU\\Run registry key added' },
-      { delay: 2300, type: 'output', text: '[STAGE 3] Killing backup processes: vssadmin, wbadmin...' },
-      { delay: 2800, type: 'error',  text: 'Shadow copies deleted — recovery via Windows Restore: DISABLED' },
-      { delay: 3300, type: 'output', text: '[STAGE 4] Encryption phase initiated (AES-256 + RSA-2048)' },
-      { delay: 3700, type: 'dim',    text: 'Encrypting: C:\\Users\\alice\\Documents\\*.* [████████░░] 82%' },
-      { delay: 4100, type: 'dim',    text: 'Encrypting: C:\\Users\\alice\\Desktop\\*.* [██████████] 100%' },
-      { delay: 4500, type: 'dim',    text: 'Encrypting: mapped network drives... Z:\\ ████████████' },
-      { delay: 5000, type: 'error',  text: '>>> 47,382 files encrypted. Extensions renamed to .l0ck3d <<<' },
-      { delay: 5500, type: 'warning',text: 'Dropping ransom note: README_DECRYPT.txt on all drives' },
-      { delay: 6000, type: 'error',  text: 'Demand: 3.5 BTC (~$210,000) to wallet: bc1q...x7k2' },
-    ]
-  },
-
-  portscan: {
-    title: '[ PORT SCAN RECONNAISSANCE ]',
-    sidebar: {
-      overview: 'Port scanning maps which services are running on a target. It is usually the first step of any attack — attackers probe for open ports to identify attack surfaces before exploitation.',
-      impact: ['Exposes running services', 'Reveals OS fingerprint', 'Identifies vulnerable software versions', 'Maps network topology'],
-      defenses: ['Firewall — block unnecessary ports', 'Intrusion Detection System (IDS)', 'Close unused services', 'Use non-default ports', 'Monitor for scan patterns'],
-    },
-    steps: [
-      { delay: 0,    type: 'prompt', text: 'nmap -sV -sC -O -p- --min-rate 1000 192.168.1.105' },
-      { delay: 500,  type: 'output', text: 'Starting Nmap 7.94 — full port scan (65535 ports)' },
-      { delay: 1000, type: 'output', text: 'Scanning 192.168.1.105...' },
-      { delay: 1600, type: 'data',   text: 'PORT      STATE  SERVICE        VERSION' },
-      { delay: 1900, type: 'data',   text: '21/tcp    open   ftp            vsftpd 3.0.3' },
-      { delay: 2100, type: 'warning',text: '22/tcp    open   ssh            OpenSSH 7.4 (OUTDATED!)' },
-      { delay: 2300, type: 'data',   text: '80/tcp    open   http           Apache 2.4.41' },
-      { delay: 2500, type: 'warning',text: '443/tcp   open   https          Apache — cert expires in 3 days!' },
-      { delay: 2700, type: 'error',  text: '3306/tcp  open   mysql          MySQL 5.7.32 (exposed to internet!)' },
-      { delay: 2900, type: 'data',   text: '8080/tcp  open   http-alt       Tomcat 9.0.45' },
-      { delay: 3100, type: 'error',  text: '27017/tcp open   mongodb        MongoDB (NO AUTH REQUIRED!)' },
-      { delay: 3400, type: 'output', text: 'OS detection: Linux 4.15-5.8 (Ubuntu 18.04–20.04)' },
-      { delay: 3900, type: 'info',   text: 'Vulnerability scan: CVE-2021-41617 (OpenSSH) — CRITICAL' },
-      { delay: 4300, type: 'info',   text: 'Vulnerability scan: CVE-2019-12815 (vsftpd) — HIGH' },
-      { delay: 4800, type: 'error',  text: '>>> 7 open ports, 2 critical misconfigs, 2 CVEs found <<<' },
-    ]
+    // Draw nodes
+    nodes.forEach(n => {
+      bgCtx.beginPath();
+      bgCtx.arc(n.x*W, n.y*H, n.size, 0, Math.PI*2);
+      bgCtx.fillStyle   = n.color+'22';
+      bgCtx.strokeStyle = n.color;
+      bgCtx.lineWidth   = 1.5;
+      bgCtx.shadowBlur  = 15;
+      bgCtx.shadowColor = n.color;
+      bgCtx.fill();
+      bgCtx.stroke();
+      bgCtx.shadowBlur  = 0;
+      bgCtx.fillStyle   = n.color;
+      bgCtx.font        = `${Math.max(9, n.size*0.75)}px 'Share Tech Mono'`;
+      bgCtx.textAlign   = 'center';
+      bgCtx.fillText(n.label, n.x*W, n.y*H + n.size + 11);
+    });
   }
-};
 
-function loadSim(id) {
-  currentSim = id;
-  const sim = simData[id];
-  document.querySelectorAll('.attack-card').forEach(c => c.classList.remove('active'));
-  event.currentTarget.classList.add('active');
-  document.getElementById('simWrapper').classList.add('visible');
-  document.getElementById('simTitle').textContent = sim.title;
-  document.getElementById('btnRun').disabled = false;
-  buildSidebar(sim.sidebar);
-  document.getElementById('terminal').innerHTML = '<span class="t-dim">// simulation loaded — press RUN ATTACK to begin</span>\n<span class="cursor"></span>';
-  document.getElementById('simWrapper').scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
+  function spawnBgPacket() {
+    const edge = edges[Math.floor(Math.random()*edges.length)];
+    const from = nodes[edge[0]], to = nodes[edge[1]];
+    bgPackets.push({ x:from.x, y:from.y, tx:to.x, ty:to.y, speed:0.01+Math.random()*0.015, color:Math.random()<0.15?'#ff3131':'#00ff41' });
+  }
 
-function buildSidebar(data) {
-  const sb = document.getElementById('sidebar');
-  sb.innerHTML = `
-    <div class="info-block">
-      <div class="info-block-title">// OVERVIEW</div>
-      <p>${data.overview}</p>
-    </div>
-    <div class="info-block">
-      <div class="info-block-title">// POTENTIAL IMPACT</div>
-      ${data.impact.map(i => `<div class="defense-item" style="color:var(--red)">${i}</div>`).join('')}
-    </div>
-    <div class="info-block">
-      <div class="info-block-title">// DEFENSES</div>
-      ${data.defenses.map(d => `<div class="defense-item">${d}</div>`).join('')}
-    </div>
-    <div class="info-block">
-      <div class="info-block-title">// SIMULATION PROGRESS</div>
-      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-    </div>
-  `;
-}
+  function lerp(a,b,t){ return a+(b-a)*t; }
 
-function runCurrentSim() {
-  if (!currentSim || simRunning) return;
-  simRunning = true;
-  document.getElementById('btnRun').disabled = true;
-  incStats();
-  const term = document.getElementById('terminal');
-  term.innerHTML = '';
-  const steps = simData[currentSim].steps;
-  const totalTime = steps[steps.length-1].delay + 800;
+  function animBg() {
+    bgPackets.forEach(p => { p.x=lerp(p.x,p.tx,p.speed*1.2); p.y=lerp(p.y,p.ty,p.speed*1.2); });
+    bgPackets = bgPackets.filter(p => { const dx=p.x-p.tx, dy=p.y-p.ty; return Math.sqrt(dx*dx+dy*dy)>0.01; });
+    if (Math.random()<0.12) spawnBgPacket();
+    drawBgNetwork();
+    requestAnimationFrame(animBg);
+  }
+  animBg();
+  window.addEventListener('resize', drawBgNetwork);
 
-  steps.forEach((s, i) => {
-    const t = setTimeout(() => {
-      const line = document.createElement('div');
-      line.className = 'terminal-line';
-      const progress = ((i+1)/steps.length)*100;
-      const fill = document.getElementById('progressFill');
-      if (fill) fill.style.width = progress + '%';
 
-      if (s.type === 'prompt') {
-        line.innerHTML = `<span class="t-prompt">root@kali:~# </span><span class="t-cmd">${s.text}</span>`;
-      } else {
-        line.innerHTML = `<span class="t-${s.type}">${s.text}</span>`;
+  // ═══════════════════════════════════════════════════
+  // SECTION 2: ATTACK VISUAL CANVAS ANIMATIONS
+  // Each attack type has its own draw function that runs
+  // on a loop while the modal is open.
+  // ═══════════════════════════════════════════════════
+
+  const atkCanvas = document.getElementById('attackCanvas');
+  const atkCtx    = atkCanvas.getContext('2d');
+  let   atkAnimId = null;   // requestAnimationFrame ID — lets us stop the loop
+  let   atkFrame  = 0;      // frame counter — used for timing within animations
+  let   currentVisual = null; // which attack type is showing
+
+  // Resize the attack canvas to match its container
+  function resizeAtkCanvas() {
+    atkCanvas.width  = atkCanvas.offsetWidth;
+    atkCanvas.height = atkCanvas.offsetHeight;
+  }
+
+  // Start the visual animation for a given attack type
+  function startVisual(type) {
+    currentVisual = type;
+    atkFrame = 0;
+    if (atkAnimId) cancelAnimationFrame(atkAnimId);
+
+    // Pick which draw function to use
+    const drawFns = {
+      bruteforce: drawBruteForce,
+      sqli:       drawSQLI,
+      phishing:   drawPhishing,
+      mitm:       drawMITM,
+      ransomware: drawRansomware,
+      portscan:   drawPortScan,
+    };
+
+    function loop() {
+      resizeAtkCanvas();
+      if (drawFns[type]) drawFns[type]();
+      atkFrame++;
+      atkAnimId = requestAnimationFrame(loop);
+    }
+    loop();
+  }
+
+  // Stop the attack visual animation
+  function stopVisual() {
+    if (atkAnimId) { cancelAnimationFrame(atkAnimId); atkAnimId = null; }
+    if (atkCtx) { atkCtx.clearRect(0, 0, atkCanvas.width, atkCanvas.height); }
+  }
+
+
+  // ── BRUTE FORCE VISUAL ──
+  // Shows a padlock with password guesses flying at it
+  // When the simulation "succeeds", the lock breaks open
+
+  let bfPasswords = [];
+  let bfLockBroken = false;
+
+  const passwordList = ['password','123456','qwerty','letmein','monkey','dragon',
+                        'master','sunshine','princess','admin123','P@ssw0rd!'];
+
+  function drawBruteForce() {
+    const W = atkCanvas.width, H = atkCanvas.height;
+    atkCtx.clearRect(0, 0, W, H);
+
+    // Background grid
+    drawGrid(atkCtx, W, H, '#001a00', 40);
+
+    const cx = W * 0.6, cy = H * 0.5;
+
+    // Draw the padlock
+    const lockOpen = bfLockBroken;
+
+    // Lock body
+    atkCtx.fillStyle   = lockOpen ? '#ff313133' : '#003a0e';
+    atkCtx.strokeStyle = lockOpen ? '#ff3131' : '#00ff41';
+    atkCtx.lineWidth   = 2;
+    atkCtx.shadowBlur  = lockOpen ? 20 : 10;
+    atkCtx.shadowColor = lockOpen ? '#ff3131' : '#00ff41';
+    roundRect(atkCtx, cx-30, cy-20, 60, 50, 6);
+    atkCtx.fill();
+    atkCtx.stroke();
+    atkCtx.shadowBlur = 0;
+
+    // Lock shackle (the U-shaped loop)
+    atkCtx.beginPath();
+    atkCtx.strokeStyle = lockOpen ? '#ff3131' : '#00ff41';
+    atkCtx.lineWidth   = 5;
+    atkCtx.lineCap     = 'round';
+    if (lockOpen) {
+      // Shackle lifted open
+      atkCtx.moveTo(cx-14, cy-18);
+      atkCtx.lineTo(cx-14, cy-40);
+      atkCtx.moveTo(cx+14, cy-18);
+      atkCtx.lineTo(cx+14, cy-50);
+    } else {
+      atkCtx.arc(cx, cy-22, 14, Math.PI, 0);
+    }
+    atkCtx.shadowBlur  = 10;
+    atkCtx.shadowColor = lockOpen ? '#ff3131' : '#00ff41';
+    atkCtx.stroke();
+    atkCtx.shadowBlur  = 0;
+
+    // Keyhole in center of lock
+    atkCtx.fillStyle = lockOpen ? '#ff313166' : '#00ff4166';
+    atkCtx.beginPath();
+    atkCtx.arc(cx, cy+5, 7, 0, Math.PI*2);
+    atkCtx.fill();
+    atkCtx.fillRect(cx-3, cy+5, 6, 12);
+
+    // Lock label
+    atkCtx.fillStyle  = lockOpen ? '#ff3131' : '#00aa2b';
+    atkCtx.font       = "11px 'Orbitron'";
+    atkCtx.textAlign  = 'center';
+    atkCtx.fillText(lockOpen ? 'CRACKED!' : 'LOCKED', cx, cy+42);
+
+    // Spawn new flying password attempts periodically
+    if (atkFrame % 18 === 0 && !bfLockBroken) {
+      const pw = passwordList[Math.floor(Math.random() * (passwordList.length - 1))];
+      bfPasswords.push({ text: pw, x: W * 0.05, y: H * (0.2 + Math.random() * 0.6), speed: 2 + Math.random() * 3, color: '#00aa2b', hit: false });
+    }
+
+    // Draw and update password projectiles
+    bfPasswords = bfPasswords.filter(p => p.x < W * 0.62);
+    bfPasswords.forEach(p => {
+      p.x += p.speed;
+      atkCtx.fillStyle  = p.color;
+      atkCtx.font       = "13px 'VT323'";
+      atkCtx.textAlign  = 'left';
+      atkCtx.shadowBlur = 4;
+      atkCtx.shadowColor= p.color;
+      atkCtx.fillText(`> ${p.text}`, p.x, p.y);
+      atkCtx.shadowBlur = 0;
+    });
+
+    // Attack label on left
+    atkCtx.fillStyle = '#00aa2b';
+    atkCtx.font      = "11px 'Share Tech Mono'";
+    atkCtx.textAlign = 'left';
+    atkCtx.fillText('ATTACKER', W*0.03, H*0.15);
+    atkCtx.fillText('HOST', W*0.03, H*0.22);
+
+    // Draw small attacker computer icon
+    drawComputer(atkCtx, W*0.03, H*0.3, '#ff3131');
+
+    // Arrow label
+    atkCtx.fillStyle = '#00ff4144';
+    atkCtx.font      = "10px 'Share Tech Mono'";
+    atkCtx.textAlign = 'center';
+    atkCtx.fillText('— PASSWORDS FLYING AT TARGET —', W*0.35, H*0.92);
+  }
+
+
+  // ── SQL INJECTION VISUAL ──
+  // Shows a database with a malicious query being injected
+
+  function drawSQLI() {
+    const W = atkCanvas.width, H = atkCanvas.height;
+    atkCtx.clearRect(0,0,W,H);
+    drawGrid(atkCtx, W, H, '#001a00', 40);
+
+    const t = atkFrame;
+
+    // Draw database cylinder on the right
+    const dbX = W*0.72, dbY = H*0.35, dbW = 100, dbH = 60;
+    atkCtx.fillStyle   = '#003a0e';
+    atkCtx.strokeStyle = '#00e5ff';
+    atkCtx.lineWidth   = 2;
+    atkCtx.shadowBlur  = 15;
+    atkCtx.shadowColor = '#00e5ff';
+
+    // Cylinder body
+    atkCtx.fillRect(dbX - dbW/2, dbY, dbW, dbH);
+    atkCtx.strokeRect(dbX - dbW/2, dbY, dbW, dbH);
+
+    // Top ellipse
+    atkCtx.beginPath();
+    atkCtx.ellipse(dbX, dbY, dbW/2, 14, 0, 0, Math.PI*2);
+    atkCtx.fillStyle='#004a12'; atkCtx.fill(); atkCtx.stroke();
+
+    // Bottom ellipse
+    atkCtx.beginPath();
+    atkCtx.ellipse(dbX, dbY+dbH, dbW/2, 14, 0, 0, Math.PI);
+    atkCtx.fillStyle='#003a0e'; atkCtx.fill(); atkCtx.stroke();
+    atkCtx.shadowBlur = 0;
+
+    atkCtx.fillStyle = '#00e5ff';
+    atkCtx.font      = "10px 'Orbitron'";
+    atkCtx.textAlign = 'center';
+    atkCtx.fillText('DATABASE', dbX, dbY + dbH + 26);
+
+    // Draw login form on the left
+    const fX = W*0.08, fY = H*0.18, fW = 170, fH = 130;
+    atkCtx.fillStyle   = '#010a02';
+    atkCtx.strokeStyle = '#00aa2b';
+    atkCtx.lineWidth   = 1;
+    roundRect(atkCtx, fX, fY, fW, fH, 4);
+    atkCtx.fill(); atkCtx.stroke();
+
+    atkCtx.fillStyle = '#00aa2b';
+    atkCtx.font      = "10px 'Orbitron'";
+    atkCtx.textAlign = 'left';
+    atkCtx.fillText('LOGIN FORM', fX+10, fY+18);
+
+    // Username field
+    atkCtx.fillStyle   = '#021505';
+    atkCtx.strokeStyle = '#00ff4188';
+    atkCtx.fillRect(fX+10, fY+30, 150, 22);
+    atkCtx.strokeRect(fX+10, fY+30, 150, 22);
+    atkCtx.fillStyle = '#00ff41';
+    atkCtx.font      = "12px 'VT323'";
+
+    // Animate the injection text being typed
+    const injection = "' OR '1'='1'--";
+    const typed = injection.substring(0, Math.floor((t % 120) / 4));
+    atkCtx.fillText('USER: ' + typed, fX+14, fY+46);
+
+    // Password field
+    atkCtx.fillStyle   = '#021505';
+    atkCtx.strokeStyle = '#00ff4188';
+    atkCtx.fillRect(fX+10, fY+62, 150, 22);
+    atkCtx.strokeRect(fX+10, fY+62, 150, 22);
+    atkCtx.fillStyle = '#00ff41';
+    atkCtx.fillText('PASS: ••••••', fX+14, fY+78);
+
+    // Submit button
+    atkCtx.fillStyle   = '#003a0e';
+    atkCtx.strokeStyle = '#00ff41';
+    atkCtx.fillRect(fX+10, fY+94, 70, 22);
+    atkCtx.strokeRect(fX+10, fY+94, 70, 22);
+    atkCtx.fillStyle = '#00ff41';
+    atkCtx.fillText('[ LOGIN ]', fX+14, fY+110);
+
+    // Arrow from form to DB
+    const arrowProgress = (Math.sin(t * 0.04) + 1) / 2;
+    const ax1 = fX + fW, ax2 = dbX - dbW/2;
+    const ay  = H * 0.5;
+
+    atkCtx.strokeStyle = '#ff313188';
+    atkCtx.lineWidth   = 2;
+    atkCtx.setLineDash([6, 3]);
+    atkCtx.beginPath();
+    atkCtx.moveTo(ax1, ay);
+    atkCtx.lineTo(ax2, ay);
+    atkCtx.stroke();
+    atkCtx.setLineDash([]);
+
+    // Moving injection packet along the arrow
+    const px = ax1 + (ax2 - ax1) * arrowProgress;
+    atkCtx.fillStyle   = '#ff3131';
+    atkCtx.shadowBlur  = 12;
+    atkCtx.shadowColor = '#ff3131';
+    atkCtx.beginPath();
+    atkCtx.arc(px, ay, 6, 0, Math.PI*2);
+    atkCtx.fill();
+    atkCtx.shadowBlur  = 0;
+
+    atkCtx.fillStyle = '#ff3131';
+    atkCtx.font      = "10px 'Share Tech Mono'";
+    atkCtx.textAlign = 'center';
+    atkCtx.fillText('MALICIOUS QUERY', (ax1+ax2)/2, ay-12);
+
+    // Show the injected SQL query below
+    atkCtx.fillStyle = '#ffb700';
+    atkCtx.font      = "11px 'VT323'";
+    atkCtx.textAlign = 'left';
+    atkCtx.fillText("INJECTED SQL:", fX, H*0.78);
+    atkCtx.fillStyle = '#ff3131';
+    atkCtx.fillText("SELECT * WHERE user='' OR 1=1--", fX, H*0.88);
+  }
+
+
+  // ── PHISHING VISUAL ──
+  // Shows fake email → victim → data stolen flow
+
+  function drawPhishing() {
+    const W = atkCanvas.width, H = atkCanvas.height;
+    atkCtx.clearRect(0,0,W,H);
+    drawGrid(atkCtx, W, H, '#1a0000', 40);
+
+    const t = atkFrame;
+
+    // Three stages: Attacker → Fake Email → Victim
+    const stages = [
+      { x: W*0.1,  y: H*0.5, label:'ATTACKER',     color:'#ff3131', icon:'💀' },
+      { x: W*0.5,  y: H*0.5, label:'FAKE EMAIL',   color:'#ffb700', icon:'📧' },
+      { x: W*0.85, y: H*0.5, label:'VICTIM',        color:'#00ff41', icon:'👤' },
+    ];
+
+    // Draw connection arrows
+    for (let i=0; i<stages.length-1; i++) {
+      const s = stages[i], e = stages[i+1];
+      const p = (Math.sin(t*0.05 + i) + 1) / 2;
+
+      atkCtx.strokeStyle = s.color + '66';
+      atkCtx.lineWidth   = 2;
+      atkCtx.setLineDash([8, 4]);
+      atkCtx.beginPath();
+      atkCtx.moveTo(s.x+36, s.y);
+      atkCtx.lineTo(e.x-36, e.y);
+      atkCtx.stroke();
+      atkCtx.setLineDash([]);
+
+      // Moving packet
+      const px = (s.x+36) + ((e.x-36) - (s.x+36)) * p;
+      atkCtx.beginPath();
+      atkCtx.arc(px, s.y, 5, 0, Math.PI*2);
+      atkCtx.fillStyle   = s.color;
+      atkCtx.shadowBlur  = 10;
+      atkCtx.shadowColor = s.color;
+      atkCtx.fill();
+      atkCtx.shadowBlur = 0;
+    }
+
+    // Draw stage nodes
+    stages.forEach(s => {
+      atkCtx.beginPath();
+      atkCtx.arc(s.x, s.y, 30, 0, Math.PI*2);
+      atkCtx.fillStyle   = s.color+'22';
+      atkCtx.strokeStyle = s.color;
+      atkCtx.lineWidth   = 2;
+      atkCtx.shadowBlur  = 15;
+      atkCtx.shadowColor = s.color;
+      atkCtx.fill();
+      atkCtx.stroke();
+      atkCtx.shadowBlur  = 0;
+
+      atkCtx.font      = '20px serif';
+      atkCtx.textAlign = 'center';
+      atkCtx.fillText(s.icon, s.x, s.y+7);
+
+      atkCtx.fillStyle = s.color;
+      atkCtx.font      = "9px 'Orbitron'";
+      atkCtx.fillText(s.label, s.x, s.y+48);
+    });
+
+    // Fake email content box near center
+    const ex = W*0.37, ey = H*0.12, ew = 155, eh = 90;
+    atkCtx.fillStyle   = '#110000';
+    atkCtx.strokeStyle = '#ffb700';
+    atkCtx.lineWidth   = 1;
+    roundRect(atkCtx, ex, ey, ew, eh, 3);
+    atkCtx.fill(); atkCtx.stroke();
+
+    atkCtx.fillStyle = '#ffb700';
+    atkCtx.font      = "9px 'Orbitron'";
+    atkCtx.textAlign = 'left';
+    atkCtx.fillText('FROM: it-helpdesk@c0rp.com', ex+6, ey+16);
+    atkCtx.fillStyle = '#ff3131';
+    atkCtx.fillText('SUBJECT: ⚠ URGENT: Reset Now', ex+6, ey+30);
+    atkCtx.fillStyle = '#ffb7007a';
+    atkCtx.font      = "9px 'Share Tech Mono'";
+    atkCtx.fillText('Your password expires in 1hr.', ex+6, ey+46);
+    atkCtx.fillText('Click here to reset: [LINK]', ex+6, ey+58);
+
+    // Stolen data flowing back (red packets going left)
+    const backProgress = (Math.sin(t*0.04 + 2) + 1) / 2;
+    const bx = W*0.85-36 + (W*0.1+36 - (W*0.85-36)) * backProgress;
+    atkCtx.fillStyle   = '#ff3131';
+    atkCtx.shadowBlur  = 10;
+    atkCtx.shadowColor = '#ff3131';
+    atkCtx.beginPath();
+    atkCtx.arc(bx, H*0.68, 5, 0, Math.PI*2);
+    atkCtx.fill();
+    atkCtx.shadowBlur  = 0;
+
+    atkCtx.fillStyle = '#ff3131';
+    atkCtx.font      = "10px 'VT323'";
+    atkCtx.textAlign = 'center';
+    atkCtx.fillText('STOLEN: username + password', W*0.5, H*0.76);
+  }
+
+
+  // ── MAN IN THE MIDDLE VISUAL ──
+  // Shows attacker sitting between user and server intercepting packets
+
+  function drawMITM() {
+    const W = atkCanvas.width, H = atkCanvas.height;
+    atkCtx.clearRect(0,0,W,H);
+    drawGrid(atkCtx, W, H, '#001a00', 40);
+
+    const t = atkFrame;
+
+    const user     = { x:W*0.1,  y:H*0.5, label:'USER',     color:'#00ff41', icon:'👤' };
+    const attacker = { x:W*0.5,  y:H*0.5, label:'ATTACKER', color:'#ff3131', icon:'👁️' };
+    const server   = { x:W*0.88, y:H*0.5, label:'SERVER',   color:'#00e5ff', icon:'🖥️' };
+
+    // Draw lines user→attacker and attacker→server
+    [[user,attacker],[attacker,server]].forEach(([a,b], i) => {
+      atkCtx.strokeStyle = i===0 ? '#00ff4144' : '#00e5ff44';
+      atkCtx.lineWidth   = 2;
+      atkCtx.beginPath();
+      atkCtx.moveTo(a.x+30, a.y);
+      atkCtx.lineTo(b.x-30, b.y);
+      atkCtx.stroke();
+    });
+
+    // Packets from user to attacker (then re-sent to server)
+    const p1 = (Math.sin(t*0.05) + 1) / 2;
+    const p2 = (Math.sin(t*0.05 + 1.5) + 1) / 2;
+
+    // Green user→attacker packet
+    const px1 = (user.x+30) + ((attacker.x-30) - (user.x+30)) * p1;
+    atkCtx.fillStyle   = '#00ff41';
+    atkCtx.shadowBlur  = 10;
+    atkCtx.shadowColor = '#00ff41';
+    atkCtx.beginPath(); atkCtx.arc(px1, H*0.5, 5, 0, Math.PI*2); atkCtx.fill();
+
+    // Cyan attacker→server packet
+    const px2 = (attacker.x+30) + ((server.x-30) - (attacker.x+30)) * p2;
+    atkCtx.fillStyle   = '#00e5ff';
+    atkCtx.shadowColor = '#00e5ff';
+    atkCtx.beginPath(); atkCtx.arc(px2, H*0.5, 5, 0, Math.PI*2); atkCtx.fill();
+    atkCtx.shadowBlur = 0;
+
+    // Draw nodes
+    [user, attacker, server].forEach(n => {
+      atkCtx.beginPath();
+      atkCtx.arc(n.x, n.y, 28, 0, Math.PI*2);
+      atkCtx.fillStyle   = n.color+'22';
+      atkCtx.strokeStyle = n.color;
+      atkCtx.lineWidth   = 2;
+      atkCtx.shadowBlur  = 15;
+      atkCtx.shadowColor = n.color;
+      atkCtx.fill(); atkCtx.stroke();
+      atkCtx.shadowBlur  = 0;
+
+      atkCtx.font      = '18px serif';
+      atkCtx.textAlign = 'center';
+      atkCtx.fillText(n.icon, n.x, n.y+7);
+
+      atkCtx.fillStyle = n.color;
+      atkCtx.font      = "9px 'Orbitron'";
+      atkCtx.fillText(n.label, n.x, n.y+44);
+    });
+
+    // Intercepted data label
+    const blinkAlpha = Math.sin(t*0.1) > 0 ? 1 : 0;
+    atkCtx.globalAlpha = blinkAlpha;
+    atkCtx.fillStyle   = '#ff3131';
+    atkCtx.font        = "10px 'Orbitron'";
+    atkCtx.textAlign   = 'center';
+    atkCtx.fillText('⚠ INTERCEPTING', W*0.5, H*0.22);
+    atkCtx.globalAlpha = 1;
+
+    // Reading popup near attacker
+    atkCtx.fillStyle   = '#150000';
+    atkCtx.strokeStyle = '#ff3131';
+    atkCtx.lineWidth   = 1;
+    roundRect(atkCtx, W*0.35, H*0.64, 190, 50, 3);
+    atkCtx.fill(); atkCtx.stroke();
+
+    atkCtx.fillStyle = '#ff3131';
+    atkCtx.font      = "9px 'Orbitron'";
+    atkCtx.textAlign = 'left';
+    atkCtx.fillText('READING PACKET:', W*0.36, H*0.72);
+    atkCtx.fillStyle = '#ff7777';
+    atkCtx.font      = "11px 'VT323'";
+    atkCtx.fillText('user=alice  pass=hunter2', W*0.36, H*0.82);
+  }
+
+
+  // ── RANSOMWARE VISUAL ──
+  // Shows files being encrypted one by one with a progress effect
+
+  let ransomFiles = [];
+  function initRansomFiles(W, H) {
+    if (ransomFiles.length > 0) return;
+    const names = ['resume.docx','photo.jpg','tax2023.pdf','project.zip',
+                   'notes.txt','music.mp3','wallet.dat','school.pptx',
+                   'backup.bak','video.mp4','database.sql','app.exe'];
+    names.forEach((name, i) => {
+      ransomFiles.push({
+        name, x: W*(0.05 + (i%4)*0.23), y: H*(0.15 + Math.floor(i/4)*0.28),
+        encrypted: false, progress: 0, color: '#00ff41',
+      });
+    });
+  }
+
+  function drawRansomware() {
+    const W = atkCanvas.width, H = atkCanvas.height;
+    atkCtx.clearRect(0,0,W,H);
+    drawGrid(atkCtx, W, H, '#1a0000', 40);
+
+    initRansomFiles(W, H);
+
+    // Gradually encrypt files based on frame count
+    const encryptedCount = Math.min(Math.floor(atkFrame / 40), ransomFiles.length);
+
+    ransomFiles.forEach((file, i) => {
+      if (i < encryptedCount) {
+        file.encrypted = true;
+        file.color = '#ff3131';
       }
-      term.appendChild(line);
-      term.scrollTop = term.scrollHeight;
-    }, s.delay);
-    simTimers.push(t);
+
+      const fc = file.color;
+      // File icon box
+      atkCtx.fillStyle   = file.encrypted ? '#1a000033' : '#00100233';
+      atkCtx.strokeStyle = fc;
+      atkCtx.lineWidth   = 1;
+      atkCtx.shadowBlur  = file.encrypted ? 8 : 4;
+      atkCtx.shadowColor = fc;
+      roundRect(atkCtx, file.x, file.y, 80, 55, 3);
+      atkCtx.fill(); atkCtx.stroke();
+      atkCtx.shadowBlur  = 0;
+
+      atkCtx.fillStyle = fc;
+      atkCtx.font      = file.encrypted ? "18px serif" : "18px serif";
+      atkCtx.textAlign = 'center';
+      atkCtx.fillText(file.encrypted ? '🔒' : '📄', file.x+40, file.y+25);
+
+      atkCtx.font      = "9px 'Share Tech Mono'";
+      atkCtx.fillText(file.encrypted ? file.name+'.l0ck3d' : file.name, file.x+40, file.y+46);
+    });
+
+    // Encryption progress bar at bottom
+    const pct = (encryptedCount / ransomFiles.length) * 100;
+    atkCtx.fillStyle = '#110000';
+    atkCtx.fillRect(W*0.05, H*0.88, W*0.9, 12);
+    atkCtx.fillStyle = '#ff3131';
+    atkCtx.fillRect(W*0.05, H*0.88, W*0.9*(pct/100), 12);
+    atkCtx.strokeStyle = '#ff313188';
+    atkCtx.strokeRect(W*0.05, H*0.88, W*0.9, 12);
+
+    atkCtx.fillStyle = '#ff3131';
+    atkCtx.font      = "10px 'Orbitron'";
+    atkCtx.textAlign = 'center';
+    atkCtx.fillText(`ENCRYPTING FILES... ${Math.round(pct)}%`, W*0.5, H*0.97);
+  }
+
+
+  // ── PORT SCAN VISUAL ──
+  // Shows a target computer with ports being probed one by one
+
+  const portList = [
+    {port:21,   name:'FTP',     open:true,  risk:'LOW'},
+    {port:22,   name:'SSH',     open:true,  risk:'HIGH'},
+    {port:80,   name:'HTTP',    open:true,  risk:'LOW'},
+    {port:443,  name:'HTTPS',   open:true,  risk:'LOW'},
+    {port:3306, name:'MYSQL',   open:true,  risk:'CRITICAL'},
+    {port:8080, name:'TOMCAT',  open:true,  risk:'MEDIUM'},
+    {port:27017,name:'MONGODB', open:true,  risk:'CRITICAL'},
+    {port:25,   name:'SMTP',    open:false, risk:''},
+    {port:445,  name:'SMB',     open:false, risk:''},
+    {port:3389, name:'RDP',     open:false, risk:''},
+  ];
+
+  function drawPortScan() {
+    const W = atkCanvas.width, H = atkCanvas.height;
+    atkCtx.clearRect(0,0,W,H);
+    drawGrid(atkCtx, W, H, '#001a00', 40);
+
+    const t = atkFrame;
+    const scanned = Math.min(Math.floor(t / 30), portList.length);
+    const activeIdx = Math.min(Math.floor(t / 30), portList.length - 1);
+
+    // Draw target server on right
+    drawComputer(atkCtx, W*0.75, H*0.35, '#00e5ff');
+    atkCtx.fillStyle = '#00e5ff';
+    atkCtx.font      = "10px 'Orbitron'";
+    atkCtx.textAlign = 'center';
+    atkCtx.fillText('TARGET', W*0.75, H*0.75);
+
+    // Draw attacker on left
+    drawComputer(atkCtx, W*0.06, H*0.35, '#ff3131');
+    atkCtx.fillStyle = '#ff3131';
+    atkCtx.font      = "10px 'Orbitron'";
+    atkCtx.textAlign = 'center';
+    atkCtx.fillText('ATTACKER', W*0.06, H*0.75);
+
+    // Port scan beam animation
+    if (activeIdx < portList.length) {
+      atkCtx.strokeStyle = '#00ff4133';
+      atkCtx.lineWidth   = 1;
+      atkCtx.setLineDash([4, 4]);
+      atkCtx.beginPath();
+      atkCtx.moveTo(W*0.14, H*0.5);
+      atkCtx.lineTo(W*0.65, H*0.5);
+      atkCtx.stroke();
+      atkCtx.setLineDash([]);
+
+      // Scanning pulse
+      const px = W*0.14 + (W*0.65 - W*0.14) * ((t % 30) / 30);
+      atkCtx.fillStyle   = '#00ff41';
+      atkCtx.shadowBlur  = 12;
+      atkCtx.shadowColor = '#00ff41';
+      atkCtx.beginPath(); atkCtx.arc(px, H*0.5, 4, 0, Math.PI*2); atkCtx.fill();
+      atkCtx.shadowBlur  = 0;
+    }
+
+    // Port results list
+    const colX = W*0.25, rowH = 17;
+    atkCtx.fillStyle = '#00aa2b';
+    atkCtx.font      = "10px 'Orbitron'";
+    atkCtx.textAlign = 'left';
+    atkCtx.fillText('PORT    SERVICE   STATUS', colX, H*0.12);
+
+    portList.slice(0, scanned).forEach((p, i) => {
+      const y = H*0.19 + i * rowH;
+      const c = p.open
+        ? (p.risk==='CRITICAL'?'#ff3131' : p.risk==='HIGH'?'#ffb700' : '#00ff41')
+        : '#2a5c2e';
+
+      atkCtx.fillStyle = c;
+      atkCtx.font      = "12px 'VT323'";
+      atkCtx.fillText(
+        `${String(p.port).padEnd(7)} ${p.name.padEnd(9)} ${p.open ? '● OPEN' + (p.risk?' ['+p.risk+']':'') : '○ closed'}`,
+        colX, y
+      );
+    });
+  }
+
+
+  // ── SHARED DRAWING HELPERS ──
+
+  // Draw a simple faint grid background
+  function drawGrid(ctx, W, H, color, spacing) {
+    ctx.strokeStyle = color;
+    ctx.lineWidth   = 0.5;
+    for (let x=0; x<W; x+=spacing) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+    for (let y=0; y<H; y+=spacing) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  }
+
+  // Draw a simple rectangle with rounded corners
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.lineTo(x+w-r, y);
+    ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+    ctx.lineTo(x+w, y+h-r);
+    ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+    ctx.lineTo(x+r, y+h);
+    ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+    ctx.lineTo(x, y+r);
+    ctx.quadraticCurveTo(x, y, x+r, y);
+    ctx.closePath();
+  }
+
+  // Draw a small computer icon at position x,y
+  function drawComputer(ctx, x, y, color) {
+    ctx.fillStyle   = color + '22';
+    ctx.strokeStyle = color;
+    ctx.lineWidth   = 1.5;
+    ctx.shadowBlur  = 10;
+    ctx.shadowColor = color;
+
+    // Monitor
+    ctx.fillRect(x-22, y-18, 44, 32);
+    ctx.strokeRect(x-22, y-18, 44, 32);
+
+    // Screen
+    ctx.fillStyle = color + '44';
+    ctx.fillRect(x-17, y-14, 34, 22);
+
+    // Stand
+    ctx.beginPath();
+    ctx.moveTo(x-8, y+14); ctx.lineTo(x+8, y+14);
+    ctx.moveTo(x, y+14); ctx.lineTo(x, y+22);
+    ctx.moveTo(x-10, y+22); ctx.lineTo(x+10, y+22);
+    ctx.strokeStyle = color;
+    ctx.stroke();
+
+    ctx.shadowBlur = 0;
+  }
+
+
+  // ═══════════════════════════════════════════════════
+  // SECTION 3: STATS
+  // ═══════════════════════════════════════════════════
+
+  let simsRun = 0, threatsShown = 0;
+
+  function incStats() {
+    simsRun++;
+    threatsShown++;
+    document.getElementById('statSims').textContent    = simsRun;
+    document.getElementById('statThreats').textContent = threatsShown;
+  }
+
+
+  // ═══════════════════════════════════════════════════
+  // SECTION 4: SIMULATION DATA (terminal steps + sidebar)
+  // ═══════════════════════════════════════════════════
+
+  const simData = {
+
+    bruteforce: {
+      title: '[ BRUTE FORCE LOGIN ATTACK ]',
+      visualLabel: 'BRUTE FORCE — PASSWORD CRACKING',
+      sidebar: {
+        overview: `A program tries thousands of password guesses per second from a "wordlist" containing millions of common passwords. Modern computers test over 1 billion simple passwords per second.`,
+        impact: ['Account takeover', 'Access to private data', 'Attacker locks you out by changing your password', 'Enables access to other accounts via reused passwords'],
+        defenses: ['Use 12+ character unique passwords', 'Lock account after 5-10 wrong attempts', 'Enable Two-Factor Authentication (2FA)', 'Use a password manager', 'Never reuse passwords'],
+      },
+      steps: [
+        { delay:0,    type:'prompt',  text:'hydra -l admin -P /wordlists/rockyou.txt 192.168.1.105 http-post' },
+        { delay:600,  type:'output',  text:'Hydra v9.4 starting — target: 192.168.1.105' },
+        { delay:1000, type:'output',  text:'Trying passwords from rockyou.txt (14 million entries)...' },
+        { delay:1400, type:'dim',     text:'[ATTEMPT] admin : password  → 401 Wrong' },
+        { delay:1700, type:'dim',     text:'[ATTEMPT] admin : 123456    → 401 Wrong' },
+        { delay:2000, type:'dim',     text:'[ATTEMPT] admin : qwerty    → 401 Wrong' },
+        { delay:2300, type:'dim',     text:'[ATTEMPT] admin : letmein   → 401 Wrong' },
+        { delay:2600, type:'dim',     text:'[ATTEMPT] admin : dragon    → 401 Wrong' },
+        { delay:2900, type:'dim',     text:'[ATTEMPT] admin : master    → 401 Wrong' },
+        { delay:3200, type:'dim',     text:'[ATTEMPT] admin : sunshine  → 401 Wrong' },
+        { delay:3500, type:'dim',     text:'[ATTEMPT] admin : admin123  → 401 Wrong' },
+        { delay:3800, type:'warning', text:'[ATTEMPT] admin : P@ssw0rd! → checking...' },
+        { delay:4300, type:'success', text:'[✓ SUCCESS] admin : P@ssw0rd! → 200 OK — LOGGED IN!' },
+        { delay:4800, type:'error',   text:'>>> Full admin access gained. Role: SUPERUSER <<<' },
+        { delay:5300, type:'info',    text:'Only 9 of 14,344,391 passwords tested before cracked.' },
+      ],
+      onSuccess: () => { bfLockBroken = true; setTimeout(()=>{ bfLockBroken=false; }, 5000); }
+    },
+
+    sqli: {
+      title: '[ SQL INJECTION ATTACK ]',
+      visualLabel: 'SQL INJECTION — DATABASE BYPASS',
+      sidebar: {
+        overview: `When login forms don't check input, attackers type SQL commands directly into the username box — tricking the database into bypassing the password check completely.`,
+        impact: ['Log in as ANY user without a password', 'Download the entire user database', 'Delete or modify data', 'On some servers: run OS commands'],
+        defenses: ['Use parameterized queries', 'Validate and sanitize all inputs', 'Use a Web Application Firewall (WAF)', 'Minimal database permissions', 'Never show raw database errors to users'],
+      },
+      steps: [
+        { delay:0,    type:'prompt',  text:"sqlmap -u \"http://target.com/login\" --data=\"user=admin&pass=x\" --dbs" },
+        { delay:600,  type:'output',  text:'Testing connection to target...' },
+        { delay:1000, type:'output',  text:'Testing login form for SQL injection...' },
+        { delay:1500, type:'info',    text:"Trying payload: admin' OR '1'='1'--" },
+        { delay:1900, type:'info',    text:"Query becomes: SELECT * FROM users WHERE user='admin' OR 1=1--" },
+        { delay:2400, type:'info',    text:'1=1 is ALWAYS true, so the WHERE clause is bypassed!' },
+        { delay:2900, type:'success', text:'[✓] Login form IS injectable — attack is possible' },
+        { delay:3300, type:'output',  text:'Database software found: MySQL 8.0.28' },
+        { delay:3700, type:'data',    text:'  [*] information_schema' },
+        { delay:3900, type:'data',    text:'  [*] appdb' },
+        { delay:4100, type:'data',    text:'  [*] users_production  ← target found!' },
+        { delay:4400, type:'output',  text:'Dumping all accounts from users_production...' },
+        { delay:4700, type:'data',    text:'  1 | admin  | $2b$12$9FzK... | admin@corp.com' },
+        { delay:4900, type:'data',    text:'  2 | jsmith | $2b$12$xMqP... | j.smith@corp.com' },
+        { delay:5100, type:'error',   text:'>>> 847 user accounts downloaded from the database <<<' },
+      ],
+    },
+
+    phishing: {
+      title: '[ PHISHING CAMPAIGN SIMULATION ]',
+      visualLabel: 'PHISHING — CREDENTIAL THEFT',
+      sidebar: {
+        overview: `Phishing emails look exactly like real emails from banks or companies. They create urgency to make you click without thinking, then record your credentials on a fake website.`,
+        impact: ['Username and password stolen', 'Bank account access', 'Attacker can impersonate you', 'Can lead to malware installation'],
+        defenses: ['Check the actual sender email address', 'Hover over links before clicking', 'Never enter passwords reached via email', 'Use 2FA — stolen passwords alone are not enough', 'Report suspicious emails to IT'],
+      },
+      steps: [
+        { delay:0,    type:'prompt',  text:'gophish --config phish_campaign.json --target employees.csv' },
+        { delay:500,  type:'output',  text:'Fake sender: it-helpdesk@c0rp-secure.com  ← note the zero!' },
+        { delay:900,  type:'info',    text:'Subject: [URGENT] Your password expires in 24 hours' },
+        { delay:1300, type:'output',  text:'Sending fake email to 250 employees...' },
+        { delay:1800, type:'dim',     text:'[SENT] → j.anderson@corp.com' },
+        { delay:2000, type:'dim',     text:'[SENT] → m.chen@corp.com  (+ 248 more)' },
+        { delay:2500, type:'warning', text:'[CLICKED] j.anderson opened the fake link at 11:42 AM' },
+        { delay:2900, type:'warning', text:'[STOLEN]  j.anderson: username=janderson  password=Summer2024!' },
+        { delay:3300, type:'warning', text:'[CLICKED] m.chen opened the fake link at 11:44 AM' },
+        { delay:3700, type:'warning', text:'[STOLEN]  m.chen: username=mchen  password=Corp#9821' },
+        { delay:4200, type:'output',  text:'Link click rate: 47 out of 250 employees (18.8%)' },
+        { delay:4700, type:'error',   text:'>>> 23 passwords stolen in under 10 minutes <<<' },
+        { delay:5200, type:'info',    text:'None of the victims know their account is compromised.' },
+      ],
+    },
+
+    mitm: {
+      title: '[ MAN-IN-THE-MIDDLE ATTACK ]',
+      visualLabel: 'MITM — TRAFFIC INTERCEPTION',
+      sidebar: {
+        overview: `On public Wi-Fi, an attacker positions themselves between you and the router. All your traffic passes through them first. On unencrypted HTTP sites, they can read everything.`,
+        impact: ['Passwords intercepted on HTTP sites', 'Session cookies stolen', 'Malicious code injected into pages', 'Confidential messages read in real time'],
+        defenses: ['Look for HTTPS (padlock icon)', 'Use a VPN on public Wi-Fi', 'Avoid banking on public networks', 'Your phone data connection is safer than public Wi-Fi'],
+      },
+      steps: [
+        { delay:0,    type:'prompt',  text:'arpspoof -i wlan0 -t 192.168.1.10 192.168.1.1' },
+        { delay:500,  type:'output',  text:'ARP poisoning — tricking victim to route through us...' },
+        { delay:1000, type:'info',    text:"Victim's computer now thinks our laptop IS the router." },
+        { delay:1500, type:'output',  text:'Starting traffic capture with Ettercap...' },
+        { delay:2000, type:'dim',     text:'[PACKET] HTTPS to google.com — ENCRYPTED ✓ cannot read' },
+        { delay:2400, type:'dim',     text:'[PACKET] HTTPS to gmail.com  — ENCRYPTED ✓ cannot read' },
+        { delay:2800, type:'warning', text:'[PACKET] HTTP to login.example.com — NO ENCRYPTION ⚠' },
+        { delay:3200, type:'warning', text:'[READING] POST form data: username=alice  password=hunter2' },
+        { delay:3700, type:'success', text:'[✓ CAPTURED] alice / hunter2 @ login.example.com' },
+        { delay:4200, type:'info',    text:'Injecting hidden tracking script into HTTP response...' },
+        { delay:4700, type:'error',   text:'>>> Password stolen. Victim had no idea this happened. <<<' },
+        { delay:5100, type:'output',  text:'HTTPS would have made the password completely unreadable.' },
+      ],
+    },
+
+    ransomware: {
+      title: '[ RANSOMWARE INFECTION SIMULATION ]',
+      visualLabel: 'RANSOMWARE — FILE ENCRYPTION',
+      sidebar: {
+        overview: `Ransomware locks all your files with military-grade encryption. Without the key (only the attacker has it), your files are permanently unreadable. Ransom demands can reach millions.`,
+        impact: ['ALL files encrypted and inaccessible', 'Business stops for days or weeks', 'Ransom $500 to millions of dollars', 'No guarantee files are returned even if paid'],
+        defenses: ['3-2-1 Backup: 3 copies, 2 formats, 1 offsite', 'Never enable Office macros from unknown sources', 'Keep OS and software updated', "Don't click unexpected email attachments", 'Keep antivirus / EDR software current'],
+      },
+      steps: [
+        { delay:0,    type:'output',  text:'[STAGE 1] User opened: Invoice_Q4_2024.docx' },
+        { delay:700,  type:'warning', text:'Word asks to "Enable Macros" — user clicks Yes' },
+        { delay:1200, type:'output',  text:'Macro runs hidden PowerShell, downloads payload...' },
+        { delay:1700, type:'output',  text:'[STAGE 2] Malware installed at C:\\AppData\\svchost32.exe' },
+        { delay:2200, type:'info',    text:'Added to startup registry — survives reboots' },
+        { delay:2700, type:'output',  text:'[STAGE 3] Disabling backups and recovery tools...' },
+        { delay:3200, type:'error',   text:'Windows backup shadow copies DELETED — no restore possible' },
+        { delay:3700, type:'output',  text:'[STAGE 4] Encrypting files (AES-256 + RSA-2048)' },
+        { delay:4100, type:'dim',     text:'Encrypting: Documents\\ [████████░░] 82%' },
+        { delay:4400, type:'dim',     text:'Encrypting: Desktop\\   [██████████] 100%' },
+        { delay:4800, type:'dim',     text:'Encrypting: network drives (Z:\\, Y:\\) ...' },
+        { delay:5200, type:'error',   text:'>>> 47,382 files encrypted. All renamed to .l0ck3d <<<' },
+        { delay:5700, type:'warning', text:'Ransom note dropped everywhere: README_DECRYPT.txt' },
+        { delay:6200, type:'error',   text:'DEMAND: Pay 3.5 Bitcoin (~$210,000) to unlock your files.' },
+      ],
+      onLoad: () => { ransomFiles = []; }
+    },
+
+    portscan: {
+      title: '[ PORT SCAN RECONNAISSANCE ]',
+      visualLabel: 'PORT SCAN — NETWORK RECON',
+      sidebar: {
+        overview: `Ports are numbered "doors" on a computer (0–65535). Each service runs on a specific port. Port scanning checks which doors are open, giving attackers a map of what to attack.`,
+        impact: ['Reveals what services are running', 'Shows software versions with known exploits', 'Finds accidentally exposed databases', 'First step in almost every real attack'],
+        defenses: ['Firewall: block all unnecessary ports', 'Close services you do not use', 'IDS alerts when scanning is detected', 'Run your own port scans regularly to audit your exposure'],
+      },
+      steps: [
+        { delay:0,    type:'prompt',  text:'nmap -sV -sC -O -p- --min-rate 1000 192.168.1.105' },
+        { delay:500,  type:'output',  text:'Nmap 7.94 — scanning all 65,535 ports...' },
+        { delay:1000, type:'data',    text:'PORT        STATE   SERVICE         VERSION' },
+        { delay:1400, type:'data',    text:'21/tcp      open    FTP             vsftpd 3.0.3' },
+        { delay:1700, type:'warning', text:'22/tcp      open    SSH             OpenSSH 7.4 ← outdated!' },
+        { delay:1900, type:'data',    text:'80/tcp      open    HTTP            Apache 2.4.41' },
+        { delay:2100, type:'warning', text:'443/tcp     open    HTTPS           cert expires in 3 days!' },
+        { delay:2300, type:'error',   text:'3306/tcp    open    MySQL           ← exposed to internet!!' },
+        { delay:2500, type:'data',    text:'8080/tcp    open    Tomcat          v9.0.45' },
+        { delay:2700, type:'error',   text:'27017/tcp   open    MongoDB         ← NO PASSWORD SET!!' },
+        { delay:3100, type:'output',  text:'OS detected: Ubuntu Linux 18-20' },
+        { delay:3500, type:'info',    text:'CVE-2021-41617: OpenSSH vulnerability — CRITICAL' },
+        { delay:3900, type:'info',    text:'CVE-2019-12815: FTP vulnerability — HIGH' },
+        { delay:4300, type:'error',   text:'>>> 7 open ports, 2 exposed databases, 2 known CVEs <<<' },
+        { delay:4700, type:'warning', text:'Attacker now has a complete map of entry points.' },
+      ],
+    },
+
+  }; // end simData
+
+
+  // ═══════════════════════════════════════════════════
+  // SECTION 5: MODAL CONTROLLER
+  // ═══════════════════════════════════════════════════
+
+  let currentSim  = null;
+  let simRunning  = false;
+  let simTimers   = [];
+
+  // Open the popup modal for a given attack type
+  function openModal(id, cardEl) {
+    currentSim  = id;
+    const sim   = simData[id];
+    bfLockBroken = false;
+
+    // Highlight clicked card
+    document.querySelectorAll('.attack-card').forEach(c => c.classList.remove('active'));
+    if (cardEl) cardEl.classList.add('active');
+
+    // Show the overlay
+    document.getElementById('modalOverlay').classList.add('open');
+    document.getElementById('modalTitle').textContent  = sim.title;
+    document.getElementById('btnRun').disabled         = false;
+    document.getElementById('visualLabel').textContent = sim.visualLabel || id.toUpperCase();
+    document.getElementById('visualStatusText').textContent = 'READY';
+
+    // Build the sidebar
+    buildSidebar(sim.sidebar);
+
+    // Reset terminal
+    document.getElementById('terminal').innerHTML =
+      '<span class="t-dim">// Simulation loaded — press ► RUN ATTACK to begin</span>\n' +
+      '<span class="cursor"></span>';
+
+    // Reset ransomware files if needed
+    if (sim.onLoad) sim.onLoad();
+
+    // Start the visual animation for this attack type
+    startVisual(id);
+
+    // Prevent background scrolling
+    document.body.style.overflow = 'hidden';
+  }
+
+  // Close the popup modal
+  function closeModal() {
+    clearSim();
+    stopVisual();
+    document.getElementById('modalOverlay').classList.remove('open');
+    document.querySelectorAll('.attack-card').forEach(c => c.classList.remove('active'));
+    currentSim = null;
+    document.body.style.overflow = '';
+    bfLockBroken = false;
+    ransomFiles  = [];
+  }
+
+  // Close modal if clicking the dark overlay (but not the modal itself)
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById('modalOverlay')) closeModal();
+  }
+
+  // Close on Escape key
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
   });
 
-  const done = setTimeout(() => {
-    simRunning = false;
-    document.getElementById('btnRun').disabled = false;
-    const cursor = document.createElement('span');
-    cursor.className = 'cursor';
-    term.appendChild(cursor);
-  }, totalTime);
-  simTimers.push(done);
-}
-
-function clearSim() {
-  simTimers.forEach(clearTimeout);
-  simTimers = [];
-  simRunning = false;
-  if (currentSim) {
-    document.getElementById('terminal').innerHTML = '<span class="t-dim">// cleared — press RUN ATTACK to restart</span>';
-    document.getElementById('btnRun').disabled = false;
-    const fill = document.getElementById('progressFill');
-    if (fill) fill.style.width = '0';
+  // Build sidebar HTML from the sim's data object
+  function buildSidebar(data) {
+    const sb = document.getElementById('sidebar');
+    sb.innerHTML = `
+      <div class="info-block">
+        <div class="info-block-title">// WHAT IS THIS ATTACK?</div>
+        <p>${data.overview}</p>
+      </div>
+      <div class="info-block">
+        <div class="info-block-title">// WHAT CAN THE ATTACKER DO?</div>
+        ${data.impact.map(i => `<div class="defense-item" style="color:var(--red)">${i}</div>`).join('')}
+      </div>
+      <div class="info-block">
+        <div class="info-block-title">// HOW TO PROTECT YOURSELF</div>
+        ${data.defenses.map(d => `<div class="defense-item">${d}</div>`).join('')}
+      </div>
+      <div class="info-block">
+        <div class="info-block-title">// SIMULATION PROGRESS</div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      </div>
+    `;
   }
-}
 
-function closeSim() {
-  clearSim();
-  document.getElementById('simWrapper').classList.remove('visible');
-  document.querySelectorAll('.attack-card').forEach(c => c.classList.remove('active'));
-  currentSim = null;
-}
+  // Run the terminal animation for the current simulation
+  function runCurrentSim() {
+    if (!currentSim || simRunning) return;
+    simRunning = true;
+    document.getElementById('btnRun').disabled = true;
+    document.getElementById('visualStatusText').textContent = 'RUNNING...';
+    incStats();
+
+    const term  = document.getElementById('terminal');
+    term.innerHTML = '';
+    const steps     = simData[currentSim].steps;
+    const totalTime = steps[steps.length-1].delay + 800;
+
+    steps.forEach((step, index) => {
+      const timer = setTimeout(() => {
+        const pct = ((index+1) / steps.length) * 100;
+        const fill = document.getElementById('progressFill');
+        if (fill) fill.style.width = pct + '%';
+
+        const line = document.createElement('div');
+        line.className = 'terminal-line';
+
+        if (step.type === 'prompt') {
+          line.innerHTML = `<span class="t-prompt">root@kali:~# </span><span class="t-cmd">${step.text}</span>`;
+        } else {
+          line.innerHTML = `<span class="t-${step.type}">${step.text}</span>`;
+        }
+
+        term.appendChild(line);
+        term.scrollTop = term.scrollHeight;
+
+        // Trigger any special events tied to certain steps
+        if (step.type === 'success' && simData[currentSim].onSuccess) {
+          simData[currentSim].onSuccess();
+        }
+
+      }, step.delay);
+
+      simTimers.push(timer);
+    });
+
+    // Re-enable run button when done, update status
+    const doneTimer = setTimeout(() => {
+      simRunning = false;
+      document.getElementById('btnRun').disabled = false;
+      document.getElementById('visualStatusText').textContent = 'COMPLETE';
+
+      const cursor = document.createElement('span');
+      cursor.className = 'cursor';
+      term.appendChild(cursor);
+    }, totalTime);
+
+    simTimers.push(doneTimer);
+  }
+
+  // Clear the terminal and cancel running timers
+  function clearSim() {
+    simTimers.forEach(id => clearTimeout(id));
+    simTimers  = [];
+    simRunning = false;
+    bfLockBroken = false;
+    ransomFiles  = [];
+
+    if (currentSim) {
+      document.getElementById('terminal').innerHTML =
+        '<span class="t-dim">// Cleared — press ► RUN ATTACK to restart</span>';
+      document.getElementById('btnRun').disabled = false;
+      document.getElementById('visualStatusText').textContent = 'READY';
+      const fill = document.getElementById('progressFill');
+      if (fill) fill.style.width = '0';
+    }
+  }
 </script>
 </body>
 </html>
