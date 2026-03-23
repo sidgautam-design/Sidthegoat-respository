@@ -1,17 +1,58 @@
-const loginAttempts = 5;
-// this is a const variable that is named login attemps which is assigned to three.
-let attempts = 3;
-// this is a let variable called attempts which is assigned to 3.
+let message = "Work in Progress";
+console.log(message);
+document.getElementById("output").innerText = message;
+// get element by ID and change text
 
-if (attempts <= loginAttempts) {
-    console.log("You can successfuly log in.")
-} else if (attempts === loginAttempts) {
-    console.log("This is your last attempt.")
-} else {
-    console.log("YOU CAN'T LOG IN ANYMORE")
+document.getElementsByClassName("textbold") [0].style.color = "darkgreen";
+// get element by class and change color
+
+//get element by tag and set attribute
+let imgTage = document.getElementsByTagName("img") [0];
+imgTage.setAttribute("This is a memewall");
+
+// create an attribute node
+var newAttribute = document.newAttribute("src");
+newAttribute.value = "wall talking.gif";
+imgTag.setAttributeNode(newAttribute); 
+
+//add css styling via DOM
+document.getElementById("footer").style.fontSize = "16px";
+
+// creation of an onclick event
+document.getElementById("homepage").onclick = function() {
+    alert("Navigating to homepage. Have fun learning!");
+    window.location = "index.html";
+};
+
+let isloggedin = true;
+let level = 5
+if(isloggedin && level>=5) { 
+    console.log("User can play level 5 or more");
 }
-// this is an if-else statements for login attempts. 
+else{
+    console.log("User cannot play level 5 or more");
+} 
 
-setTimeOut(function () {
-    alert("This website is focused on cybersecurity.");
-}, 2000);
+let ispremiumuser = true;
+let coins = 10000;
+
+if(ispremiumuser || coins>=10000){
+    console.log("User can play all the premium levels");
+} 
+else{
+    console.log("User is not allowed to play premium levels");
+}
+
+let isbanned = true;
+if(!isbanned && isloggedin){
+    console.log("The user is logged in");
+}
+else{
+    console.log("The user is not logged in")
+} 
+let premiumPassCost = 2500;
+if(ispremiumuser || coins >= premiumPassCost) {
+    coins = coins - premiumPassCost;
+    console.log("Premium unlocked! Coins left: " + coins);
+} else 
+    console.log("Not enough coins to unlock premium."); 
