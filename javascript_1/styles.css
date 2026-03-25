@@ -1,3 +1,18 @@
+body {
+    background-color: black;
+}
+
+h1 {
+    color: #FFD700;
+    text-indent: center;
+    font-family: 'Papyrus', serif;
+         background-color: black;
+}
+li { 
+    color: whitesmoke;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    background-color:navy;
+}
 
 img {
     height: 300px;

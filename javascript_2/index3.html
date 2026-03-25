@@ -3,975 +3,1277 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CyberSec Lab — Attack Simulation</title> 
-<button onclick="window.location= 'index.html'">Homepage</button>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=VT323&display=swap" rel="stylesheet">
+<title>ThreatLens — Attack Intelligence Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --green: #00ff41;
-    --green-dim: #00aa2b;
-    --green-faint: #003a0e;
-    --red: #ff3131;
-    --amber: #ffb700;
-    --cyan: #00e5ff;
-    --bg: #020c03;
-    --panel: #050f06;
-    --border: #0a2a0e;
-    --text: #b0ffb8;
-  }
+:root {
+  --ink: #0a0d14;
+  --ink2: #141926;
+  --ink3: #1e2538;
+  --slate: #2d3450;
+  --muted: #4a5278;
+  --dim: #6b7494;
+  --ghost: #9aa3c2;
+  --text: #dde2f4;
+  --white: #f0f3ff;
+  --orange: #ff6b2b;
+  --orange-dim: #c94d18;
+  --orange-glow: rgba(255,107,43,0.15);
+  --cyan: #3de8d4;
+  --cyan-dim: #25b09f;
+  --yellow: #ffd166;
+  --red: #ff4d6d;
+  --green: #06d6a0;
+  --purple: #b48eff;
+  --border: rgba(255,255,255,0.06);
+  --border-hover: rgba(255,107,43,0.3);
+}
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Share Tech Mono', monospace;
-    min-height: 100vh;
-    overflow-x: hidden;
-    cursor: default;
-  }
+html { scroll-behavior: smooth; }
 
-  /* CRT scanline overlay */
-  body::before {
-    content: '';
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: repeating-linear-gradient(
-      0deg,
-      rgba(0,0,0,0.07) 0px,
-      rgba(0,0,0,0.07) 1px,
-      transparent 1px,
-      transparent 2px
-    );
-    pointer-events: none;
-    z-index: 9999;
-  }
+body {
+  background: var(--ink);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-weight: 300;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
 
-  /* CRT flicker */
-  @keyframes flicker {
-    0%,100% { opacity: 1; }
-    92% { opacity: 1; }
-    93% { opacity: 0.92; }
-    94% { opacity: 1; }
-    96% { opacity: 0.95; }
-    97% { opacity: 1; }
-  }
-  body { animation: flicker 6s infinite; }
+/* ── Background mesh ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 20%, rgba(255,107,43,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 60% at 80% 80%, rgba(61,232,212,0.04) 0%, transparent 60%);
+  pointer-events: none; z-index: 0;
+}
 
-  /* HEADER */
-  header {
-    border-bottom: 1px solid var(--green-dim);
-    padding: 18px 32px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: linear-gradient(180deg, #030e04, var(--bg));
-    position: sticky; top: 0; z-index: 100;
-  }
+/* ── Grid overlay ── */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none; z-index: 0;
+}
 
-  .logo {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 1.1rem;
-    font-weight: 900;
-    color: var(--green);
-    letter-spacing: 3px;
-    text-shadow: 0 0 20px var(--green);
-  }
+/* ── Layout ── */
+header {
+  position: sticky; top: 0; z-index: 200;
+  background: rgba(10,13,20,0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 40px;
+  height: 64px;
+  display: flex; align-items: center; justify-content: space-between;
+}
 
-  .logo span { color: var(--red); }
+.logo {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 1.25rem;
+  letter-spacing: -0.5px;
+  color: var(--white);
+  display: flex; align-items: center; gap: 10px;
+}
+.logo-icon {
+  width: 32px; height: 32px;
+  background: var(--orange);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem;
+}
+.logo span { color: var(--orange); }
 
-  .header-status {
-    font-size: 0.72rem;
-    color: var(--green-dim);
-    text-align: right;
-    line-height: 1.7;
-  }
+.header-right {
+  display: flex; align-items: center; gap: 24px;
+}
+.pill {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.6rem;
+  padding: 4px 10px;
+  border-radius: 20px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.pill-edu { background: rgba(6,214,160,0.12); color: var(--green); border: 1px solid rgba(6,214,160,0.2); }
+.pill-sandbox { background: rgba(255,107,43,0.1); color: var(--orange); border: 1px solid rgba(255,107,43,0.2); }
 
-  .status-dot {
-    display: inline-block;
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: var(--green);
-    box-shadow: 0 0 8px var(--green);
-    animation: pulse 1.5s infinite;
-    margin-right: 6px;
-  }
-  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+.nav-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--ghost);
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.nav-btn:hover { border-color: var(--border-hover); color: var(--orange); }
 
-  /* WARNING BANNER */
-  .warning-banner {
-    background: repeating-linear-gradient(45deg, #1a0000, #1a0000 10px, #0d0000 10px, #0d0000 20px);
-    border-top: 2px solid var(--red);
-    border-bottom: 2px solid var(--red);
-    padding: 10px 32px;
-    text-align: center;
-    color: var(--red);
-    font-size: 0.75rem;
-    letter-spacing: 2px;
-    text-shadow: 0 0 10px var(--red);
-  }
+main {
+  position: relative; z-index: 1;
+  max-width: 1200px; margin: 0 auto;
+  padding: 48px 24px;
+}
 
-  /* MAIN LAYOUT */
-  main {
-    max-width: 1300px;
-    margin: 0 auto;
-    padding: 28px 24px;
-  }
+/* ── Hero ── */
+.hero {
+  text-align: center;
+  padding: 20px 0 56px;
+}
+.hero-eyebrow {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.68rem;
+  color: var(--orange);
+  letter-spacing: 3px;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+}
+.hero h1 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 1.1;
+  color: var(--white);
+  letter-spacing: -1px;
+  margin-bottom: 18px;
+}
+.hero h1 span { color: var(--orange); }
+.hero p {
+  max-width: 520px;
+  margin: 0 auto 32px;
+  color: var(--dim);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+.hero-stats {
+  display: flex; justify-content: center; gap: 48px;
+  font-family: 'Space Mono', monospace;
+}
+.hstat-num {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--white);
+  display: block;
+}
+.hstat-label {
+  font-size: 0.62rem;
+  color: var(--dim);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
 
-  /* SECTION TITLES */
-  .section-title {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.75rem;
-    letter-spacing: 4px;
-    color: var(--green-dim);
-    margin-bottom: 18px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .section-title::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: linear-gradient(90deg, var(--border), transparent);
-  }
+/* ── Section header ── */
+.sec-hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 24px;
+}
+.sec-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--white);
+}
+.sec-sub {
+  font-size: 0.75rem;
+  color: var(--dim);
+  margin-top: 2px;
+}
 
-  /* ATTACK GRID */
-  .attack-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 16px;
-    margin-bottom: 32px;
-  }
+/* ── Attack grid ── */
+.attack-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 16px;
+  margin-bottom: 48px;
+}
 
-  .attack-card {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 20px;
-    cursor: pointer;
-    transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
-    position: relative;
-    overflow: hidden;
-  }
-  .attack-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: var(--green-dim);
-    opacity: 0;
-    transition: opacity 0.2s;
-  }
-  .attack-card:hover {
-    border-color: var(--green-dim);
-    box-shadow: 0 0 20px rgba(0,255,65,0.08);
-    transform: translateY(-2px);
-  }
-  .attack-card:hover::before { opacity: 1; }
-  .attack-card.active {
-    border-color: var(--green);
-    box-shadow: 0 0 30px rgba(0,255,65,0.15);
-  }
-  .attack-card.active::before { opacity: 1; background: var(--green); }
+.attack-card {
+  background: var(--ink2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  cursor: pointer;
+  transition: border-color 0.25s, transform 0.2s, box-shadow 0.25s;
+  position: relative;
+  overflow: hidden;
+  display: flex; flex-direction: column;
+}
+.attack-card::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 60% at 50% 0%, rgba(255,107,43,0.06), transparent);
+  opacity: 0; transition: opacity 0.3s;
+}
+.attack-card:hover {
+  border-color: rgba(255,107,43,0.35);
+  transform: translateY(-3px);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,107,43,0.1);
+}
+.attack-card:hover::after { opacity: 1; }
+.attack-card.selected {
+  border-color: var(--orange);
+  box-shadow: 0 0 0 1px var(--orange), 0 16px 40px rgba(255,107,43,0.15);
+}
 
-  .card-threat {
-    font-size: 0.65rem;
-    letter-spacing: 2px;
-    margin-bottom: 8px;
-  }
-  .threat-critical { color: var(--red); }
-  .threat-high { color: var(--amber); }
-  .threat-medium { color: var(--cyan); }
+.card-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 16px;
+}
 
-  .card-icon { font-size: 1.8rem; margin-bottom: 10px; }
+.card-icon-wrap {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+.icon-red { background: rgba(255,77,109,0.12); }
+.icon-orange { background: rgba(255,107,43,0.12); }
+.icon-yellow { background: rgba(255,209,102,0.12); }
+.icon-cyan { background: rgba(61,232,212,0.12); }
 
-  .card-title {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.8rem;
-    color: var(--green);
-    margin-bottom: 6px;
-    letter-spacing: 1px;
-  }
+.card-threat-badge {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 1.5px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+.badge-critical { background: rgba(255,77,109,0.12); color: var(--red); border: 1px solid rgba(255,77,109,0.2); }
+.badge-high { background: rgba(255,107,43,0.12); color: var(--orange); border: 1px solid rgba(255,107,43,0.2); }
+.badge-medium { background: rgba(61,232,212,0.1); color: var(--cyan); border: 1px solid rgba(61,232,212,0.2); }
 
-  .card-desc {
-    font-size: 0.72rem;
-    color: #5a8c60;
-    line-height: 1.6;
-  }
+.card-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--white);
+  margin-bottom: 8px;
+}
+.card-desc {
+  font-size: 0.78rem;
+  color: var(--dim);
+  line-height: 1.65;
+  flex: 1;
+}
 
-  .card-btn {
-    margin-top: 14px;
-    display: inline-block;
-    border: 1px solid var(--green-dim);
-    color: var(--green);
-    padding: 6px 14px;
-    font-size: 0.68rem;
-    font-family: 'Share Tech Mono', monospace;
-    letter-spacing: 2px;
-    border-radius: 2px;
-    transition: background 0.2s, box-shadow 0.2s;
-  }
-  .attack-card:hover .card-btn {
-    background: rgba(0,255,65,0.08);
-    box-shadow: 0 0 10px rgba(0,255,65,0.2);
-  }
+.card-footer {
+  display: flex; gap: 8px; margin-top: 20px;
+}
+.card-btn {
+  flex: 1;
+  padding: 8px;
+  border-radius: 7px;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 1px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+.btn-run {
+  background: var(--orange);
+  color: var(--ink);
+  font-weight: 700;
+}
+.btn-run:hover { background: #ff8c5a; }
+.btn-why {
+  background: var(--ink3);
+  color: var(--ghost);
+  border: 1px solid var(--border);
+}
+.btn-why:hover { border-color: var(--border-hover); color: var(--orange); }
 
-  /* SIMULATION TERMINAL */
-  .sim-wrapper {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    margin-bottom: 32px;
-    overflow: hidden;
-    display: none;
-    animation: slideDown 0.3s ease;
-  }
-  .sim-wrapper.visible { display: block; }
-  @keyframes slideDown { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+/* ── Simulation panel ── */
+.sim-panel {
+  background: var(--ink2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 48px;
+  display: none;
+  animation: fadeUp 0.35s ease;
+}
+.sim-panel.open { display: block; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
 
-  .sim-titlebar {
-    background: #030f04;
-    border-bottom: 1px solid var(--border);
-    padding: 10px 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .sim-dot { width: 10px; height: 10px; border-radius: 50%; }
-  .dot-red { background: #ff5f56; }
-  .dot-yellow { background: #ffbd2e; }
-  .dot-green { background: #27c93f; }
-  .sim-titlebar-text {
-    flex: 1;
-    text-align: center;
-    font-size: 0.72rem;
-    color: var(--green-dim);
-    letter-spacing: 2px;
-  }
+.sim-header {
+  background: var(--ink3);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.sim-title-area { display: flex; align-items: center; gap: 12px; }
+.sim-icon { font-size: 1.4rem; }
+.sim-name {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--white);
+}
+.sim-sub {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--orange);
+  letter-spacing: 1px;
+  margin-top: 2px;
+}
+.sim-header-actions { display: flex; gap: 8px; }
+.sim-btn {
+  padding: 7px 16px;
+  border-radius: 7px;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.63rem;
+  letter-spacing: 1px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+.sbtn-run { background: var(--orange); color: var(--ink); font-weight: 700; }
+.sbtn-run:hover { background: #ff8c5a; }
+.sbtn-run:disabled { opacity: 0.4; cursor: not-allowed; }
+.sbtn-clear { background: var(--ink); color: var(--ghost); border: 1px solid var(--border); }
+.sbtn-clear:hover { border-color: var(--border-hover); color: var(--text); }
+.sbtn-close { background: transparent; color: var(--dim); border: 1px solid var(--border); font-size: 0.9rem; padding: 7px 12px; }
+.sbtn-close:hover { color: var(--red); border-color: rgba(255,77,109,0.3); }
 
-  .sim-body {
-    display: grid;
-    grid-template-columns: 1fr 340px;
-    min-height: 420px;
-  }
+.sim-body {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+}
+@media(max-width: 720px) { .sim-body { grid-template-columns: 1fr; } }
 
-  @media(max-width: 768px) {
-    .sim-body { grid-template-columns: 1fr; }
-  }
+/* ── Terminal ── */
+.terminal-wrap {
+  padding: 20px;
+  border-right: 1px solid var(--border);
+}
+.terminal-topbar {
+  display: flex; align-items: center; gap: 6px;
+  margin-bottom: 14px;
+}
+.tbar-dot { width: 10px; height: 10px; border-radius: 50%; }
+.td1 { background: #ff5f56; }
+.td2 { background: #ffbd2e; }
+.td3 { background: #27c93f; }
+.tbar-label {
+  margin-left: 8px;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.62rem;
+  color: var(--muted);
+  letter-spacing: 1px;
+}
 
-  /* TERMINAL OUTPUT */
-  .terminal {
-    padding: 16px;
-    font-family: 'VT323', monospace;
-    font-size: 1.05rem;
-    line-height: 1.5;
-    overflow-y: auto;
-    max-height: 420px;
-    border-right: 1px solid var(--border);
-  }
+.terminal {
+  background: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.72rem;
+  line-height: 1.7;
+  min-height: 340px;
+  max-height: 380px;
+  overflow-y: auto;
+}
+.terminal::-webkit-scrollbar { width: 3px; }
+.terminal::-webkit-scrollbar-thumb { background: var(--slate); border-radius: 2px; }
 
-  .terminal-line { margin-bottom: 2px; }
-  .t-prompt { color: var(--green-dim); }
-  .t-cmd { color: var(--green); }
-  .t-output { color: #7aad7e; }
-  .t-success { color: var(--green); text-shadow: 0 0 8px var(--green); }
-  .t-error { color: var(--red); }
-  .t-warning { color: var(--amber); }
-  .t-info { color: var(--cyan); }
-  .t-data { color: #c8ffc8; }
-  .t-dim { color: #2a5c2e; }
+.tl { display: block; margin-bottom: 1px; word-break: break-all; }
+.t-prompt { color: var(--orange-dim); }
+.t-cmd { color: var(--orange); }
+.t-out { color: #6b7494; }
+.t-success { color: var(--green); }
+.t-error { color: var(--red); }
+.t-warn { color: var(--yellow); }
+.t-info { color: var(--cyan); }
+.t-data { color: #b8c2f0; }
+.t-dim { color: #383f5c; }
 
-  .cursor {
-    display: inline-block;
-    width: 9px; height: 16px;
-    background: var(--green);
-    animation: blink 0.9s steps(1) infinite;
-    vertical-align: middle;
-    box-shadow: 0 0 6px var(--green);
-  }
-  @keyframes blink { 50% { opacity: 0; } }
+.cursor {
+  display: inline-block;
+  width: 7px; height: 13px;
+  background: var(--orange);
+  vertical-align: middle;
+  animation: blink 1s steps(1) infinite;
+  border-radius: 1px;
+}
+@keyframes blink { 50%{opacity:0} }
 
-  /* SIDEBAR */
-  .sim-sidebar {
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    overflow-y: auto;
-    max-height: 420px;
-  }
+/* ── Sidebar ── */
+.sim-sidebar {
+  padding: 20px;
+  display: flex; flex-direction: column; gap: 16px;
+  overflow-y: auto; max-height: 440px;
+}
+.sim-sidebar::-webkit-scrollbar { width: 3px; }
+.sim-sidebar::-webkit-scrollbar-thumb { background: var(--slate); }
 
-  .info-block {
-    background: #030a04;
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    padding: 12px;
-  }
+.info-card {
+  background: var(--ink3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+}
+.info-card-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 0.7rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--ghost);
+  margin-bottom: 10px;
+  display: flex; align-items: center; gap: 6px;
+}
+.info-card-title::before { content: ''; display: block; width: 3px; height: 10px; background: var(--orange); border-radius: 2px; }
+.info-card p {
+  font-size: 0.73rem;
+  color: var(--dim);
+  line-height: 1.6;
+}
+.impact-item {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: 0.72rem; color: var(--dim);
+  margin-bottom: 5px; line-height: 1.5;
+}
+.impact-item::before { content: '→'; color: var(--red); flex-shrink: 0; margin-top: 1px; }
+.defense-item {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: 0.72rem; color: var(--dim);
+  margin-bottom: 5px; line-height: 1.5;
+}
+.defense-item::before { content: '✓'; color: var(--green); flex-shrink: 0; font-weight: 700; margin-top: 1px; }
 
-  .info-block-title {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 0.62rem;
-    letter-spacing: 2px;
-    color: var(--green-dim);
-    margin-bottom: 8px;
-  }
+.progress-track {
+  background: var(--ink);
+  border-radius: 4px;
+  height: 5px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--orange-dim), var(--orange));
+  border-radius: 4px;
+  width: 0;
+  transition: width 0.4s ease;
+  box-shadow: 0 0 8px rgba(255,107,43,0.4);
+}
 
-  .info-block p, .info-block li {
-    font-size: 0.75rem;
-    color: #5a8060;
-    line-height: 1.6;
-  }
-  .info-block li { margin-left: 14px; margin-bottom: 3px; }
-  .info-block strong { color: var(--text); }
+/* ── WHY POPUP MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s;
+}
+.modal-overlay.open {
+  opacity: 1; pointer-events: all;
+}
 
-  .defense-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    margin-bottom: 6px;
-    font-size: 0.73rem;
-    color: #5a8060;
-  }
-  .defense-item::before { content: '▸'; color: var(--green); flex-shrink: 0; }
+.modal {
+  background: var(--ink2);
+  border: 1px solid rgba(255,107,43,0.25);
+  border-radius: 16px;
+  max-width: 600px; width: 100%;
+  max-height: 88vh;
+  overflow-y: auto;
+  transform: scale(0.94) translateY(16px);
+  transition: transform 0.3s ease;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,107,43,0.05);
+}
+.modal-overlay.open .modal { transform: scale(1) translateY(0); }
 
-  .progress-bar {
-    height: 6px;
-    background: var(--border);
-    border-radius: 3px;
-    overflow: hidden;
-    margin-top: 6px;
-  }
-  .progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--green-dim), var(--green));
-    border-radius: 3px;
-    width: 0;
-    transition: width 0.5s ease;
-    box-shadow: 0 0 8px var(--green);
-  }
+.modal-header {
+  padding: 24px 24px 0;
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 16px;
+}
+.modal-icon {
+  width: 56px; height: 56px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.8rem;
+  flex-shrink: 0;
+}
+.modal-title-area { flex: 1; }
+.modal-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--orange);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.modal-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 1.4rem;
+  color: var(--white);
+  line-height: 1.2;
+}
+.modal-close {
+  background: var(--ink3);
+  border: 1px solid var(--border);
+  color: var(--dim);
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.modal-close:hover { background: rgba(255,77,109,0.1); color: var(--red); border-color: rgba(255,77,109,0.3); }
 
-  /* CONTROLS */
-  .sim-controls {
-    padding: 12px 16px;
-    border-top: 1px solid var(--border);
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
+.modal-body { padding: 24px; }
 
-  .btn {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.72rem;
-    letter-spacing: 2px;
-    padding: 8px 18px;
-    border-radius: 2px;
-    cursor: pointer;
-    transition: all 0.2s;
-    border: 1px solid;
-  }
-  .btn-primary {
-    background: transparent;
-    border-color: var(--green);
-    color: var(--green);
-  }
-  .btn-primary:hover {
-    background: var(--green);
-    color: var(--bg);
-    box-shadow: 0 0 20px rgba(0,255,65,0.4);
-  }
-  .btn-secondary {
-    background: transparent;
-    border-color: var(--border);
-    color: var(--green-dim);
-  }
-  .btn-secondary:hover {
-    border-color: var(--green-dim);
-    color: var(--text);
-  }
-  .btn:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-  }
+.modal-why {
+  background: rgba(255,107,43,0.07);
+  border: 1px solid rgba(255,107,43,0.15);
+  border-left: 3px solid var(--orange);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+.modal-why-label {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 0.72rem;
+  color: var(--orange);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.modal-why p {
+  font-size: 0.82rem;
+  color: var(--text);
+  line-height: 1.7;
+}
 
-  /* NETWORK MAP */
-  .network-map {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 20px;
-    margin-bottom: 32px;
-  }
+.modal-section { margin-bottom: 20px; }
+.modal-section-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: var(--ghost);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.modal-section p { font-size: 0.8rem; color: var(--dim); line-height: 1.65; }
 
-  #netCanvas {
-    width: 100%;
-    height: 220px;
-    display: block;
-  }
+.real-world-list { display: flex; flex-direction: column; gap: 8px; }
+.rw-item {
+  background: var(--ink3);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex; gap: 12px;
+  align-items: flex-start;
+}
+.rw-year {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--orange);
+  background: rgba(255,107,43,0.1);
+  padding: 2px 7px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.rw-text { font-size: 0.77rem; color: var(--dim); line-height: 1.5; }
+.rw-text strong { color: var(--text); }
 
-  /* STATS ROW */
-  .stats-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 12px;
-    margin-bottom: 32px;
-  }
+.victim-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.victim-chip {
+  font-size: 0.68rem;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: var(--ink3);
+  border: 1px solid var(--border);
+  color: var(--ghost);
+  font-family: 'Space Mono', monospace;
+}
 
-  .stat-card {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 14px;
-    text-align: center;
-  }
-  .stat-num {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 1.6rem;
-    color: var(--green);
-    text-shadow: 0 0 15px var(--green);
-  }
-  .stat-label {
-    font-size: 0.65rem;
-    color: var(--green-dim);
-    letter-spacing: 2px;
-    margin-top: 4px;
-  }
+.modal-run-btn {
+  width: 100%;
+  padding: 12px;
+  background: var(--orange);
+  color: var(--ink);
+  border: none;
+  border-radius: 8px;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 4px;
+}
+.modal-run-btn:hover { background: #ff8c5a; box-shadow: 0 8px 24px rgba(255,107,43,0.3); }
 
-  /* TICKER */
-  .ticker-wrap {
-    overflow: hidden;
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-    background: #030a04;
-    padding: 8px 0;
-    margin-bottom: 32px;
-  }
-  .ticker {
-    white-space: nowrap;
-    display: inline-block;
-    animation: ticker 35s linear infinite;
-    font-size: 0.72rem;
-    color: var(--green-dim);
-  }
-  @keyframes ticker { from{transform:translateX(100vw)} to{transform:translateX(-100%)} }
+/* ── Live ticker ── */
+.ticker-band {
+  overflow: hidden;
+  background: var(--ink3);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 9px 0;
+  margin-bottom: 48px;
+  position: relative;
+}
+.ticker-band::before, .ticker-band::after {
+  content: '';
+  position: absolute; top: 0; bottom: 0; width: 60px;
+  z-index: 2;
+}
+.ticker-band::before { left: 0; background: linear-gradient(90deg, var(--ink3), transparent); }
+.ticker-band::after { right: 0; background: linear-gradient(270deg, var(--ink3), transparent); }
+.ticker-inner {
+  white-space: nowrap;
+  display: inline-block;
+  animation: scroll 40s linear infinite;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.63rem;
+  color: var(--muted);
+}
+@keyframes scroll { from{transform:translateX(100vw)} to{transform:translateX(-100%)} }
+.ticker-inner span { color: var(--orange); margin: 0 6px; }
 
-  /* FOOTER */
-  footer {
-    border-top: 1px solid var(--border);
-    padding: 18px 32px;
-    text-align: center;
-    font-size: 0.68rem;
-    color: #2a5c2e;
-    letter-spacing: 1px;
-  }
-
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: var(--green-faint); border-radius: 2px; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--green-dim); }
+/* ── Footer ── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 24px 40px;
+  text-align: center;
+  font-size: 0.7rem;
+  color: var(--muted);
+  font-family: 'Space Mono', monospace;
+  letter-spacing: 0.5px;
+}
+footer strong { color: var(--green); }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="logo">CYBER<span>SEC</span> LAB</div>
-  <div class="header-status">
-    <div><span class="status-dot"></span>SIMULATION MODE — NO REAL ATTACKS</div>
-    <div>SESSION: EDU-2024 | CLEARANCE: PUBLIC</div>
+  <div class="logo">
+    <div class="logo-icon">🔍</div>
+    Threat<span>Lens</span>
+  </div>
+  <div class="header-right">
+    <span class="pill pill-edu">Educational</span>
+    <span class="pill pill-sandbox">100% Sandboxed</span>
+    <button class="nav-btn" onclick="window.location='index.html'">← Homepage</button>
   </div>
 </header>
 
-<div class="warning-banner">
-  ⚠ EDUCATIONAL SIMULATION ONLY — ALL SCENARIOS ARE FICTIONAL & SANDBOXED — FOR LEARNING PURPOSES ⚠
-</div>
-
 <main>
 
-  <!-- TICKER -->
-  <div class="ticker-wrap">
-    <span class="ticker">
-      [ALERT] Simulated brute force detected on NODE-07 &nbsp;///&nbsp; [INFO] SQL injection pattern identified &nbsp;///&nbsp; [ALERT] Phishing payload staged for demo &nbsp;///&nbsp; [INFO] Man-in-the-middle scenario loaded &nbsp;///&nbsp; [WARN] Ransomware simulation ready &nbsp;///&nbsp; [INFO] Port scan sequence initialized &nbsp;///&nbsp; [ALERT] Zero-day exploit demo available &nbsp;///&nbsp; [INFO] All attacks are simulated — no real systems at risk &nbsp;///&nbsp;
-    </span>
-  </div>
-
-  <!-- STATS -->
-  <div class="stats-row">
-    <div class="stat-card">
-      <div class="stat-num" id="statSims">0</div>
-      <div class="stat-label">SIMS RUN</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num">6</div>
-      <div class="stat-label">ATTACK TYPES</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num" id="statThreats">0</div>
-      <div class="stat-label">THREATS SHOWN</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num">100%</div>
-      <div class="stat-label">SANDBOXED</div>
+  <div class="hero">
+    <div class="hero-eyebrow">// Attack Intelligence Lab</div>
+    <h1>Learn How Attacks <span>Actually Work</span></h1>
+    <p>Interactive simulations of real-world cyber threats. Understand the techniques, motivations, and defenses — no real systems at risk.</p>
+    <div class="hero-stats">
+      <div>
+        <span class="hstat-num" id="simsRun">0</span>
+        <div class="hstat-label">Sims Run</div>
+      </div>
+      <div>
+        <span class="hstat-num">6</span>
+        <div class="hstat-label">Attack Types</div>
+      </div>
+      <div>
+        <span class="hstat-num">100%</span>
+        <div class="hstat-label">Sandboxed</div>
+      </div>
     </div>
   </div>
 
-  <!-- NETWORK MAP -->
-  <div class="section-title">// NETWORK TOPOLOGY</div>
-  <div class="network-map">
-    <canvas id="netCanvas"></canvas>
+  <div class="ticker-band">
+    <div class="ticker-inner">
+      <span>LIVE FEED</span> Brute force attempt on NODE-07 &nbsp;·&nbsp; SQL injection pattern blocked &nbsp;·&nbsp; Phishing campaign staged for demo &nbsp;·&nbsp; <span>ALERT</span> MITM scenario loaded on wlan0 &nbsp;·&nbsp; Ransomware simulation ready &nbsp;·&nbsp; Port scan sequence initialized &nbsp;·&nbsp; <span>INFO</span> All attacks are simulated — no real systems at risk &nbsp;·&nbsp; Zero-day exploit demo available &nbsp;·&nbsp;
+    </div>
   </div>
 
-  <!-- ATTACK SCENARIOS -->
-  <div class="section-title">// SELECT ATTACK SIMULATION</div>
-  <div class="attack-grid">
+  <!-- Attack cards -->
+  <div class="sec-hdr">
+    <div>
+      <div class="sec-title">Select an Attack Simulation</div>
+      <div class="sec-sub">Click "Why This Attack?" to understand the motivation, then run the simulation</div>
+    </div>
+  </div>
 
-    <div class="attack-card" onclick="loadSim('bruteforce')">
-      <div class="card-threat threat-critical">■ CRITICAL THREAT</div>
-      <div class="card-icon">🔓</div>
-      <div class="card-title">BRUTE FORCE ATTACK</div>
-      <div class="card-desc">Dictionary and credential stuffing attack against a login system. Demonstrates why password complexity matters.</div>
-      <span class="card-btn">► RUN SIMULATION</span>
+  <div class="attack-grid" id="attackGrid">
+
+    <div class="attack-card" id="card-bruteforce">
+      <div class="card-top">
+        <div class="card-icon-wrap icon-red">🔓</div>
+        <span class="card-threat-badge badge-critical">Critical</span>
+      </div>
+      <div class="card-title">Brute Force Attack</div>
+      <div class="card-desc">Systematically tries thousands of password combinations until the right one is found. Automated tools can test millions of credentials per second.</div>
+      <div class="card-footer">
+        <button class="card-btn btn-run" onclick="openSim('bruteforce')">▶ Run Sim</button>
+        <button class="card-btn btn-why" onclick="openWhy('bruteforce')">? Why This Attack</button>
+      </div>
     </div>
 
-    <div class="attack-card" onclick="loadSim('sqli')">
-      <div class="card-threat threat-critical">■ CRITICAL THREAT</div>
-      <div class="card-icon">💉</div>
-      <div class="card-title">SQL INJECTION</div>
-      <div class="card-desc">Malicious SQL inserted into input fields to bypass authentication and exfiltrate database records.</div>
-      <span class="card-btn">► RUN SIMULATION</span>
+    <div class="attack-card" id="card-sqli">
+      <div class="card-top">
+        <div class="card-icon-wrap icon-red">💉</div>
+        <span class="card-threat-badge badge-critical">Critical</span>
+      </div>
+      <div class="card-title">SQL Injection</div>
+      <div class="card-desc">Malicious SQL inserted into input fields bypasses authentication and can dump entire databases. Still one of the most common vulnerabilities found in the wild.</div>
+      <div class="card-footer">
+        <button class="card-btn btn-run" onclick="openSim('sqli')">▶ Run Sim</button>
+        <button class="card-btn btn-why" onclick="openWhy('sqli')">? Why This Attack</button>
+      </div>
     </div>
 
-    <div class="attack-card" onclick="loadSim('phishing')">
-      <div class="card-threat threat-high">▲ HIGH THREAT</div>
-      <div class="card-icon">🎣</div>
-      <div class="card-title">PHISHING ATTACK</div>
-      <div class="card-desc">Social engineering via spoofed emails and fake login pages to harvest credentials from unsuspecting users.</div>
-      <span class="card-btn">► RUN SIMULATION</span>
+    <div class="attack-card" id="card-phishing">
+      <div class="card-top">
+        <div class="card-icon-wrap icon-orange">🎣</div>
+        <span class="card-threat-badge badge-high">High</span>
+      </div>
+      <div class="card-title">Phishing Attack</div>
+      <div class="card-desc">Deceptive emails that impersonate trusted brands trick users into handing over credentials. The #1 entry point for corporate breaches worldwide.</div>
+      <div class="card-footer">
+        <button class="card-btn btn-run" onclick="openSim('phishing')">▶ Run Sim</button>
+        <button class="card-btn btn-why" onclick="openWhy('phishing')">? Why This Attack</button>
+      </div>
     </div>
 
-    <div class="attack-card" onclick="loadSim('mitm')">
-      <div class="card-threat threat-high">▲ HIGH THREAT</div>
-      <div class="card-icon">👁️</div>
-      <div class="card-title">MAN-IN-THE-MIDDLE</div>
-      <div class="card-desc">Attacker intercepts traffic between client and server on an unsecured network to eavesdrop or tamper with data.</div>
-      <span class="card-btn">► RUN SIMULATION</span>
+    <div class="attack-card" id="card-mitm">
+      <div class="card-top">
+        <div class="card-icon-wrap icon-orange">👁️</div>
+        <span class="card-threat-badge badge-high">High</span>
+      </div>
+      <div class="card-title">Man-in-the-Middle</div>
+      <div class="card-desc">Attacker secretly intercepts traffic between two parties — stealing credentials, session tokens, or injecting malicious content without either side knowing.</div>
+      <div class="card-footer">
+        <button class="card-btn btn-run" onclick="openSim('mitm')">▶ Run Sim</button>
+        <button class="card-btn btn-why" onclick="openWhy('mitm')">? Why This Attack</button>
+      </div>
     </div>
 
-    <div class="attack-card" onclick="loadSim('ransomware')">
-      <div class="card-threat threat-critical">■ CRITICAL THREAT</div>
-      <div class="card-icon">🔒</div>
-      <div class="card-title">RANSOMWARE</div>
-      <div class="card-desc">Malware that encrypts victim's files and demands payment. Simulates infection vector, propagation, and encryption phase.</div>
-      <span class="card-btn">► RUN SIMULATION</span>
+    <div class="attack-card" id="card-ransomware">
+      <div class="card-top">
+        <div class="card-icon-wrap icon-red">🔒</div>
+        <span class="card-threat-badge badge-critical">Critical</span>
+      </div>
+      <div class="card-title">Ransomware</div>
+      <div class="card-desc">Malware that encrypts your files then demands payment for the key. A single click on an infected attachment can lock an entire organization's data.</div>
+      <div class="card-footer">
+        <button class="card-btn btn-run" onclick="openSim('ransomware')">▶ Run Sim</button>
+        <button class="card-btn btn-why" onclick="openWhy('ransomware')">? Why This Attack</button>
+      </div>
     </div>
 
-    <div class="attack-card" onclick="loadSim('portscan')">
-      <div class="card-threat threat-medium">◆ MEDIUM THREAT</div>
-      <div class="card-icon">📡</div>
-      <div class="card-title">PORT SCANNING</div>
-      <div class="card-desc">Reconnaissance technique to map open ports and services on a target system — the first step in most attacks.</div>
-      <span class="card-btn">► RUN SIMULATION</span>
+    <div class="attack-card" id="card-portscan">
+      <div class="card-top">
+        <div class="card-icon-wrap icon-cyan">📡</div>
+        <span class="card-threat-badge badge-medium">Medium</span>
+      </div>
+      <div class="card-title">Port Scanning</div>
+      <div class="card-desc">Maps open ports and running services on a target — the reconnaissance phase nearly every attack begins with. What you expose determines your attack surface.</div>
+      <div class="card-footer">
+        <button class="card-btn btn-run" onclick="openSim('portscan')">▶ Run Sim</button>
+        <button class="card-btn btn-why" onclick="openWhy('portscan')">? Why This Attack</button>
+      </div>
     </div>
 
   </div>
 
-  <!-- SIMULATION TERMINAL -->
-  <div class="sim-wrapper" id="simWrapper">
-    <div class="sim-titlebar">
-      <div class="sim-dot dot-red"></div>
-      <div class="sim-dot dot-yellow"></div>
-      <div class="sim-dot dot-green"></div>
-      <div class="sim-titlebar-text" id="simTitle">SIMULATION TERMINAL</div>
+  <!-- Simulation Panel -->
+  <div class="sim-panel" id="simPanel">
+    <div class="sim-header">
+      <div class="sim-title-area">
+        <div class="sim-icon" id="simPanelIcon">🔓</div>
+        <div>
+          <div class="sim-name" id="simPanelName">Brute Force Attack</div>
+          <div class="sim-sub">SIMULATION TERMINAL — SANDBOXED</div>
+        </div>
+      </div>
+      <div class="sim-header-actions">
+        <button class="sim-btn sbtn-run" id="btnRun" onclick="runSim()">▶ Run Attack</button>
+        <button class="sim-btn sbtn-clear" onclick="clearSim()">↺ Clear</button>
+        <button class="sim-btn sbtn-close" onclick="closeSim()">✕</button>
+      </div>
     </div>
     <div class="sim-body">
-      <div class="terminal" id="terminal"></div>
-      <div class="sim-sidebar" id="sidebar"></div>
-    </div>
-    <div class="sim-controls">
-      <button class="btn btn-primary" id="btnRun" onclick="runCurrentSim()">► RUN ATTACK</button>
-      <button class="btn btn-secondary" onclick="clearSim()">✕ CLEAR</button>
-      <button class="btn btn-secondary" onclick="closeSim()">← BACK</button>
+      <div class="terminal-wrap">
+        <div class="terminal-topbar">
+          <div class="tbar-dot td1"></div>
+          <div class="tbar-dot td2"></div>
+          <div class="tbar-dot td3"></div>
+          <span class="tbar-label">KALI@ATTACKER-VM — SIMULATION ONLY</span>
+        </div>
+        <div class="terminal" id="terminal">
+          <span class="tl t-dim">// Select a simulation and press Run Attack</span>
+          <span class="cursor"></span>
+        </div>
+      </div>
+      <div class="sim-sidebar" id="simSidebar"></div>
     </div>
   </div>
 
 </main>
 
 <footer>
-  CYBERSEC LAB v1.0 — EDUCATIONAL USE ONLY — ALL SIMULATIONS ARE FICTIONAL AND SANDBOXED<br>
-  No real networks, systems, or data are affected. Use this knowledge to <strong style="color:var(--green-dim)">defend</strong>, not attack.
+  THREATLENS v2.0 — EDUCATIONAL USE ONLY — ALL SIMULATIONS ARE FICTIONAL &amp; SANDBOXED<br>
+  Use this knowledge to <strong>defend</strong>, never attack.
 </footer>
 
+<!-- WHY MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeWhyOnBg(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-icon" id="mIcon"></div>
+      <div class="modal-title-area">
+        <div class="modal-label">Why This Attack Exists</div>
+        <div class="modal-title" id="mTitle"></div>
+      </div>
+      <button class="modal-close" onclick="closeWhy()">✕</button>
+    </div>
+    <div class="modal-body" id="mBody"></div>
+  </div>
+</div>
+
 <script>
-// ── Network Canvas ──────────────────────────────────────────────
-const canvas = document.getElementById('netCanvas');
-const ctx = canvas.getContext('2d');
-
-const nodes = [
-  {x:0.1, y:0.5, label:'ATTACKER', color:'#ff3131', size:12},
-  {x:0.3, y:0.2, label:'ROUTER', color:'#ffb700', size:9},
-  {x:0.3, y:0.8, label:'SWITCH', color:'#ffb700', size:9},
-  {x:0.55, y:0.3, label:'WEB SERVER', color:'#00e5ff', size:10},
-  {x:0.55, y:0.7, label:'DB SERVER', color:'#00e5ff', size:10},
-  {x:0.75, y:0.15, label:'CLIENT A', color:'#00ff41', size:8},
-  {x:0.75, y:0.45, label:'CLIENT B', color:'#00ff41', size:8},
-  {x:0.75, y:0.75, label:'CLIENT C', color:'#00ff41', size:8},
-  {x:0.9, y:0.5, label:'FIREWALL', color:'#ff3131', size:10},
-];
-
-const edges = [
-  [0,1],[0,2],[1,3],[2,4],[3,5],[3,6],[4,7],[3,4],[1,2],[6,8],[4,8]
-];
-
-let packets = [];
-let animFrame;
-
-function drawNetwork() {
-  canvas.width = canvas.offsetWidth;
-  canvas.height = canvas.offsetHeight;
-  const W = canvas.width, H = canvas.height;
-
-  ctx.clearRect(0,0,W,H);
-
-  // Draw edges
-  edges.forEach(([a,b]) => {
-    const na = nodes[a], nb = nodes[b];
-    ctx.beginPath();
-    ctx.moveTo(na.x*W, na.y*H);
-    ctx.lineTo(nb.x*W, nb.y*H);
-    ctx.strokeStyle = 'rgba(0,170,43,0.25)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-  });
-
-  // Draw packets
-  packets.forEach(p => {
-    ctx.beginPath();
-    ctx.arc(p.x*W, p.y*H, 4, 0, Math.PI*2);
-    ctx.fillStyle = p.color || '#00ff41';
-    ctx.shadowBlur = 10;
-    ctx.shadowColor = p.color || '#00ff41';
-    ctx.fill();
-    ctx.shadowBlur = 0;
-  });
-
-  // Draw nodes
-  nodes.forEach(n => {
-    ctx.beginPath();
-    ctx.arc(n.x*W, n.y*H, n.size, 0, Math.PI*2);
-    ctx.fillStyle = n.color + '22';
-    ctx.strokeStyle = n.color;
-    ctx.lineWidth = 1.5;
-    ctx.shadowBlur = 15;
-    ctx.shadowColor = n.color;
-    ctx.fill();
-    ctx.stroke();
-    ctx.shadowBlur = 0;
-
-    ctx.fillStyle = n.color;
-    ctx.font = `${Math.max(9, n.size*0.75)}px 'Share Tech Mono'`;
-    ctx.textAlign = 'center';
-    ctx.fillText(n.label, n.x*W, n.y*H + n.size + 11);
-  });
-}
-
-function spawnPacket() {
-  const edge = edges[Math.floor(Math.random()*edges.length)];
-  const from = nodes[edge[0]], to = nodes[edge[1]];
-  const isAttack = Math.random() < 0.15;
-  packets.push({
-    x: from.x, y: from.y,
-    tx: to.x, ty: to.y,
-    speed: 0.01 + Math.random()*0.015,
-    color: isAttack ? '#ff3131' : '#00ff41',
-    t: 0
-  });
-}
-
-function animNet() {
-  packets.forEach(p => {
-    p.t += p.speed;
-    p.x = lerp(p.x, p.tx, p.speed*1.2);
-    p.y = lerp(p.y, p.ty, p.speed*1.2);
-  });
-  packets = packets.filter(p => {
-    const dx = p.x - p.tx, dy = p.y - p.ty;
-    return Math.sqrt(dx*dx+dy*dy) > 0.01;
-  });
-  if (Math.random() < 0.12) spawnPacket();
-  drawNetwork();
-  animFrame = requestAnimationFrame(animNet);
-}
-
-function lerp(a,b,t){ return a+(b-a)*t; }
-
-animNet();
-window.addEventListener('resize', drawNetwork);
-
-// ── Stats Counter ──────────────────────────────────────────────
-let simsRun = 0, threatsShown = 0;
-function incStats() {
-  simsRun++; threatsShown++;
-  document.getElementById('statSims').textContent = simsRun;
-  document.getElementById('statThreats').textContent = threatsShown;
-}
-
-// ── Simulation Engine ──────────────────────────────────────────
-let currentSim = null;
-let simRunning = false;
-let simTimers = [];
-
-const simData = {
+// ─── Data ───────────────────────────────────────────────────────────
+const attacks = {
   bruteforce: {
-    title: '[ BRUTE FORCE LOGIN ATTACK ]',
-    sidebar: {
-      overview: 'A brute force attack systematically tries username/password combinations until access is gained. Attackers use wordlists, previously leaked databases, and automated tools.',
-      impact: ['Account takeover', 'Privilege escalation', 'Data breach', 'Lateral movement'],
-      defenses: ['Strong password policies', 'Account lockout after N attempts', 'Multi-factor authentication (MFA)', 'IP rate limiting & CAPTCHA', 'Monitoring & alerting'],
+    icon: '🔓', name: 'Brute Force Attack', iconClass: 'icon-red',
+    why: {
+      reason: "Brute force attacks exist because humans are predictable. Despite decades of warnings, the most common passwords year after year are \"123456\", \"password\", and \"qwerty\". Attackers know this — and they've built tools that exploit it at machine speed.",
+      motivation: "The payoff is enormous with minimal skill required. Tools like Hydra and Medusa are freely available and can test thousands of credentials per second. A successful login means instant account access — no need to find a vulnerability in the code.",
+      howItHappens: "Attackers obtain leaked password lists from previous breaches (billions of credentials are sold on dark web markets). They then automate login attempts against your application. If there's no rate limiting or lockout, it's just a numbers game they'll eventually win.",
+      realWorld: [
+        { year: '2016', title: 'GitHub Mass Credential Stuffing', text: 'Attackers used 93 million leaked credentials from other sites to compromise GitHub accounts — users who reused the same password.' },
+        { year: '2020', title: 'Zoom Account Takeovers', text: 'Over 500,000 Zoom accounts were found for sale on the dark web, compromised via credential stuffing from prior data breaches.' },
+        { year: '2023', title: 'Citrix Bleed / NetScaler', text: 'Threat actors brute-forced VPN credentials at healthcare organizations, causing widespread ransomware infections.' },
+      ],
+      victims: ['Banks', 'Healthcare', 'Gaming', 'Social Media', 'E-commerce'],
     },
-    steps: [
-      { delay: 0,    type: 'prompt', text: 'hydra -l admin -P /wordlists/rockyou.txt 192.168.1.105 http-post' },
-      { delay: 600,  type: 'output', text: 'Hydra v9.4 starting — target: 192.168.1.105' },
-      { delay: 1000, type: 'output', text: 'Attempting credential pairs from rockyou.txt (14M entries)...' },
-      { delay: 1400, type: 'dim',    text: '[ATTEMPT] admin:password → 401 Unauthorized' },
-      { delay: 1700, type: 'dim',    text: '[ATTEMPT] admin:123456 → 401 Unauthorized' },
-      { delay: 2000, type: 'dim',    text: '[ATTEMPT] admin:qwerty → 401 Unauthorized' },
-      { delay: 2300, type: 'dim',    text: '[ATTEMPT] admin:letmein → 401 Unauthorized' },
-      { delay: 2600, type: 'dim',    text: '[ATTEMPT] admin:monkey → 401 Unauthorized' },
-      { delay: 2900, type: 'dim',    text: '[ATTEMPT] admin:dragon → 401 Unauthorized' },
-      { delay: 3200, type: 'dim',    text: '[ATTEMPT] admin:master → 401 Unauthorized' },
-      { delay: 3500, type: 'dim',    text: '[ATTEMPT] admin:sunshine → 401 Unauthorized' },
-      { delay: 3800, type: 'dim',    text: '[ATTEMPT] admin:princess → 401 Unauthorized' },
-      { delay: 4100, type: 'dim',    text: '[ATTEMPT] admin:admin123 → 401 Unauthorized' },
-      { delay: 4400, type: 'warning',text: '[ATTEMPT] admin:P@ssw0rd! → checking...' },
-      { delay: 4900, type: 'success', text: '[✓ SUCCESS] admin:P@ssw0rd! → 200 OK — SESSION COOKIE OBTAINED' },
-      { delay: 5400, type: 'error',   text: '>>> AUTHENTICATED AS: admin | Role: SUPERUSER <<<' },
-      { delay: 5900, type: 'info',    text: 'Session token: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiYWRtaW4ifQ...' },
-      { delay: 6400, type: 'output',  text: '⚠ 1 of 14,344,391 passwords tested. Elapsed: 4.2s' },
-    ]
+    sim: {
+      title: '[ BRUTE FORCE — LOGIN ATTACK ]',
+      steps: [
+        { d:0,    t:'prompt', s:'hydra -l admin -P /wordlists/rockyou.txt 192.168.1.105 http-post-form' },
+        { d:600,  t:'out',    s:'Hydra v9.4 starting — target: 192.168.1.105' },
+        { d:1000, t:'out',    s:'Loading rockyou.txt — 14,344,391 entries...' },
+        { d:1400, t:'dim',    s:'[ATTEMPT] admin:password → 401 Unauthorized' },
+        { d:1700, t:'dim',    s:'[ATTEMPT] admin:123456 → 401 Unauthorized' },
+        { d:2000, t:'dim',    s:'[ATTEMPT] admin:qwerty → 401 Unauthorized' },
+        { d:2300, t:'dim',    s:'[ATTEMPT] admin:letmein → 401 Unauthorized' },
+        { d:2600, t:'dim',    s:'[ATTEMPT] admin:dragon → 401 Unauthorized' },
+        { d:2900, t:'dim',    s:'[ATTEMPT] admin:sunshine → 401 Unauthorized' },
+        { d:3200, t:'dim',    s:'[ATTEMPT] admin:master → 401 Unauthorized' },
+        { d:3500, t:'dim',    s:'[ATTEMPT] admin:admin123 → 401 Unauthorized' },
+        { d:3800, t:'warn',   s:'[ATTEMPT] admin:P@ssw0rd! → checking response...' },
+        { d:4400, t:'success',s:'[✓ SUCCESS] admin:P@ssw0rd! → 200 OK — SESSION TOKEN OBTAINED' },
+        { d:4900, t:'error',  s:'>>> AUTHENTICATED AS: admin | Role: SUPERUSER <<<' },
+        { d:5400, t:'info',   s:'Session: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiYWRtaW4ifQ...' },
+        { d:5900, t:'out',    s:'⚠ 1 of 14,344,391 passwords tested. Elapsed: 4.2s' },
+      ],
+      sidebar: {
+        overview: 'A dictionary attack uses common password wordlists against a login endpoint. With no rate limiting, millions of attempts can be made in minutes.',
+        impact: ['Full account takeover', 'Privilege escalation', 'Lateral movement across network', 'Data exfiltration'],
+        defenses: ['Account lockout after 5–10 failed attempts', 'Multi-factor authentication (MFA)', 'IP rate limiting & CAPTCHA', 'Strong password policy + manager', 'Login anomaly monitoring'],
+      }
+    }
   },
 
   sqli: {
-    title: '[ SQL INJECTION ATTACK ]',
-    sidebar: {
-      overview: 'SQL Injection exploits unsanitized user input by inserting SQL commands into query parameters. This can bypass authentication, extract data, and in some cases execute OS commands.',
-      impact: ['Authentication bypass', 'Full database dump', 'Data modification/deletion', 'OS command execution (stacked queries)'],
-      defenses: ['Parameterized queries / prepared statements', 'ORM frameworks', 'Input validation & sanitization', 'Web Application Firewall (WAF)', 'Least privilege DB accounts'],
+    icon: '💉', name: 'SQL Injection', iconClass: 'icon-red',
+    why: {
+      reason: "SQL Injection exists because developers concatenate user input directly into database queries. When a login form passes your username straight into SQL without sanitization, an attacker can close your string early and add their own SQL logic — turning a login check into a data dump.",
+      motivation: "It's one of the most rewarding attacks per unit of effort. A single injectable parameter can expose an entire database — every user's credentials, PII, payment info. It requires no special hardware, just a browser and knowledge of SQL syntax.",
+      howItHappens: "The vulnerable query looks like: SELECT * FROM users WHERE username='[INPUT]'. If input is admin' OR '1'='1'--, the WHERE clause always evaluates true — authentication bypassed. Attackers then enumerate tables and dump data using tools like sqlmap.",
+      realWorld: [
+        { year: '2008', title: 'Heartland Payment Systems', text: '130 million credit card numbers stolen via SQL injection — the largest payment card breach in history at the time.' },
+        { year: '2012', title: 'LinkedIn Breach', text: '6.5 million password hashes exposed via SQL injection, later revealed to be 117 million in total.' },
+        { year: '2019', title: 'Capital One', text: 'Over 100 million customer records exposed. SQLi was part of the attack chain that led to the cloud misconfiguration exploit.' },
+      ],
+      victims: ['Finance', 'Healthcare', 'Government', 'Retail', 'Any web app with a database'],
     },
-    steps: [
-      { delay: 0,    type: 'prompt', text: 'sqlmap -u "http://target.com/login" --data="user=admin&pass=x" --dbs' },
-      { delay: 600,  type: 'output', text: 'sqlmap 1.7.8 — testing connection to target...' },
-      { delay: 1000, type: 'output', text: 'Testing parameter: user → GET/POST injection points' },
-      { delay: 1500, type: 'info',   text: 'Payload: admin\' OR \'1\'=\'1\'--' },
-      { delay: 1900, type: 'info',   text: 'Query becomes: SELECT * FROM users WHERE user=\'admin\' OR \'1\'=\'1\'--\'' },
-      { delay: 2400, type: 'success',text: '[✓] Parameter "user" is INJECTABLE (boolean-blind)' },
-      { delay: 2900, type: 'output', text: 'Backend DBMS: MySQL 8.0.28 (Ubuntu)' },
-      { delay: 3300, type: 'output', text: 'Enumerating databases...' },
-      { delay: 3700, type: 'data',   text: '  [*] information_schema' },
-      { delay: 3900, type: 'data',   text: '  [*] appdb' },
-      { delay: 4100, type: 'data',   text: '  [*] users_production' },
-      { delay: 4400, type: 'output', text: 'Dumping table: users_production.accounts' },
-      { delay: 4900, type: 'data',   text: '  id | username | password_hash | email' },
-      { delay: 5100, type: 'data',   text: '  1  | admin    | $2b$12$9FzK... | admin@corp.com' },
-      { delay: 5300, type: 'data',   text: '  2  | jsmith   | $2b$12$xMqP... | j.smith@corp.com' },
-      { delay: 5500, type: 'data',   text: '  3  | mlee     | $2b$12$3TrW... | m.lee@corp.com' },
-      { delay: 5800, type: 'error',  text: '>>> 847 rows exfiltrated. Entire user table dumped. <<<' },
-    ]
+    sim: {
+      title: '[ SQL INJECTION — DATABASE DUMP ]',
+      steps: [
+        { d:0,    t:'prompt', s:"sqlmap -u \"http://target.com/login\" --data=\"user=x&pass=x\" --dbs" },
+        { d:600,  t:'out',    s:'sqlmap 1.7.8 — testing connection...' },
+        { d:1000, t:'out',    s:'Testing parameter: user → checking injection points' },
+        { d:1500, t:'info',   s:"Payload: admin' OR '1'='1'--" },
+        { d:1900, t:'info',   s:"Query becomes: SELECT * FROM users WHERE user='admin' OR '1'='1'--'" },
+        { d:2400, t:'success',s:'[✓] Parameter "user" is INJECTABLE (boolean-based blind)' },
+        { d:2900, t:'out',    s:'Backend DBMS: MySQL 8.0.28 (Ubuntu 22.04)' },
+        { d:3300, t:'out',    s:'Enumerating databases...' },
+        { d:3700, t:'data',   s:'  [*] information_schema' },
+        { d:3900, t:'data',   s:'  [*] appdb' },
+        { d:4100, t:'data',   s:'  [*] users_production' },
+        { d:4400, t:'out',    s:'Dumping table: users_production.accounts' },
+        { d:4900, t:'data',   s:'  id | username | password_hash              | email' },
+        { d:5100, t:'data',   s:'  1  | admin    | $2b$12$9FzKaM... | admin@corp.com' },
+        { d:5300, t:'data',   s:'  2  | jsmith   | $2b$12$xMqPvR... | j.smith@corp.com' },
+        { d:5500, t:'data',   s:'  3  | mlee     | $2b$12$3TrWnK... | m.lee@corp.com' },
+        { d:5800, t:'error',  s:'>>> 847 rows exfiltrated — entire user table dumped <<<' },
+      ],
+      sidebar: {
+        overview: 'SQL Injection manipulates database queries by injecting SQL syntax into user input fields. It can bypass auth, read or delete data, and in some cases execute system commands.',
+        impact: ['Authentication bypass', 'Full database exfiltration', 'Data deletion / modification', 'OS command execution via stacked queries'],
+        defenses: ['Parameterized queries / prepared statements', 'ORM frameworks (hide raw SQL)', 'Input validation & escaping', 'Web Application Firewall (WAF)', 'Least-privilege DB accounts'],
+      }
+    }
   },
 
   phishing: {
-    title: '[ PHISHING CAMPAIGN SIMULATION ]',
-    sidebar: {
-      overview: 'Phishing uses deceptive emails that impersonate trusted organizations to trick users into revealing credentials. Spear-phishing targets specific individuals with personalized content.',
-      impact: ['Credential theft', 'Malware delivery', 'Account compromise', 'Corporate espionage'],
-      defenses: ['Email filtering & SPF/DKIM/DMARC', 'Security awareness training', 'Verify sender before clicking', 'Use password managers (detect fakes)', 'Report suspicious emails'],
+    icon: '🎣', name: 'Phishing Attack', iconClass: 'icon-orange',
+    why: {
+      reason: "Phishing works because it bypasses all your technical defenses and goes straight to the human. No firewall can stop a user who willingly types their own password into a fake site. Attackers exploit urgency, fear, and trust — emotions that override rational thinking.",
+      motivation: "It's low cost and scales massively. A $50 phishing kit, a free domain lookalike, and a bulk email service can reach thousands of employees. With an average 9% click rate, even 100 emails will yield several credential harvests.",
+      howItHappens: "Attackers register a domain that looks like the real one (corp.com → c0rp.com), clone the login page pixel-perfectly, then blast emails claiming your account will be suspended unless you verify immediately. Credentials entered on the fake page are captured in real time.",
+      realWorld: [
+        { year: '2016', title: 'Democratic National Committee', text: 'A spear-phishing email mimicking Google security alerts tricked a staffer into revealing their credentials, leading to one of the most consequential breaches in US political history.' },
+        { year: '2019', title: 'Twitter CEO Jack Dorsey', text: 'Hackers used social engineering (a form of phishing) to gain access to Dorsey\'s phone number, then hijacked his Twitter account.' },
+        { year: '2022', title: 'Cisco Breach', text: 'An employee\'s saved browser credentials were accessed after sophisticated phishing and voice phishing (vishing) tricked them into accepting an MFA push notification.' },
+      ],
+      victims: ['Employees at any company', 'Healthcare workers', 'Government staff', 'Executives (spear-phishing)', 'Anyone with email'],
     },
-    steps: [
-      { delay: 0,    type: 'prompt', text: 'gophish --config phish_campaign.json --target corp_employees.csv' },
-      { delay: 500,  type: 'output', text: 'GoPhish Campaign Manager initializing...' },
-      { delay: 900,  type: 'output', text: 'Spoofing sender: it-helpdesk@c0rp-secure.com (corp.com lookalike)' },
-      { delay: 1300, type: 'info',   text: 'Subject: [URGENT] Password Reset Required — IT Security Team' },
-      { delay: 1700, type: 'output', text: 'Sending to 250 employees in target organization...' },
-      { delay: 2200, type: 'dim',    text: '[SENT] → j.anderson@corp.com' },
-      { delay: 2400, type: 'dim',    text: '[SENT] → m.chen@corp.com' },
-      { delay: 2600, type: 'dim',    text: '[SENT] → r.williams@corp.com' },
-      { delay: 3000, type: 'warning',text: '[OPENED] → j.anderson@corp.com (11:42 AM) — link clicked!' },
-      { delay: 3400, type: 'warning',text: '[CREDS] → j.anderson entered: janderson / Summer2024!' },
-      { delay: 3800, type: 'warning',text: '[OPENED] → m.chen@corp.com (11:44 AM) — link clicked!' },
-      { delay: 4200, type: 'warning',text: '[CREDS] → m.chen entered: mchen / Corp#9821' },
-      { delay: 4700, type: 'output', text: 'Fake login page visits: 47 / 250 (18.8% click rate)' },
-      { delay: 5200, type: 'error',  text: '>>> 23 credentials harvested from 250 targets (9.2% yield) <<<' },
-      { delay: 5800, type: 'info',   text: 'Industry avg phishing success: 7–15%. This campaign: above avg.' },
-    ]
+    sim: {
+      title: '[ PHISHING — CREDENTIAL HARVEST ]',
+      steps: [
+        { d:0,    t:'prompt', s:'gophish --config campaign.json --targets employees.csv' },
+        { d:500,  t:'out',    s:'GoPhish Campaign Manager initializing...' },
+        { d:900,  t:'out',    s:'Spoofing sender: it-helpdesk@c0rp-secure.com' },
+        { d:1300, t:'info',   s:'Subject: [URGENT] Password Reset Required — IT Security Team' },
+        { d:1700, t:'out',    s:'Sending to 250 employees...' },
+        { d:2200, t:'dim',    s:'[SENT] → j.anderson@corp.com' },
+        { d:2400, t:'dim',    s:'[SENT] → m.chen@corp.com' },
+        { d:2600, t:'dim',    s:'[SENT] → r.williams@corp.com' },
+        { d:3000, t:'warn',   s:'[OPENED] → j.anderson@corp.com — link clicked! (11:42 AM)' },
+        { d:3400, t:'warn',   s:'[CREDS CAPTURED] j.anderson / Summer2024!' },
+        { d:3800, t:'warn',   s:'[OPENED] → m.chen@corp.com — link clicked! (11:44 AM)' },
+        { d:4200, t:'warn',   s:'[CREDS CAPTURED] m.chen / Corp#9821' },
+        { d:4700, t:'out',    s:'Fake page visits: 47 / 250 (18.8% click rate)' },
+        { d:5200, t:'error',  s:'>>> 23 credentials harvested from 250 targets (9.2% yield) <<<' },
+        { d:5800, t:'info',   s:'Industry phishing avg: 7–15%. This campaign: above average.' },
+      ],
+      sidebar: {
+        overview: 'Phishing uses spoofed emails to redirect users to fake login pages. Spear-phishing personalizes messages for specific targets — dramatically increasing success rates.',
+        impact: ['Credential theft at scale', 'Malware delivery via attachments', 'Corporate account compromise', 'Ransomware entry point'],
+        defenses: ['Email filtering + SPF/DKIM/DMARC', 'Security awareness training', 'Verify sender before clicking', 'Password managers (detect fake domains)', 'Phishing simulation exercises'],
+      }
+    }
   },
 
   mitm: {
-    title: '[ MAN-IN-THE-MIDDLE ATTACK ]',
-    sidebar: {
-      overview: 'In a MITM attack, the attacker secretly intercepts and relays communications between two parties. Common on public Wi-Fi using ARP spoofing or rogue access points.',
-      impact: ['Session hijacking', 'Credential interception', 'Traffic manipulation', 'SSL stripping'],
-      defenses: ['Always use HTTPS (check padlock)', 'Use VPN on public Wi-Fi', 'Certificate pinning in apps', 'HSTS (HTTP Strict Transport Security)', 'Avoid public Wi-Fi for sensitive tasks'],
+    icon: '👁️', name: 'Man-in-the-Middle', iconClass: 'icon-orange',
+    why: {
+      reason: "MITM attacks exist because network traffic — especially on public or poorly secured Wi-Fi — can be intercepted by anyone on the same network. Without encryption, your data travels in plaintext that any eavesdropper can read.",
+      motivation: "Coffee shop Wi-Fi and hotel networks are goldmines. An attacker with a laptop can silently intercept traffic from dozens of users without them knowing. Captured session cookies mean account takeover without needing a password at all.",
+      howItHappens: "ARP spoofing poisons the victim's network cache, making them believe the attacker's machine is the gateway. All traffic is rerouted through the attacker before reaching its destination — intercepted, possibly modified, then forwarded to avoid detection.",
+      realWorld: [
+        { year: '2015', title: 'Superfish / Lenovo', text: 'Lenovo pre-installed adware that intercepted HTTPS traffic on millions of laptops using MITM techniques — exposing users to credential theft.' },
+        { year: '2017', title: 'KRACK Attack', text: 'A fundamental flaw in the WPA2 Wi-Fi protocol allowed attackers to perform MITM attacks against nearly every Wi-Fi device on the planet.' },
+        { year: '2022', title: 'Evil Twin Wi-Fi Attacks', text: 'Rogue access points mimicking legitimate hotel and airport Wi-Fi harvested credentials from business travelers, targeting executives at international conferences.' },
+      ],
+      victims: ['Coffee shop users', 'Hotel guests', 'Airport travelers', 'Corporate Wi-Fi users', 'Anyone on HTTP'],
     },
-    steps: [
-      { delay: 0,    type: 'prompt', text: 'arpspoof -i wlan0 -t 192.168.1.10 192.168.1.1 &' },
-      { delay: 500,  type: 'output', text: 'ARP spoofing started — poisoning victim cache...' },
-      { delay: 1000, type: 'info',   text: 'Victim (192.168.1.10) now thinks attacker is the router' },
-      { delay: 1500, type: 'prompt', text: 'ettercap -T -q -i wlan0 -M arp:remote /192.168.1.10// /192.168.1.1//' },
-      { delay: 2000, type: 'output', text: 'Ettercap 0.8.3 — sniffing all traffic on wlan0...' },
-      { delay: 2500, type: 'dim',    text: '[PKT] TCP 192.168.1.10:52341 → 74.125.199.99:443 (HTTPS — encrypted)' },
-      { delay: 2900, type: 'dim',    text: '[PKT] TCP 192.168.1.10:52342 → 93.184.216.34:80 (HTTP — plaintext!)' },
-      { delay: 3300, type: 'warning',text: '[HTTP INTERCEPT] GET http://login.example.com/auth' },
-      { delay: 3700, type: 'warning',text: '[HTTP INTERCEPT] POST data: username=alice&password=hunter2' },
-      { delay: 4200, type: 'success',text: '[✓ CAPTURED] alice / hunter2 @ login.example.com' },
-      { delay: 4700, type: 'info',   text: 'Injecting malicious JS into HTTP response...' },
-      { delay: 5200, type: 'error',  text: '>>> Traffic intercepted, credentials stolen, JS injected <<<' },
-      { delay: 5700, type: 'output', text: 'Note: HTTPS would have prevented credential interception' },
-    ]
+    sim: {
+      title: '[ MAN-IN-THE-MIDDLE — ARP SPOOF ]',
+      steps: [
+        { d:0,    t:'prompt', s:'arpspoof -i wlan0 -t 192.168.1.10 192.168.1.1 &' },
+        { d:500,  t:'out',    s:'ARP cache poisoning started — victim: 192.168.1.10' },
+        { d:1000, t:'info',   s:'Victim now believes attacker MAC = gateway MAC' },
+        { d:1500, t:'prompt', s:'ettercap -T -q -i wlan0 -M arp /192.168.1.10// /192.168.1.1//' },
+        { d:2000, t:'out',    s:'Ettercap 0.8.3 — intercepting all traffic on wlan0...' },
+        { d:2500, t:'dim',    s:'[PKT] 192.168.1.10:52341 → 74.125.x.x:443 (HTTPS — encrypted)' },
+        { d:2900, t:'dim',    s:'[PKT] 192.168.1.10:52342 → 93.184.x.x:80 (HTTP — plaintext!)' },
+        { d:3300, t:'warn',   s:'[HTTP INTERCEPT] GET http://login.example.com/auth' },
+        { d:3700, t:'warn',   s:'[POST DATA CAPTURED] username=alice&password=hunter2' },
+        { d:4200, t:'success',s:'[✓ CAPTURED] alice / hunter2 @ login.example.com' },
+        { d:4700, t:'info',   s:'Injecting malicious JS into HTTP response stream...' },
+        { d:5200, t:'error',  s:'>>> Credentials stolen, malicious JS injected, session hijacked <<<' },
+        { d:5700, t:'out',    s:'Note: HTTPS would have encrypted this traffic entirely.' },
+      ],
+      sidebar: {
+        overview: 'ARP spoofing poisons the victim\'s network cache, routing all their traffic through the attacker\'s machine for interception before forwarding to the real destination.',
+        impact: ['Session cookie theft', 'Credential interception on HTTP', 'JS injection into web pages', 'SSL stripping on misconfigured sites'],
+        defenses: ['Always use HTTPS (padlock)', 'Use VPN on public networks', 'Certificate pinning in apps', 'HSTS (HTTP Strict Transport Security)', 'Avoid sensitive tasks on public Wi-Fi'],
+      }
+    }
   },
 
   ransomware: {
-    title: '[ RANSOMWARE INFECTION SIMULATION ]',
-    sidebar: {
-      overview: 'Ransomware encrypts victim files and demands cryptocurrency payment for the decryption key. Often delivered via phishing or exploiting vulnerabilities. Causes billions in damages annually.',
-      impact: ['Complete data loss if no backup', 'Business operations halted', 'Ransom payments ($10k–$5M+)', 'Reputational damage'],
-      defenses: ['Regular offline backups (3-2-1 rule)', 'Keep systems patched', 'Disable macros in Office docs', 'Endpoint Detection & Response (EDR)', 'Network segmentation'],
+    icon: '🔒', name: 'Ransomware', iconClass: 'icon-red',
+    why: {
+      reason: "Ransomware is the most financially devastating form of malware because it turns data — the most valuable thing a company has — into a hostage. Cryptocurrency made it possible: attackers can demand payment with near-perfect anonymity and no way to reverse the transaction.",
+      motivation: "A single successful attack can net millions of dollars. Ransomware-as-a-Service (RaaS) platforms have industrialized the crime — non-technical criminals can \"subscribe\" to ransomware infrastructure for a cut of the profits. The entry barrier is near zero.",
+      howItHappens: "Most ransomware begins with a phishing email. A user enables a malicious macro, the dropper installs itself, deletes backup shadow copies, then encrypts every file it can reach — including mapped network drives. The entire process takes under 10 minutes.",
+      realWorld: [
+        { year: '2021', title: 'Colonial Pipeline', text: 'A single compromised VPN password shut down the largest US fuel pipeline for 5 days. The company paid $4.4M in Bitcoin, with most later recovered by the FBI.' },
+        { year: '2021', title: 'Irish Health Service (HSE)', text: 'Ireland\'s national healthcare system was crippled for weeks. Patient appointments cancelled, cancer screenings delayed. Estimated recovery cost: €100 million.' },
+        { year: '2023', title: 'MGM Resorts', text: 'A 10-minute vishing call impersonating an IT employee led to a ransomware attack causing $100M+ in losses and days of outages across Las Vegas properties.' },
+      ],
+      victims: ['Hospitals', 'Schools', 'Local governments', 'Manufacturers', 'Any organization with backups'],
     },
-    steps: [
-      { delay: 0,    type: 'output', text: '[STAGE 1] User opened: Invoice_Q4_2024.docx (macro enabled)' },
-      { delay: 700,  type: 'warning',text: 'Macro executed — downloading payload from C2 server...' },
-      { delay: 1300, type: 'output', text: '[STAGE 2] Dropper installed to %APPDATA%/svchost32.exe' },
-      { delay: 1800, type: 'info',   text: 'Establishing persistence: HKCU\\Run registry key added' },
-      { delay: 2300, type: 'output', text: '[STAGE 3] Killing backup processes: vssadmin, wbadmin...' },
-      { delay: 2800, type: 'error',  text: 'Shadow copies deleted — recovery via Windows Restore: DISABLED' },
-      { delay: 3300, type: 'output', text: '[STAGE 4] Encryption phase initiated (AES-256 + RSA-2048)' },
-      { delay: 3700, type: 'dim',    text: 'Encrypting: C:\\Users\\alice\\Documents\\*.* [████████░░] 82%' },
-      { delay: 4100, type: 'dim',    text: 'Encrypting: C:\\Users\\alice\\Desktop\\*.* [██████████] 100%' },
-      { delay: 4500, type: 'dim',    text: 'Encrypting: mapped network drives... Z:\\ ████████████' },
-      { delay: 5000, type: 'error',  text: '>>> 47,382 files encrypted. Extensions renamed to .l0ck3d <<<' },
-      { delay: 5500, type: 'warning',text: 'Dropping ransom note: README_DECRYPT.txt on all drives' },
-      { delay: 6000, type: 'error',  text: 'Demand: 3.5 BTC (~$210,000) to wallet: bc1q...x7k2' },
-    ]
+    sim: {
+      title: '[ RANSOMWARE — INFECTION CHAIN ]',
+      steps: [
+        { d:0,    t:'out',    s:'[STAGE 1] User opened: Invoice_Q4_2024.docx — macro enabled' },
+        { d:700,  t:'warn',   s:'Macro executed — downloading payload from C2 server...' },
+        { d:1300, t:'out',    s:'[STAGE 2] Dropper saved to %APPDATA%\\svchost32.exe' },
+        { d:1800, t:'info',   s:'Persistence: HKCU\\Run registry key added' },
+        { d:2300, t:'out',    s:'[STAGE 3] Killing backup processes: vssadmin, wbadmin, bcdedit...' },
+        { d:2800, t:'error',  s:'Shadow copies DELETED — Windows Restore: DISABLED' },
+        { d:3300, t:'out',    s:'[STAGE 4] Encryption phase — AES-256 + RSA-2048 key pair' },
+        { d:3700, t:'dim',    s:'Encrypting: C:\\Users\\alice\\Documents\\*.* [███████░░░] 70%' },
+        { d:4100, t:'dim',    s:'Encrypting: C:\\Users\\alice\\Desktop\\*.* [██████████] 100%' },
+        { d:4500, t:'dim',    s:'Encrypting: mapped drives Z:\\ [████████████] done' },
+        { d:5000, t:'error',  s:'>>> 47,382 files encrypted — renamed to .l0ck3d <<<' },
+        { d:5500, t:'warn',   s:'Dropping ransom note: README_DECRYPT.txt on all drives' },
+        { d:6000, t:'error',  s:'Demand: 3.5 BTC (~$210,000) — wallet: bc1q...x7k2' },
+      ],
+      sidebar: {
+        overview: 'Ransomware delivers via phishing, installs silently, deletes all backups and restore points, then encrypts everything in minutes. Payment demands are made in untraceable cryptocurrency.',
+        impact: ['Total data loss without backups', 'Business operations halted', 'Ransom: $10K – $5M+', 'Regulatory fines for data exposure'],
+        defenses: ['3-2-1 backup rule (offline copy)', 'Keep systems & software patched', 'Disable macros in Office docs', 'Endpoint Detection & Response (EDR)', 'Network segmentation to limit spread'],
+      }
+    }
   },
 
   portscan: {
-    title: '[ PORT SCAN RECONNAISSANCE ]',
-    sidebar: {
-      overview: 'Port scanning maps which services are running on a target. It is usually the first step of any attack — attackers probe for open ports to identify attack surfaces before exploitation.',
-      impact: ['Exposes running services', 'Reveals OS fingerprint', 'Identifies vulnerable software versions', 'Maps network topology'],
-      defenses: ['Firewall — block unnecessary ports', 'Intrusion Detection System (IDS)', 'Close unused services', 'Use non-default ports', 'Monitor for scan patterns'],
+    icon: '📡', name: 'Port Scanning', iconClass: 'icon-cyan',
+    why: {
+      reason: "Port scanning is the digital equivalent of testing every door and window of a building before breaking in. Attackers use it to map what's running on your network before deciding which vulnerability to exploit. Everything exposed to the internet is being scanned constantly — every minute of every day.",
+      motivation: "It's completely passive from the attacker's perspective and hard to distinguish from normal traffic. Automated scanners sweep billions of IP addresses daily. If you expose port 3306 (MySQL) to the internet, someone will find it within minutes.",
+      howItHappens: "Tools like Nmap send crafted TCP packets to each port and analyze the response. Open ports respond, closed ports reject, filtered ports are silently dropped. Service version detection then identifies exact software versions — cross-referenced against CVE databases for known exploits.",
+      realWorld: [
+        { year: '2017', title: 'WannaCry Global Spread', text: 'WannaCry used automated port 445 scanning to find vulnerable SMB services. It infected 230,000 computers in 150 countries within 24 hours.' },
+        { year: '2020', title: 'SolarWinds Supply Chain', text: 'Recon scanning helped attackers map Orion software deployments across US government networks before the backdoor was activated.' },
+        { year: '2023', title: 'MOVEit Transfer', text: 'Mass scanning identified all public-facing MOVEit instances before CVE-2023-34362 was public, enabling attackers to exploit hundreds of organizations simultaneously.' },
+      ],
+      victims: ['Anyone with public-facing services', 'Cloud servers', 'IoT devices', 'Corporate networks', 'Home routers'],
     },
-    steps: [
-      { delay: 0,    type: 'prompt', text: 'nmap -sV -sC -O -p- --min-rate 1000 192.168.1.105' },
-      { delay: 500,  type: 'output', text: 'Starting Nmap 7.94 — full port scan (65535 ports)' },
-      { delay: 1000, type: 'output', text: 'Scanning 192.168.1.105...' },
-      { delay: 1600, type: 'data',   text: 'PORT      STATE  SERVICE        VERSION' },
-      { delay: 1900, type: 'data',   text: '21/tcp    open   ftp            vsftpd 3.0.3' },
-      { delay: 2100, type: 'warning',text: '22/tcp    open   ssh            OpenSSH 7.4 (OUTDATED!)' },
-      { delay: 2300, type: 'data',   text: '80/tcp    open   http           Apache 2.4.41' },
-      { delay: 2500, type: 'warning',text: '443/tcp   open   https          Apache — cert expires in 3 days!' },
-      { delay: 2700, type: 'error',  text: '3306/tcp  open   mysql          MySQL 5.7.32 (exposed to internet!)' },
-      { delay: 2900, type: 'data',   text: '8080/tcp  open   http-alt       Tomcat 9.0.45' },
-      { delay: 3100, type: 'error',  text: '27017/tcp open   mongodb        MongoDB (NO AUTH REQUIRED!)' },
-      { delay: 3400, type: 'output', text: 'OS detection: Linux 4.15-5.8 (Ubuntu 18.04–20.04)' },
-      { delay: 3900, type: 'info',   text: 'Vulnerability scan: CVE-2021-41617 (OpenSSH) — CRITICAL' },
-      { delay: 4300, type: 'info',   text: 'Vulnerability scan: CVE-2019-12815 (vsftpd) — HIGH' },
-      { delay: 4800, type: 'error',  text: '>>> 7 open ports, 2 critical misconfigs, 2 CVEs found <<<' },
-    ]
+    sim: {
+      title: '[ PORT SCAN — RECONNAISSANCE ]',
+      steps: [
+        { d:0,    t:'prompt', s:'nmap -sV -sC -O -p- --min-rate 1000 192.168.1.105' },
+        { d:500,  t:'out',    s:'Starting Nmap 7.94 — full port scan (65,535 ports)' },
+        { d:1000, t:'out',    s:'Scanning 192.168.1.105...' },
+        { d:1600, t:'data',   s:'PORT      STATE  SERVICE        VERSION' },
+        { d:1900, t:'data',   s:'21/tcp    open   ftp            vsftpd 3.0.3' },
+        { d:2100, t:'warn',   s:'22/tcp    open   ssh            OpenSSH 7.4 (OUTDATED — CVE exists!)' },
+        { d:2300, t:'data',   s:'80/tcp    open   http           Apache 2.4.41' },
+        { d:2500, t:'warn',   s:'443/tcp   open   https          Apache — cert expires in 3 days!' },
+        { d:2700, t:'error',  s:'3306/tcp  open   mysql          MySQL 5.7.32 (EXPOSED TO INTERNET!)' },
+        { d:2900, t:'data',   s:'8080/tcp  open   http-alt       Tomcat 9.0.45' },
+        { d:3100, t:'error',  s:'27017/tcp open   mongodb        MongoDB (NO AUTH REQUIRED!)' },
+        { d:3400, t:'out',    s:'OS: Linux 4.15–5.8 (Ubuntu 18.04–20.04)' },
+        { d:3900, t:'info',   s:'CVE-2021-41617 (OpenSSH privilege escalation) — CRITICAL' },
+        { d:4300, t:'info',   s:'CVE-2019-12815 (vsftpd arbitrary file copy) — HIGH' },
+        { d:4800, t:'error',  s:'>>> 7 open ports, 2 critical misconfigs, 2 CVEs identified <<<' },
+      ],
+      sidebar: {
+        overview: 'Port scanning is reconnaissance — mapping open services and versions. Combined with CVE lookups, it identifies exactly which exploits to launch next. Every internet-facing server is scanned within minutes of going online.',
+        impact: ['Complete service inventory exposed', 'OS fingerprinting', 'Version-specific exploit selection', 'Maps internal network topology'],
+        defenses: ['Firewall — close unused ports', 'Intrusion Detection System (IDS)', 'Non-default ports for admin services', 'Regular vulnerability scanning (beat attackers to it)', 'Monitor logs for scan patterns'],
+      }
+    }
   }
 };
 
-function loadSim(id) {
+// ─── State ─────────────────────────────────────────────────────────
+let currentSim = null;
+let simRunning = false;
+let timers = [];
+let simsRun = 0;
+
+// ─── Why Modal ─────────────────────────────────────────────────────
+function openWhy(id) {
+  const a = attacks[id];
+  const w = a.why;
+
+  document.getElementById('mIcon').className = 'modal-icon ' + a.iconClass;
+  document.getElementById('mIcon').textContent = a.icon;
+  document.getElementById('mTitle').textContent = a.name;
+
+  document.getElementById('mBody').innerHTML = `
+    <div class="modal-why">
+      <div class="modal-why-label">⚡ Why Do Attackers Use This?</div>
+      <p>${w.reason}</p>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title">The Attacker's Motivation</div>
+      <p>${w.motivation}</p>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title">How It Actually Happens</div>
+      <p>${w.howItHappens}</p>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title">Real-World Examples</div>
+      <div class="real-world-list">
+        ${w.realWorld.map(r => `
+          <div class="rw-item">
+            <span class="rw-year">${r.year}</span>
+            <div class="rw-text"><strong>${r.title}</strong><br>${r.text}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-title">Common Victims</div>
+      <div class="victim-chips">
+        ${w.victims.map(v => `<span class="victim-chip">${v}</span>`).join('')}
+      </div>
+    </div>
+
+    <button class="modal-run-btn" onclick="closeWhy(); openSim('${id}')">▶ Now Run the Simulation →</button>
+  `;
+
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeWhy() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function closeWhyOnBg(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeWhy();
+}
+
+// ─── Simulation ────────────────────────────────────────────────────
+function openSim(id) {
+  clearSim();
   currentSim = id;
-  const sim = simData[id];
-  document.querySelectorAll('.attack-card').forEach(c => c.classList.remove('active'));
-  event.currentTarget.classList.add('active');
-  document.getElementById('simWrapper').classList.add('visible');
-  document.getElementById('simTitle').textContent = sim.title;
+  const a = attacks[id];
+
+  document.querySelectorAll('.attack-card').forEach(c => c.classList.remove('selected'));
+  const card = document.getElementById('card-' + id);
+  if (card) card.classList.add('selected');
+
+  document.getElementById('simPanelIcon').textContent = a.icon;
+  document.getElementById('simPanelName').textContent = a.name;
   document.getElementById('btnRun').disabled = false;
-  buildSidebar(sim.sidebar);
-  document.getElementById('terminal').innerHTML = '<span class="t-dim">// simulation loaded — press RUN ATTACK to begin</span>\n<span class="cursor"></span>';
-  document.getElementById('simWrapper').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  buildSidebar(a.sim.sidebar);
+  document.getElementById('terminal').innerHTML = '<span class="tl t-dim">// ' + a.sim.title + ' — press Run Attack to begin</span><span class="cursor"></span>';
+
+  const panel = document.getElementById('simPanel');
+  panel.classList.add('open');
+  setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
 }
 
 function buildSidebar(data) {
-  const sb = document.getElementById('sidebar');
-  sb.innerHTML = `
-    <div class="info-block">
-      <div class="info-block-title">// OVERVIEW</div>
+  document.getElementById('simSidebar').innerHTML = `
+    <div class="info-card">
+      <div class="info-card-title">Overview</div>
       <p>${data.overview}</p>
     </div>
-    <div class="info-block">
-      <div class="info-block-title">// POTENTIAL IMPACT</div>
-      ${data.impact.map(i => `<div class="defense-item" style="color:var(--red)">${i}</div>`).join('')}
+    <div class="info-card">
+      <div class="info-card-title">Potential Impact</div>
+      ${data.impact.map(i => `<div class="impact-item">${i}</div>`).join('')}
     </div>
-    <div class="info-block">
-      <div class="info-block-title">// DEFENSES</div>
+    <div class="info-card">
+      <div class="info-card-title">Defenses</div>
       ${data.defenses.map(d => `<div class="defense-item">${d}</div>`).join('')}
     </div>
-    <div class="info-block">
-      <div class="info-block-title">// SIMULATION PROGRESS</div>
-      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="info-card">
+      <div class="info-card-title">Progress</div>
+      <div class="progress-track"><div class="progress-bar" id="pBar"></div></div>
     </div>
   `;
 }
 
-function runCurrentSim() {
+function runSim() {
   if (!currentSim || simRunning) return;
   simRunning = true;
   document.getElementById('btnRun').disabled = true;
-  incStats();
+  simsRun++;
+  document.getElementById('simsRun').textContent = simsRun;
+
   const term = document.getElementById('terminal');
   term.innerHTML = '';
-  const steps = simData[currentSim].steps;
-  const totalTime = steps[steps.length-1].delay + 800;
+  const steps = attacks[currentSim].sim.steps;
+  const total = steps[steps.length - 1].d + 900;
 
   steps.forEach((s, i) => {
     const t = setTimeout(() => {
-      const line = document.createElement('div');
-      line.className = 'terminal-line';
-      const progress = ((i+1)/steps.length)*100;
-      const fill = document.getElementById('progressFill');
-      if (fill) fill.style.width = progress + '%';
+      const el = document.createElement('span');
+      el.className = 'tl';
 
-      if (s.type === 'prompt') {
-        line.innerHTML = `<span class="t-prompt">root@kali:~# </span><span class="t-cmd">${s.text}</span>`;
+      if (s.t === 'prompt') {
+        el.innerHTML = `<span class="t-prompt">root@kali:~# </span><span class="t-cmd">${s.s}</span>`;
       } else {
-        line.innerHTML = `<span class="t-${s.type}">${s.text}</span>`;
+        const map = { out:'t-out', success:'t-success', error:'t-error', warn:'t-warn', info:'t-info', data:'t-data', dim:'t-dim' };
+        el.innerHTML = `<span class="${map[s.t] || 't-out'}">${s.s}</span>`;
       }
-      term.appendChild(line);
+
+      term.appendChild(el);
       term.scrollTop = term.scrollHeight;
-    }, s.delay);
-    simTimers.push(t);
+
+      const bar = document.getElementById('pBar');
+      if (bar) bar.style.width = ((i + 1) / steps.length * 100) + '%';
+    }, s.d);
+    timers.push(t);
   });
 
-  const done = setTimeout(() => {
+  timers.push(setTimeout(() => {
     simRunning = false;
     document.getElementById('btnRun').disabled = false;
-    const cursor = document.createElement('span');
-    cursor.className = 'cursor';
-    term.appendChild(cursor);
-  }, totalTime);
-  simTimers.push(done);
+    const cur = document.createElement('span');
+    cur.className = 'cursor';
+    term.appendChild(cur);
+  }, total));
 }
 
 function clearSim() {
-  simTimers.forEach(clearTimeout);
-  simTimers = [];
+  timers.forEach(clearTimeout);
+  timers = [];
   simRunning = false;
-  if (currentSim) {
-    document.getElementById('terminal').innerHTML = '<span class="t-dim">// cleared — press RUN ATTACK to restart</span>';
-    document.getElementById('btnRun').disabled = false;
-    const fill = document.getElementById('progressFill');
-    if (fill) fill.style.width = '0';
-  }
+  const term = document.getElementById('terminal');
+  if (term) term.innerHTML = '<span class="tl t-dim">// cleared — press Run Attack to restart</span>';
+  document.getElementById('btnRun').disabled = false;
+  const bar = document.getElementById('pBar');
+  if (bar) bar.style.width = '0';
 }
 
 function closeSim() {
   clearSim();
-  document.getElementById('simWrapper').classList.remove('visible');
-  document.querySelectorAll('.attack-card').forEach(c => c.classList.remove('active'));
+  document.getElementById('simPanel').classList.remove('open');
+  document.querySelectorAll('.attack-card').forEach(c => c.classList.remove('selected'));
   currentSim = null;
 }
+
+// Keyboard close
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeWhy();
+});
 </script>
 </body>
 </html>
