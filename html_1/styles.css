@@ -1,94 +1,174 @@
 /* ============================================================
    CYBERSEC EDUCATION — Homepage Stylesheet
-   Theme: Dark terminal / hacker aesthetic
+   Theme: Multi-color cybersecurity
+   Colors: White, Red, Blue, Yellow, Purple, Green, Orange
    ============================================================ */
 
-/* Google Fonts — techy monospace + display font */
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=VT323&display=swap');
 
-/* ── COLOR VARIABLES ──────────────────────────────────────── */
+/* ── COLOR VARIABLES ──────────────────────────────────────────
+   🎨 CHANGE ANY COLOR HERE — everything on the page uses these
+   --white    → h1 title, bold highlights
+   --blue     → buttons, list accents, links, accordions
+   --red      → warnings, alerts, error text
+   --yellow   → h2 subheadings
+   --purple   → h3 headings, summary headers
+   --green    → terminal (#output) text
+   --orange   → nav button hover, special highlights
+   --bg       → main page background
+   --panel    → card / container background
+   --border   → border lines
+   --text     → main body text         ⬅ NOW WHITE
+   --text-dim → dimmer/secondary text  ⬅ NOW LIGHT GREY
+   ──────────────────────────────────────────────────────────── */
 :root {
-  --green:       #00ff41;   /* bright neon green — main accent  */
-  --green-dim:   #00aa2b;   /* dimmer green for secondary text  */
-  --green-faint: #003a0e;   /* very dark green for backgrounds  */
-  --red:         #ff3131;   /* alert / danger color             */
-  --bg:          #020c03;   /* near-black main background       */
-  --panel:       #050f06;   /* slightly lighter panel color     */
-  --border:      #0a2a0e;   /* subtle green-tinted border       */
-  --text:        #b0ffb8;   /* soft green body text             */
-  --text-dim:    #5a8c60;   /* muted text                       */
+  --white:    black;
+  --blue:     #00aaff;
+  --red:      #ff4444;
+  --yellow:   #ffdd00;
+  --purple:   #cc66ff;
+  --green:    #00ff88;
+  --orange:   #ff8800;
+
+  --bg:       #0a0a0a;
+  --panel:    #111111;
+  --border:   #333333;
+  --text:     #ffffff;   /* ⬅ MAIN TEXT COLOR — white */
+  --text-dim: #aaaaaa;   /* ⬅ SECONDARY TEXT — light grey */
 }
 
-/* ── GLOBAL RESET & BASE ──────────────────────────────────── */
+/* ── GLOBAL RESET ─────────────────────────────────────────────
+   Removes all default browser margin/padding from every element.
+   box-sizing: border-box keeps padding inside element widths.
+   ──────────────────────────────────────────────────────────── */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* CRT scanline overlay on entire page */
-body::before {
-  content: '';
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: repeating-linear-gradient(
-    0deg,
-    rgba(0, 0, 0, 0.07) 0px,
-    rgba(0, 0, 0, 0.07) 1px,
-    transparent 1px,
-    transparent 2px
-  );
-  pointer-events: none; /* let clicks pass through */
-  z-index: 9999;
-}
-
-/* Subtle screen flicker animation */
-@keyframes flicker {
-  0%,  100% { opacity: 1;    }
-  93%        { opacity: 0.93; }
-  94%        { opacity: 1;    }
-  97%        { opacity: 0.96; }
-}
-
+/* ── BODY ─────────────────────────────────────────────────────
+   Root page element. Sets the background color, default font,
+   and default text color used across the whole page.
+   ──────────────────────────────────────────────────────────── */
 body {
   background-color: var(--bg);
-
-  /* Faint grid pattern over the background */
-  background-image:
-    linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 255, 65, 0.03) 1px, transparent 1px);
-  background-size: 40px 40px;
-
   color: var(--text);
   font-family: 'Share Tech Mono', monospace;
   min-height: 100vh;
-  animation: flicker 8s infinite;
   overflow-x: hidden;
 }
 
-/* ── H1 HEADING ───────────────────────────────────────────── */
-/* BUG FIXED: "text-indent: center" → "text-align: center"    */
+/* ── HEADER ───────────────────────────────────────────────────
+   Top banner bar — stays pinned to the top while you scroll.
+   Contains your site name and navigation.
+   ──────────────────────────────────────────────────────────── */
+header {
+  padding: 16px 32px;
+  border-bottom: 2px solid var(--blue);
+  background-color: black;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* ── H1 — MAIN PAGE TITLE ─────────────────────────────────────
+   🎨 TO CHANGE TITLE COLOR: change `color: var(--white)` below
+      Options: var(--blue), var(--yellow), var(--purple), etc.
+   ──────────────────────────────────────────────────────────── */
 h1 {
-  color: var(--green);
-  text-align: center;                      /* ← was text-indent: center (invalid) */
-  font-family: 'Orbitron', sans-serif;     /* ← replaces Papyrus with techy font  */
+  color: var(white);  /* ⬅ MAIN TITLE COLOR — white */
+  text-align: center;
+  font-family: 'Orbitron', sans-serif;
   font-weight: 900;
-  font-size: clamp(1.4rem, 4vw, 2.4rem);  /* scales nicely on all screens        */
+  font-size: clamp(1.4rem, 4vw, 2.4rem);
   letter-spacing: 4px;
-  text-shadow: 0 0 30px rgba(0, 255, 65, 0.5),
-               0 0 60px rgba(0, 255, 65, 0.2);
-  background-color: transparent;
   padding: 24px 16px;
   border-bottom: 1px solid var(--border);
 }
 
-/* ── LIST ITEMS ───────────────────────────────────────────── */
+/* ── H2 — SECTION SUBHEADINGS ─────────────────────────────────
+   🎨 TO CHANGE: replace var(--yellow) with any color variable.
+   ──────────────────────────────────────────────────────────── */
+h2 {
+  color: var(--yellow);  /* ⬅ SUBHEADING COLOR — yellow */
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: clamp(1rem, 2.5vw, 1.6rem);
+  letter-spacing: 3px;
+  padding: 16px 32px 8px;
+}
+
+/* ── H3 — TERTIARY HEADINGS ───────────────────────────────────
+   🎨 TO CHANGE: replace var(--purple) with any color variable.
+   ──────────────────────────────────────────────────────────── */
+h3 {
+  color: var(--purple);  /* ⬅ H3 COLOR — purple */
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.95rem;
+  letter-spacing: 2px;
+  padding: 12px 32px 4px;
+}
+
+/* ── NAV ──────────────────────────────────────────────────────
+   Navigation bar holding your page/section buttons.
+   Lays buttons out in a horizontal row, wraps on small screens.
+   ──────────────────────────────────────────────────────────── */
+nav {
+  display: flex;
+  gap: 12px;
+  padding: 20px 32px;
+  flex-wrap: wrap;
+}
+
+/* ── BUTTON ───────────────────────────────────────────────────
+   All <button> elements on the page.
+   Default: blue outlined button.
+   Hover: switches to orange border and text.
+   ──────────────────────────────────────────────────────────── */
+button {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.78rem;
+  letter-spacing: 2px;
+  padding: 9px 20px;
+  background: transparent;
+  color: var(--blue);
+  border: 1px solid var(--blue);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+
+button:hover {
+  background: black;
+  border-color: var(--orange);
+  color: var(--orange);
+}
+
+/* ── UL — UNORDERED LISTS ─────────────────────────────────────
+   The wrapper around all list items.
+   ──────────────────────────────────────────────────────────── */
+ul {
+  font-family: 'Share Tech Mono', monospace;
+  color: var(--text);
+  padding: 12px 32px;
+}
+
+/* ── LI — LIST ITEMS ──────────────────────────────────────────
+   Individual items inside your lists.
+   Left border cycles through theme colors using nth-child.
+   The ::before pseudo-element adds the ▸ arrow automatically.
+   ──────────────────────────────────────────────────────────── */
 li {
   color: var(--text);
   font-family: 'Share Tech Mono', monospace;
   background-color: var(--panel);
-  border-left: 3px solid var(--green-dim);
+  border-left: 3px solid var(--blue);
   padding: 10px 16px;
   margin-bottom: 6px;
   border-radius: 2px;
@@ -96,99 +176,78 @@ li {
   transition: border-color 0.2s, background-color 0.2s;
 }
 
+/* Each list item gets a different left-bar color by position */
+li:nth-child(1) { border-left-color: var(--blue);   }
+li:nth-child(2) { border-left-color: var(--red);    }
+li:nth-child(3) { border-left-color: var(--yellow); }
+li:nth-child(4) { border-left-color: var(--purple); }
+li:nth-child(5) { border-left-color: var(--green);  }
+li:nth-child(6) { border-left-color: var(--orange); }
+li:nth-child(7) { border-left-color: var(--white);  }
+
 li:hover {
-  border-left-color: var(--green);
-  background-color: rgba(0, 255, 65, 0.05);
+  background-color: #1a1a1a;
 }
 
 li::before {
   content: '▸ ';
-  color: var(--green-dim);
+  color: var(--blue);
 }
 
-/* ── UNORDERED LISTS ──────────────────────────────────────── */
-ul {
-  font-family: 'Share Tech Mono', monospace;
-  color: var(--text);
-  padding: 12px 0;
-}
-
-/* ── IMAGES ───────────────────────────────────────────────── */
-img {
-  height: 300px;
-  width: 200px;
-  border: 1px solid var(--green-faint);
-  border-radius: 4px;
-  display: block;
-  margin: 20px auto;
-
-  /* green glow border effect */
-  box-shadow: 0 0 20px rgba(0, 255, 65, 0.15),
-              0 0 60px rgba(0, 255, 65, 0.05);
-
-  /* slight green tint to fit the theme */
-  filter: sepia(20%) hue-rotate(80deg) brightness(0.9);
-  transition: box-shadow 0.3s, filter 0.3s;
-}
-
-img:hover {
-  box-shadow: 0 0 30px rgba(0, 255, 65, 0.3),
-              0 0 80px rgba(0, 255, 65, 0.1);
-  filter: sepia(10%) hue-rotate(80deg) brightness(1.05);
-}
-
-/* ── #textbold ID ─────────────────────────────────────────── */
-#textbold {
+/* ── .textbold CLASS ──────────────────────────────────────────
+   Reusable class for highlighted bold text.
+   Add class="textbold" to any element to apply it.
+   Example: <span class="textbold">WARNING</span>
+   ──────────────────────────────────────────────────────────── */
+.textbold {
   font-weight: bold;
-  background-color: var(--panel);
-  color: var(--green);
-  border: 1px solid var(--border);
-  padding: 4px 8px;
-  border-radius: 2px;
-  font-family: 'Share Tech Mono', monospace;
+  color: var(--white);
 }
 
-/* ── DETAILS / SUMMARY (expandable sections) ──────────────── */
+/* ── DETAILS — COLLAPSIBLE ACCORDION ─────────────────────────
+   The outer wrapper of each expandable/collapsible section.
+   Collapsed by default. Click the summary row to open it.
+   ──────────────────────────────────────────────────────────── */
 details {
   background-color: var(--panel);
   border: 1px solid var(--border);
   border-radius: 4px;
   margin: 12px 0;
-  padding: 0;
   transition: border-color 0.2s;
 }
 
 details:hover,
 details[open] {
-  border-color: var(--green-dim);
+  border-color: var(--purple);
 }
 
+/* ── SUMMARY — ACCORDION CLICK HEADER ────────────────────────
+   The always-visible row you click to open/close <details>.
+   Arrow icon flips from ► to ▼ when opened.
+   ──────────────────────────────────────────────────────────── */
 summary {
   padding: 14px 18px;
   cursor: pointer;
   font-family: 'Share Tech Mono', monospace;
   font-size: 0.9rem;
-  color: var(--green);
+  color: var(--purple);
   letter-spacing: 1px;
-  list-style: none;          /* removes default triangle */
+  list-style: none;
   user-select: none;
 }
 
-summary::before {
-  content: '► ';
-  color: var(--green-dim);
-  transition: transform 0.2s;
-}
+summary::before               { content: '► '; color: var(--purple); }
+details[open] summary::before { content: '▼ '; }
 
-details[open] summary::before {
-  content: '▼ ';
-}
-
+/* ── DETAILS INNER CONTENT ────────────────────────────────────
+   <p> and <li> elements INSIDE an accordion.
+   Overrides the global li styles (no left border, dimmer text).
+   ──────────────────────────────────────────────────────────── */
 details p,
 details li {
   padding: 10px 18px 14px;
   font-size: 0.82rem;
-  color: var(--text-dim);
+  color: var(--text);
   line-height: 1.8;
   border-top: 1px solid var(--border);
   background: none;
@@ -197,14 +256,54 @@ details li {
 }
 
 details p::before,
-details li::before {
-  content: none; /* remove the ▸ arrow inside details */
+details li::before { content: none; }
+
+/* ── P — PARAGRAPHS ───────────────────────────────────────────
+   All standard paragraph text on the page.
+   ──────────────────────────────────────────────────────────── */
+p {
+  font-family: 'Share Tech Mono', monospace;
+  color: var(--text);
+  font-size: 0.82rem;
+  line-height: 1.8;
+  padding: 0 32px;
 }
 
-/* ── FOOTER ───────────────────────────────────────────────── */
-/* BUG FIXED: duplicate footer rules merged into one          */
-/* BUG FIXED: missing semicolon after "color: white"         */
-footer {
+/* ── A — HYPERLINKS ───────────────────────────────────────────
+   All clickable links. Blue by default, green on hover.
+   ──────────────────────────────────────────────────────────── */
+a {
+  color: var(--blue);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+a:hover {
+  color: var(--green);
+}
+
+/* ── #output — TERMINAL OUTPUT BOX ───────────────────────────
+   The <div id="output"> used to display script/scan results.
+   VT323 gives it a retro terminal look. Green text on black.
+   ──────────────────────────────────────────────────────────── */
+#output {
+  color: var(--green);
+  font-family: 'VT323', monospace;
+  font-size: 1.1rem;
+  background-color: #050505;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--green);
+  border-radius: 3px;
+  padding: 12px 16px;
+  margin: 20px 32px;
+  line-height: 1.6;
+}
+
+/* ── FOOTER / #footer ─────────────────────────────────────────
+   Bottom site footer. Works for both <footer> and id="footer".
+   ──────────────────────────────────────────────────────────── */
+footer,
+#footer {
   color: var(--text-dim);
   font-family: 'Share Tech Mono', monospace;
   font-size: 0.72rem;
@@ -216,84 +315,10 @@ footer {
   background-color: var(--panel);
 }
 
-/* ── #footer ID ───────────────────────────────────────────── */
-#footer {
-  font-style: normal;
-  font-family: 'Share Tech Mono', monospace;
-  color: var(--text-dim);
-}
-
-/* ── #output ID ───────────────────────────────────────────── */
-#output {
-  color: var(--green);
-  font-family: 'VT323', monospace;  /* terminal-style display font */
-  font-size: 1.1rem;
-  background-color: #020a03;
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  padding: 12px 16px;
-  line-height: 1.6;
-}
-
-/* ── BUTTON (homepage nav button) ────────────────────────── */
-/* BUG FIXED: button was inside <head> — move it to <body>   */
-/* "#window.location" is not valid CSS — buttons styled here */
-button {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 0.78rem;
-  letter-spacing: 2px;
-  padding: 9px 20px;
-  background: transparent;
-  color: var(--green);
-  border: 1px solid var(--green-dim);
-  border-radius: 2px;
-  cursor: pointer;
-  transition: background 0.2s, box-shadow 0.2s, border-color 0.2s;
-}
-
-button:hover {
-  background: rgba(0, 255, 65, 0.1);
-  border-color: var(--green);
-  box-shadow: 0 0 14px rgba(0, 255, 65, 0.25);
-}
-
-/* ── HEADER ───────────────────────────────────────────────── */
-header {
-  padding: 16px 32px;
-  border-bottom: 1px solid var(--border);
-  background: linear-gradient(180deg, #031005, var(--bg));
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 10px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-/* ── PARAGRAPHS ───────────────────────────────────────────── */
-p {
-  font-family: 'Share Tech Mono', monospace;
-  color: var(--text-dim);
-  font-size: 0.82rem;
-  line-height: 1.8;
-}
-
-/* ── LINKS ─────────────────────────────────────────────────── */
-a {
-  color: var(--green-dim);
-  text-decoration: none;
-  transition: color 0.2s;
-}
-
-a:hover {
-  color: var(--green);
-  text-shadow: 0 0 8px rgba(0, 255, 65, 0.4);
-}
-
-/* ── SCROLLBAR ─────────────────────────────────────────────── */
+/* ── ::-webkit-scrollbar — CUSTOM SCROLLBAR ──────────────────
+   Styles the thin scrollbar in Chrome, Edge, and Safari.
+   ──────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar       { width: 5px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--green-faint); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: var(--green-dim); }
+::-webkit-scrollbar-thumb { background: #333333; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--blue); }

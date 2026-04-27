@@ -3,1593 +3,1967 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CyberSec Guide — Know Your Threats</title>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=VT323&display=swap" rel="stylesheet">
+<title>CyberSim — Phishing Attack Lab</title>
 <style>
+     <div class="dropdown">
+  <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Menu
+  </button>
+  <ul class="dropdown-menu">
+    <li><a class="dropdown-item" href="index2.html">Simulation</a></li>
+    <li><a class="dropdown-item" href="index3.html">Cybersecurity Education Hub</a></li>
+  </ul>
+</div>
+/* =====================================================
+   CYBER SIM — styles.css
+   Green / Black phosphor terminal aesthetic
+   ===================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap');
+
+/* ── CSS Variables ── */
 :root {
-  --green: #00ff41;
-  --green-dim: #00aa2b;
-  --green-faint: #003a0e;
-  --red: #ff3131;
-  --amber: #ffb700;
-  --cyan: #00e5ff;
-  --blue: #4488ff;
-  --bg: #020c03;
-  --panel: #050f06;
-  --panel2: #071209;
-  --border: #0a2a0e;
-  --border-bright: #124a18;
-  --text: #b0ffb8;
-  --text-dim: #5a8c60;
+  --g0:  #000000;          /* pure black */
+  --g1:  #020d02;          /* near-black green tint */
+  --g2:  #051405;          /* dark surface */
+  --g3:  #0a2a0a;          /* panel bg */
+  --g4:  #0f3d0f;          /* raised surface */
+  --g5:  #134f13;          /* border */
+  --g6:  #1a6e1a;          /* mid green */
+  --g7:  #22942a;          /* accent */
+  --g8:  #2bbd35;          /* bright green */
+  --g9:  #39e644;          /* neon green — main accent */
+  --ga:  #70ff78;          /* glow green */
+  --gb:  #c8ffc8;          /* near-white green */
+  --red:    #ff3b3b;
+  --amber:  #ffa320;
+  --cyan:   #00e5ff;
+  --white:  #e8ffe8;
+  --dim:    #1a4a1a;
+
+  --font-mono:    'Share Tech Mono', monospace;
+  --font-display: 'Orbitron', monospace;
+  --font-body:    'Exo 2', sans-serif;
+
+  --glow-sm: 0 0 6px var(--g9);
+  --glow-md: 0 0 14px var(--g9), 0 0 28px rgba(57,230,68,0.3);
+  --glow-lg: 0 0 20px var(--g9), 0 0 50px rgba(57,230,68,0.25), 0 0 100px rgba(57,230,68,0.1);
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+/* ── Reset ── */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
+/* ── Body / OS Shell ── */
 body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Share Tech Mono', monospace;
-  min-height: 100vh;
-  overflow-x: hidden;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--g0);
+  color: var(--g9);
+  font-family: var(--font-mono);
+  cursor: default;
 }
 
-/* CRT scanlines */
+/* CRT scanline overlay */
 body::before {
   content: '';
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
+  inset: 0;
   background: repeating-linear-gradient(
     0deg,
-    rgba(0,0,0,0.06) 0px,
-    rgba(0,0,0,0.06) 1px,
-    transparent 1px,
-    transparent 2px
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.18) 2px,
+    rgba(0,0,0,0.18) 4px
   );
   pointer-events: none;
   z-index: 9999;
 }
 
-@keyframes flicker {
-  0%,100%{opacity:1} 93%{opacity:0.94} 94%{opacity:1} 97%{opacity:0.96} 98%{opacity:1}
-}
-body { animation: flicker 8s infinite; }
-
-/* ── HEADER ── */
-header {
-  border-bottom: 1px solid var(--green-dim);
-  padding: 16px 32px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: linear-gradient(180deg, #031005, var(--bg));
-  position: sticky; top: 0; z-index: 200;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.logo {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 1.05rem;
-  font-weight: 900;
-  color: var(--green);
-  letter-spacing: 3px;
-  text-shadow: 0 0 20px var(--green);
-}
-.logo span { color: var(--red); }
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.home-btn {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 0.72rem;
-  letter-spacing: 2px;
-  padding: 7px 16px;
-  border: 1px solid var(--green-dim);
-  background: transparent;
-  color: var(--green);
-  cursor: pointer;
-  border-radius: 2px;
-  transition: all 0.2s;
-  text-decoration: none;
-  display: inline-block;
-}
-.home-btn:hover {
-  background: rgba(0,255,65,0.1);
-  box-shadow: 0 0 12px rgba(0,255,65,0.3);
-  border-color: var(--green);
-}
-
-.header-status { font-size: 0.7rem; color: var(--green-dim); }
-@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
-.status-dot {
-  display: inline-block; width: 7px; height: 7px;
-  border-radius: 50%; background: var(--green);
-  box-shadow: 0 0 8px var(--green);
-  animation: pulse 1.5s infinite; margin-right: 6px;
-}
-
-/* ── TICKER ── */
-.ticker-wrap {
-  overflow: hidden;
-  background: #030a04;
-  border-bottom: 1px solid var(--border);
-  padding: 7px 0;
-}
-.ticker {
-  white-space: nowrap;
-  display: inline-block;
-  animation: tickerMove 40s linear infinite;
-  font-size: 0.7rem;
-  color: var(--green-dim);
-}
-@keyframes tickerMove { from{transform:translateX(100vw)} to{transform:translateX(-100%)} }
-
-/* ── HERO ── */
-.hero {
-  text-align: center;
-  padding: 52px 24px 36px;
-  border-bottom: 1px solid var(--border);
-  position: relative;
-}
-.hero::before {
+/* Vignette edges */
+body::after {
   content: '';
-  position: absolute;
-  top: 0; left: 50%; transform: translateX(-50%);
-  width: 600px; height: 200px;
-  background: radial-gradient(ellipse, rgba(0,255,65,0.04) 0%, transparent 70%);
-  pointer-events: none;
-}
-.hero-label {
-  font-size: 0.68rem;
-  letter-spacing: 5px;
-  color: var(--green-dim);
-  margin-bottom: 14px;
-}
-.hero h1 {
-  font-family: 'Orbitron', sans-serif;
-  font-size: clamp(1.4rem, 4vw, 2.4rem);
-  font-weight: 900;
-  color: var(--green);
-  text-shadow: 0 0 40px rgba(0,255,65,0.4);
-  letter-spacing: 4px;
-  margin-bottom: 16px;
-  line-height: 1.2;
-}
-.hero h1 span { color: var(--red); }
-.hero p {
-  font-size: 0.82rem;
-  color: var(--text-dim);
-  max-width: 600px;
-  margin: 0 auto 28px;
-  line-height: 1.8;
-}
-
-/* threat level legend */
-.legend {
-  display: flex;
-  justify-content: center;
-  gap: 24px;
-  flex-wrap: wrap;
-  font-size: 0.68rem;
-  letter-spacing: 1px;
-}
-.legend-item { display: flex; align-items: center; gap: 7px; }
-.legend-badge {
-  padding: 2px 8px;
-  border-radius: 2px;
-  font-size: 0.62rem;
-  letter-spacing: 2px;
-  font-weight: bold;
-}
-.badge-critical { background: rgba(255,49,49,0.15); color: var(--red); border: 1px solid var(--red); }
-.badge-high     { background: rgba(255,183,0,0.12); color: var(--amber); border: 1px solid var(--amber); }
-.badge-medium   { background: rgba(0,229,255,0.1);  color: var(--cyan);  border: 1px solid var(--cyan); }
-.badge-low      { background: rgba(0,255,65,0.1);   color: var(--green); border: 1px solid var(--green-dim); }
-
-/* ── MAIN ── */
-main { max-width: 1100px; margin: 0 auto; padding: 36px 20px 60px; }
-
-/* ── SECTION HEADER ── */
-.section-header {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 24px;
-  margin-top: 40px;
-}
-.section-header:first-child { margin-top: 0; }
-.section-label {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 0.72rem;
-  letter-spacing: 4px;
-  color: var(--green-dim);
-  white-space: nowrap;
-}
-.section-line { flex: 1; height: 1px; background: linear-gradient(90deg, var(--border-bright), transparent); }
-
-/* ── QUICK NAV ── */
-.quick-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 36px;
-  padding: 16px;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-}
-.quick-nav a {
-  font-size: 0.68rem;
-  letter-spacing: 1px;
-  color: var(--green-dim);
-  text-decoration: none;
-  padding: 5px 12px;
-  border: 1px solid var(--border);
-  border-radius: 2px;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.quick-nav a:hover { color: var(--green); border-color: var(--green-dim); background: rgba(0,255,65,0.05); }
-.quick-nav-label { font-size: 0.65rem; color: #2a5c2e; letter-spacing: 2px; width: 100%; }
-
-/* ── ATTACK GUIDE CARD ── */
-.attack-guide {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  margin-bottom: 20px;
-  overflow: hidden;
-  transition: border-color 0.2s;
-  scroll-margin-top: 80px;
-}
-.attack-guide:hover { border-color: var(--border-bright); }
-
-/* Alert bar at top */
-.alert-bar {
-  padding: 10px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px;
-  border-bottom: 1px solid;
-  font-size: 0.7rem;
-  letter-spacing: 2px;
-}
-.alert-bar-critical { background: rgba(255,49,49,0.12); border-color: rgba(255,49,49,0.3); }
-.alert-bar-high     { background: rgba(255,183,0,0.1);  border-color: rgba(255,183,0,0.25); }
-.alert-bar-medium   { background: rgba(0,229,255,0.07); border-color: rgba(0,229,255,0.2); }
-
-.alert-left { display: flex; align-items: center; gap: 12px; }
-.alert-icon { font-size: 1.1rem; }
-.alert-type-label { font-family: 'Orbitron', sans-serif; font-size: 0.65rem; letter-spacing: 3px; }
-.alert-bar-critical .alert-type-label { color: var(--red); }
-.alert-bar-high     .alert-type-label { color: var(--amber); }
-.alert-bar-medium   .alert-type-label { color: var(--cyan); }
-
-.alert-right { display: flex; align-items: center; gap: 10px; }
-.alert-id { font-size: 0.62rem; color: #2a5c2e; }
-
-/* Expand toggle */
-.expand-btn {
-  background: none;
-  border: 1px solid var(--border);
-  color: var(--green-dim);
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 0.65rem;
-  letter-spacing: 2px;
-  padding: 4px 10px;
-  cursor: pointer;
-  border-radius: 2px;
-  transition: all 0.2s;
-}
-.expand-btn:hover { border-color: var(--green-dim); color: var(--green); }
-
-/* Card body */
-.card-header {
-  padding: 18px 20px 14px;
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  border-bottom: 1px solid var(--border);
-  cursor: pointer;
-  user-select: none;
-}
-.card-icon-big { font-size: 2.2rem; flex-shrink: 0; }
-.card-title-block {}
-.card-title {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 0.9rem;
-  letter-spacing: 2px;
-  margin-bottom: 5px;
-  color: var(--green);
-}
-.card-subtitle { font-size: 0.74rem; color: var(--text-dim); line-height: 1.6; }
-
-/* Expandable content */
-.card-content {
-  display: none;
-  padding: 0;
-}
-.card-content.open { display: block; }
-
-/* Tabs */
-.tab-bar {
-  display: flex;
-  border-bottom: 1px solid var(--border);
-  background: var(--panel2);
-  overflow-x: auto;
-}
-.tab-btn {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 0.67rem;
-  letter-spacing: 2px;
-  color: var(--text-dim);
-  padding: 10px 18px;
-  border: none;
-  background: none;
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  white-space: nowrap;
-  transition: all 0.2s;
-}
-.tab-btn:hover { color: var(--text); }
-.tab-btn.active { color: var(--green); border-bottom-color: var(--green); }
-
-/* Tab panels */
-.tab-panel { display: none; padding: 20px; }
-.tab-panel.active { display: block; }
-
-/* "What is it" */
-.what-text {
-  font-size: 0.78rem;
-  color: var(--text);
-  line-height: 1.9;
-  margin-bottom: 16px;
-}
-
-/* Step list */
-.steps-list { list-style: none; counter-reset: steps; }
-.steps-list li {
-  counter-increment: steps;
-  display: flex;
-  gap: 14px;
-  margin-bottom: 14px;
-  font-size: 0.76rem;
-  color: var(--text-dim);
-  line-height: 1.7;
-  align-items: flex-start;
-}
-.steps-list li::before {
-  content: counter(steps, decimal-leading-zero);
-  font-family: 'VT323', monospace;
-  font-size: 1.1rem;
-  color: var(--green-dim);
-  flex-shrink: 0;
-  width: 26px;
-  margin-top: -1px;
-}
-.steps-list li strong { color: var(--text); }
-
-/* Terminal block */
-.mini-terminal {
-  background: #020a03;
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  padding: 14px 16px;
-  margin: 14px 0;
-  font-family: 'VT323', monospace;
-  font-size: 1rem;
-  line-height: 1.6;
-  overflow-x: auto;
-}
-.mini-terminal .mt-line { margin-bottom: 1px; }
-.mt-prompt { color: var(--green-dim); }
-.mt-cmd    { color: var(--green); }
-.mt-out    { color: #5a8c60; }
-.mt-warn   { color: var(--amber); }
-.mt-err    { color: var(--red); }
-.mt-ok     { color: var(--green); text-shadow: 0 0 6px var(--green); }
-.mt-info   { color: var(--cyan); }
-
-/* Alert examples */
-.alert-example {
-  border-radius: 3px;
-  padding: 12px 16px;
-  margin-bottom: 10px;
-  font-size: 0.74rem;
-  line-height: 1.7;
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  border-left: 3px solid;
-}
-.alert-example.alert-c { background: rgba(255,49,49,0.08); border-color: var(--red); color: #ffaaaa; }
-.alert-example.alert-w { background: rgba(255,183,0,0.08); border-color: var(--amber); color: #ffe0a0; }
-.alert-example.alert-i { background: rgba(0,229,255,0.06); border-color: var(--cyan); color: #a0eeff; }
-.alert-example.alert-s { background: rgba(0,255,65,0.06); border-color: var(--green-dim); color: var(--text); }
-.alert-icon-sm { flex-shrink: 0; margin-top: 1px; }
-.alert-content {}
-.alert-title-sm { font-family: 'Orbitron', sans-serif; font-size: 0.6rem; letter-spacing: 2px; margin-bottom: 3px; opacity: 0.8; }
-
-/* Defense grid */
-.defense-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-@media(max-width: 600px) { .defense-grid { grid-template-columns: 1fr; } }
-.defense-tile {
-  background: rgba(0,255,65,0.03);
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  padding: 12px;
-  font-size: 0.73rem;
-  color: var(--text-dim);
-  line-height: 1.6;
-}
-.defense-tile-title {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 0.6rem;
-  letter-spacing: 2px;
-  color: var(--green-dim);
-  margin-bottom: 6px;
-}
-.defense-tile strong { color: var(--text); }
-
-/* Red flags list */
-.redflag-list { list-style: none; }
-.redflag-list li {
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
-  font-size: 0.75rem;
-  color: var(--text-dim);
-  margin-bottom: 9px;
-  line-height: 1.6;
-}
-.redflag-list li::before { content: '⚑'; color: var(--red); flex-shrink: 0; }
-
-/* Real-world example box */
-.realworld {
-  background: rgba(0,229,255,0.04);
-  border: 1px solid rgba(0,229,255,0.15);
-  border-radius: 3px;
-  padding: 14px 16px;
-  margin-top: 14px;
-}
-.realworld-label {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 0.6rem;
-  letter-spacing: 3px;
-  color: var(--cyan);
-  margin-bottom: 6px;
-}
-.realworld p { font-size: 0.74rem; color: #7ab8c8; line-height: 1.7; }
-
-/* ── BOTTOM GLOSSARY ── */
-.glossary-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 10px;
-  margin-top: 8px;
-}
-.gloss-item {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  padding: 12px;
-}
-.gloss-term {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 0.62rem;
-  color: var(--green);
-  letter-spacing: 2px;
-  margin-bottom: 4px;
-}
-.gloss-def { font-size: 0.72rem; color: var(--text-dim); line-height: 1.6; }
-
-/* ── FOOTER ── */
-footer {
-  border-top: 1px solid var(--border);
-  padding: 20px 32px;
-  text-align: center;
-  font-size: 0.67rem;
-  color: #2a5c2e;
-  letter-spacing: 1px;
-  line-height: 1.8;
-}
-footer strong { color: var(--green-dim); }
-
-/* ── SCROLLBAR ── */
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--green-faint); border-radius: 2px; }
-
-/* ── ANIMATIONS ── */
-@keyframes slideIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.card-content.open { animation: slideIn 0.25s ease; }
-
-/* ── RUNNING SIM BUTTON ── */
-.run-sim-btn {
-  display: inline-block;
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 0.68rem;
-  letter-spacing: 2px;
-  padding: 8px 16px;
-  border: 1px solid var(--green-dim);
-  background: transparent;
-  color: var(--green);
-  cursor: pointer;
-  border-radius: 2px;
-  transition: all 0.2s;
-  margin-top: 14px;
-}
-.run-sim-btn:hover {
-  background: rgba(0,255,65,0.1);
-  box-shadow: 0 0 14px rgba(0,255,65,0.25);
-}
-
-/* ── LIVE SIM MODAL ── */
-.sim-modal-overlay {
-  display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.88);
-  z-index: 1000;
+  background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.7) 100%);
+  pointer-events: none;
+  z-index: 9998;
+}
+
+/* ── Desktop ── */
+.desktop {
+  position: relative;
+  width: 100%;
+  height: calc(100vh - 48px);
+  overflow: hidden;
+}
+
+/* Phosphor dot texture */
+.desktop::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(rgba(57,230,68,0.04) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
+}
+
+/* ── Taskbar ── */
+.taskbar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 48px;
+  background: rgba(2,13,2,0.96);
+  border-top: 1px solid var(--g5);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 14px;
+  z-index: 9000;
+  box-shadow: 0 -4px 20px rgba(57,230,68,0.08);
+}
+
+.tb-brand {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 4px;
+  color: var(--g9);
+  text-shadow: var(--glow-sm);
+  padding-right: 14px;
+  border-right: 1px solid var(--g5);
+  white-space: nowrap;
+}
+.tb-brand em { color: var(--amber); font-style: normal; }
+
+.tb-windows { display: flex; gap: 8px; flex: 1; }
+.tb-btn {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  padding: 5px 14px;
+  border-radius: 4px;
+  border: 1px solid var(--g5);
+  background: transparent;
+  color: var(--g7);
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 1px;
+}
+.tb-btn:hover, .tb-btn.active {
+  border-color: var(--g9);
+  color: var(--g9);
+  background: rgba(57,230,68,0.06);
+  text-shadow: var(--glow-sm);
+}
+
+.tb-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-left: 14px;
+  border-left: 1px solid var(--g5);
+}
+.tb-status {
+  font-size: 0.65rem;
+  color: var(--g7);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  letter-spacing: 1px;
+}
+.status-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--g9);
+  box-shadow: var(--glow-sm);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.status-dot.red { background: var(--red); box-shadow: 0 0 6px var(--red); }
+
+.tb-clock {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--g9);
+  text-shadow: var(--glow-sm);
+  text-align: right;
+  letter-spacing: 1px;
+}
+.tb-clock small {
+  display: block;
+  font-size: 0.6rem;
+  color: var(--g6);
+}
+
+/* ── Window System ── */
+.window {
+  position: absolute;
+  background: var(--g1);
+  border: 1px solid var(--g5);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 320px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(57,230,68,0.05);
+  transition: box-shadow 0.2s;
+}
+.window.active {
+  border-color: var(--g6);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.9), var(--glow-md);
+  z-index: 100 !important;
+}
+.window.minimized { display: none !important; }
+
+/* Window titlebar */
+.win-bar {
+  background: var(--g2);
+  border-bottom: 1px solid var(--g5);
+  padding: 9px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: grab;
+  flex-shrink: 0;
+  user-select: none;
+}
+.win-bar:active { cursor: grabbing; }
+
+.win-dots { display: flex; gap: 7px; flex-shrink: 0; }
+.win-dot {
+  width: 11px; height: 11px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: filter 0.15s, transform 0.15s;
+}
+.win-dot:hover { filter: brightness(1.4); transform: scale(1.1); }
+.dot-close { background: #e05555; box-shadow: 0 0 4px rgba(224,85,85,0.5); }
+.dot-min   { background: var(--amber); box-shadow: 0 0 4px rgba(255,163,32,0.4); }
+.dot-max   { background: var(--g9); box-shadow: 0 0 4px rgba(57,230,68,0.4); }
+
+.win-title {
+  flex: 1;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--g8);
+  pointer-events: none;
+  text-shadow: var(--glow-sm);
+}
+
+.win-body { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+
+/* ─────────────────────────────────────
+   MAIN SIM WINDOW
+───────────────────────────────────── */
+#sim-win {
+  left: 20px;
+  top: 20px;
+  width: calc(100vw - 40px);
+  max-width: 1200px;
+  height: calc(100vh - 88px);
+}
+
+/* Stage progress header */
+.stage-header {
+  background: var(--g2);
+  border-bottom: 1px solid var(--g5);
+  padding: 10px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.stage-steps {
+  display: flex;
+  gap: 0;
+  align-items: center;
+}
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+.step-circle {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 2px solid var(--g5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--g6);
+  transition: all 0.3s;
+  flex-shrink: 0;
+}
+.step-circle.done    { border-color: var(--g7); background: var(--g4); color: var(--g9); }
+.step-circle.current { border-color: var(--g9); background: rgba(57,230,68,0.12); color: var(--g9); box-shadow: var(--glow-sm); animation: step-pulse 1.5s ease-in-out infinite; }
+@keyframes step-pulse { 0%,100%{box-shadow: var(--glow-sm)} 50%{box-shadow: var(--glow-md)} }
+
+.step-label {
+  font-size: 0.6rem;
+  color: var(--g6);
+  white-space: nowrap;
+  margin: 0 6px;
+  letter-spacing: 0.5px;
+  transition: color 0.3s;
+}
+.step-label.current { color: var(--g9); }
+.step-label.done    { color: var(--g7); }
+
+.step-line {
+  width: 20px;
+  height: 1px;
+  background: var(--g5);
+  flex-shrink: 0;
+  transition: background 0.3s;
+}
+.step-line.done { background: var(--g7); }
+
+.stage-title {
+  flex: 1;
+  font-size: 0.78rem;
+  color: var(--g8);
+  letter-spacing: 1px;
+}
+.stage-title strong { color: var(--g9); text-shadow: var(--glow-sm); }
+
+.edu-badge {
+  font-family: var(--font-display);
+  font-size: 0.52rem;
+  letter-spacing: 2px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  background: rgba(57,230,68,0.06);
+  border: 1px solid var(--g5);
+  color: var(--g7);
+  white-space: nowrap;
+}
+
+/* ── Split Layout ── */
+.sim-split {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+  min-height: 0;
+  position: relative;
+}
+
+/* ── Attacker VM Panel ── */
+.panel-attacker {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--g5);
+  overflow: hidden;
+  background: var(--g0);
+}
+
+.panel-label {
+  padding: 7px 14px;
+  border-bottom: 1px solid var(--g5);
+  font-family: var(--font-display);
+  font-size: 0.58rem;
+  letter-spacing: 3px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.label-att { color: var(--red); background: rgba(255,59,59,0.04); }
+.label-att .blink-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--red);
+  animation: pulse-dot 1.2s ease-in-out infinite;
+  box-shadow: 0 0 6px var(--red);
+}
+.label-vic { color: var(--g8); background: rgba(57,230,68,0.04); }
+.label-vic .blink-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--g9);
+  box-shadow: var(--glow-sm);
+}
+
+/* ── Terminal ── */
+.terminal {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 14px 16px;
+  background: var(--g0);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  line-height: 1.65;
+  position: relative;
+}
+
+.t-line { margin-bottom: 1px; word-break: break-all; }
+.t-prompt { color: var(--g9); }
+.t-cmd    { color: var(--gb); }
+.t-out    { color: var(--g7); }
+.t-dim    { color: var(--g5); }
+.t-info   { color: var(--cyan); }
+.t-warn   { color: var(--amber); }
+.t-err    { color: var(--red); }
+.t-hit    { color: var(--g9); font-weight: bold; text-shadow: var(--glow-sm); }
+.t-sys    { color: var(--g8); }
+.t-head   { color: var(--g9); letter-spacing: 2px; text-shadow: var(--glow-md); }
+
+.cursor {
+  display: inline-block;
+  width: 9px; height: 1.1em;
+  background: var(--g9);
+  vertical-align: text-bottom;
+  margin-left: 2px;
+  animation: blink-cur 1s steps(1) infinite;
+  box-shadow: var(--glow-sm);
+}
+@keyframes blink-cur { 0%,49%{opacity:1} 50%,100%{opacity:0} }
+
+/* ── Victim VM Panel ── */
+.panel-victim {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--g1);
+}
+
+.victim-vm {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── VM Views (each is a screen state) ── */
+.v-view {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+}
+.v-view.active { display: flex; }
+
+/* Idle view */
+.v-idle {
+  background: #020d02;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  flex-direction: column;
+}
+.idle-monitor {
+  font-size: 5rem;
+  opacity: 0.15;
+  filter: drop-shadow(0 0 20px var(--g9));
+}
+.idle-text {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  letter-spacing: 3px;
+  color: var(--g6);
+}
+.idle-sub {
+  font-size: 0.7rem;
+  color: var(--g5);
+  letter-spacing: 1px;
+}
+
+/* ── Fake OS Desktop (victim's machine) ── */
+.fake-os {
+  background: linear-gradient(135deg, #1a2a1a 0%, #0d1d0d 100%);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-body);
+}
+.fake-os-bar {
+  height: 28px;
+  background: rgba(5,20,5,0.95);
+  border-bottom: 1px solid var(--g5);
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.fake-os-start {
+  font-size: 0.62rem;
+  background: var(--g4);
+  border: 1px solid var(--g5);
+  color: var(--g8);
+  padding: 2px 8px;
+  border-radius: 3px;
+  letter-spacing: 1px;
+}
+.fake-os-clock {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--g7);
+}
+.fake-os-desktop {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+.os-icon {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: background 0.15s;
+  width: 60px;
+}
+.os-icon:hover { background: rgba(57,230,68,0.1); }
+.os-icon .icon-e { font-size: 1.8rem; }
+.os-icon .icon-l {
+  font-size: 0.58rem;
+  color: var(--gb);
+  text-align: center;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.9);
+  font-family: var(--font-body);
+}
+
+/* ── Email App ── */
+.email-app {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #030d03;
+}
+.email-topbar {
+  background: #020a02;
+  border-bottom: 1px solid var(--g5);
+  padding: 7px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.72rem;
+  color: var(--g8);
+  flex-shrink: 0;
+}
+.email-split { display: flex; flex: 1; overflow: hidden; }
+.email-sidebar {
+  width: 90px;
+  border-right: 1px solid var(--g5);
+  padding: 8px 0;
+  flex-shrink: 0;
+}
+.email-folder {
+  padding: 6px 10px;
+  font-size: 0.67rem;
+  color: var(--g6);
+  cursor: pointer;
+  margin-right: 6px;
+  border-radius: 0 12px 12px 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-body);
+}
+.email-folder.active { background: rgba(57,230,68,0.1); color: var(--g9); }
+.email-badge {
+  background: var(--red);
+  color: white;
+  border-radius: 8px;
+  font-size: 0.55rem;
+  padding: 1px 4px;
+  font-weight: 700;
+}
+.email-list { flex: 1; overflow-y: auto; }
+.email-item {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--g3);
+  cursor: pointer;
+  transition: background 0.15s;
+  font-family: var(--font-body);
+}
+.email-item:hover { background: rgba(57,230,68,0.05); }
+.email-item.unread { background: rgba(255,59,59,0.06); }
+.email-item.unread .e-from { color: var(--white); font-weight: 600; }
+.e-from { font-size: 0.72rem; color: var(--g7); margin-bottom: 3px; }
+.e-subj { font-size: 0.7rem; color: var(--g8); margin-bottom: 2px; }
+.e-prev { font-size: 0.65rem; color: var(--g6); }
+.e-time { float: right; font-size: 0.62rem; color: var(--g6); }
+
+/* ── Open Email View ── */
+.email-open {
+  background: #030e03;
+  height: 100%;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-family: var(--font-body);
+}
+.email-open-header { border-bottom: 1px solid var(--g5); padding-bottom: 10px; }
+.email-subj-line {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--amber);
+  margin-bottom: 8px;
+}
+.email-meta { font-size: 0.68rem; color: var(--g6); margin-bottom: 3px; }
+.email-meta strong { color: var(--g8); }
+.red-flag {
+  color: var(--red);
+  background: rgba(255,59,59,0.1);
+  border: 1px solid rgba(255,59,59,0.2);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+}
+
+.email-brand-bar {
+  background: #0a1a0a;
+  border: 1px solid var(--g5);
+  border-radius: 4px 4px 0 0;
+  padding: 8px 12px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--amber);
+  letter-spacing: 1px;
+  border-bottom: 2px solid var(--amber);
+}
+.email-body-text {
+  background: rgba(57,230,68,0.02);
+  border: 1px solid var(--g4);
+  border-radius: 0 0 4px 4px;
+  padding: 12px;
+  font-size: 0.8rem;
+  color: var(--g8);
+  line-height: 1.8;
+}
+.email-body-text p { margin-bottom: 8px; }
+
+.phish-btn {
+  display: inline-block;
+  background: linear-gradient(135deg, #c87a10, var(--amber));
+  color: #000;
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 9px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: none;
+  font-family: var(--font-body);
+  margin-top: 6px;
+  transition: filter 0.15s;
+  position: relative;
+}
+.phish-btn:hover { filter: brightness(1.1); }
+.phish-btn:hover + .url-sniff { display: block; }
+
+.url-sniff {
+  display: none;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--red);
+  margin-top: 5px;
+  padding: 4px 8px;
+  background: rgba(255,59,59,0.07);
+  border: 1px solid rgba(255,59,59,0.2);
+  border-radius: 3px;
+}
+
+/* ── Browser View ── */
+.browser-app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #f5f5f5;
+}
+.browser-chrome-bar {
+  background: #1a2e1a;
+  border-bottom: 1px solid #0a1a0a;
+  padding: 6px 10px;
+  flex-shrink: 0;
+}
+.browser-tabs {
+  display: flex;
+  margin-bottom: 5px;
+}
+.b-tab {
+  background: rgba(255,255,255,0.08);
+  border-radius: 6px 6px 0 0;
+  padding: 4px 12px;
+  font-size: 0.65rem;
+  color: #aaa;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.b-tab.active { background: #f5f5f5; color: #222; }
+.b-tab.active .b-favicon { color: var(--amber); }
+
+.browser-addr-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  border-radius: 20px;
+  padding: 4px 12px;
+  border: 1px solid #ddd;
+}
+.b-lock { font-size: 0.8rem; }
+.b-lock.safe   { color: #2d6a4f; }
+.b-lock.unsafe { color: var(--red); }
+.b-url { font-family: var(--font-mono); font-size: 0.67rem; flex: 1; }
+.url-bad  { color: var(--red); font-weight: 700; }
+.url-ok   { color: #333; }
+
+.browser-content {
+  flex: 1;
+  overflow-y: auto;
+  background: #f5f5f5;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* Fake login card */
+.login-card {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 20px;
+  width: 100%;
+  max-width: 320px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  font-family: sans-serif;
+}
+.login-logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #e47911;
+  margin-bottom: 10px;
+}
+.login-logo span { color: #131a22; }
+.login-title { font-size: 0.95rem; font-weight: 600; color: #111; margin-bottom: 14px; }
+.login-field { margin-bottom: 10px; }
+.login-label { font-size: 0.72rem; font-weight: 600; color: #111; margin-bottom: 4px; display: block; }
+.login-input {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid #888;
+  border-radius: 3px;
+  font-size: 0.8rem;
+  outline: none;
+}
+.login-input:focus { border-color: #e47911; box-shadow: 0 0 0 2px rgba(228,121,17,0.15); }
+.login-submit {
+  width: 100%;
+  background: linear-gradient(#f7dfa5, #f0c14b);
+  border: 1px solid #a88734;
+  border-radius: 3px;
+  padding: 7px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #111;
+  margin-top: 4px;
+}
+.login-submit:hover { background: linear-gradient(#f5d78e, #eeb933); }
+.login-fine { font-size: 0.62rem; color: #767676; margin-top: 8px; line-height: 1.5; }
+.login-fine a { color: #0066c0; cursor: pointer; }
+
+.login-warning {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 3px;
+  padding: 7px;
+  font-size: 0.68rem;
+  color: #856404;
+  margin-bottom: 10px;
+  display: none;
+}
+
+/* Safe result view */
+.safe-result {
+  flex: 1;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.safe-card {
+  text-align: center;
+  font-family: sans-serif;
+  padding: 20px;
+}
+.safe-check { font-size: 3rem; margin-bottom: 10px; }
+.safe-title { font-size: 1rem; font-weight: 600; color: #2d6a4f; margin-bottom: 6px; }
+.safe-body  { font-size: 0.8rem; color: #555; line-height: 1.6; }
+
+/* ── Annotation overlays on victim screen ── */
+.annotation {
+  position: absolute;
+  background: rgba(2,8,2,0.92);
+  border: 1px solid var(--g5);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--g9);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s;
+  z-index: 50;
+  max-width: 200px;
+  line-height: 1.5;
+}
+.annotation.show { opacity: 1; }
+.annotation::before {
+  content: '▶ ';
+  color: var(--amber);
+}
+
+/* ── Controls Bar ── */
+.sim-controls {
+  background: var(--g2);
+  border-top: 1px solid var(--g5);
+  padding: 10px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  min-height: 56px;
+  flex-wrap: wrap;
+}
+
+.narrate {
+  flex: 1;
+  font-size: 0.78rem;
+  color: var(--g7);
+  line-height: 1.6;
+  min-width: 0;
+  font-family: var(--font-body);
+}
+.narrate strong { color: var(--g9); }
+.narrate .warn-txt { color: var(--amber); font-weight: 600; }
+
+/* Buttons */
+.btn {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: 9px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  border: 1px solid;
+  transition: all 0.18s;
+  white-space: nowrap;
+  flex-shrink: 0;
+  letter-spacing: 1px;
+}
+.btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.btn-primary {
+  background: rgba(57,230,68,0.08);
+  border-color: var(--g8);
+  color: var(--g9);
+}
+.btn-primary:hover:not(:disabled) {
+  background: rgba(57,230,68,0.15);
+  box-shadow: var(--glow-sm);
+}
+
+.btn-danger {
+  background: rgba(255,59,59,0.08);
+  border-color: var(--red);
+  color: var(--red);
+}
+.btn-danger:hover { background: rgba(255,59,59,0.16); box-shadow: 0 0 12px rgba(255,59,59,0.3); }
+
+.btn-safe {
+  background: rgba(57,230,68,0.08);
+  border-color: var(--g9);
+  color: var(--g9);
+}
+.btn-safe:hover { background: rgba(57,230,68,0.15); box-shadow: var(--glow-sm); }
+
+.btn-ghost {
+  background: transparent;
+  border-color: var(--g5);
+  color: var(--g6);
+}
+.btn-ghost:hover { border-color: var(--g7); color: var(--g8); }
+
+/* ─────────────────────────────────────
+   EXPLAINER / INFO PANEL
+───────────────────────────────────── */
+#explain-win {
+  right: 20px;
+  top: 20px;
+  width: 300px;
+}
+
+.explain-body {
+  padding: 14px;
+  overflow-y: auto;
+  max-height: 500px;
+}
+.explain-section { margin-bottom: 16px; }
+.explain-h {
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  letter-spacing: 3px;
+  color: var(--g9);
+  text-shadow: var(--glow-sm);
+  margin-bottom: 8px;
+}
+.explain-p {
+  font-size: 0.77rem;
+  color: var(--g7);
+  line-height: 1.7;
+  font-family: var(--font-body);
+  margin-bottom: 7px;
+}
+.explain-p strong { color: var(--gb); }
+
+.flag-list, .tip-list { list-style: none; }
+.flag-list li, .tip-list li {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: 0.75rem;
+  color: var(--g7);
+  margin-bottom: 8px;
+  line-height: 1.5;
+  font-family: var(--font-body);
+}
+.flag-list li::before { content: '⚑'; color: var(--red); flex-shrink: 0; }
+.tip-list  li::before { content: '✓'; color: var(--g9); flex-shrink: 0; font-weight: 700; text-shadow: var(--glow-sm); }
+.flag-list li strong, .tip-list li strong { color: var(--gb); }
+
+/* ─────────────────────────────────────
+   OUTCOME OVERLAY
+───────────────────────────────────── */
+.outcome-overlay {
+  display: none;
+  position: absolute;
+  inset: 0;
+  z-index: 200;
   align-items: center;
   justify-content: center;
   padding: 20px;
+  animation: fade-in 0.4s ease;
 }
-.sim-modal-overlay.open { display: flex; }
-.sim-modal {
-  background: var(--panel);
-  border: 1px solid var(--green-dim);
-  border-radius: 4px;
+@keyframes fade-in { from{opacity:0;transform:scale(0.97)} to{opacity:1;transform:scale(1)} }
+.outcome-overlay.show { display: flex; }
+.outcome-overlay.outcome-safe   { background: rgba(0,10,0,0.94); }
+.outcome-overlay.outcome-unsafe { background: rgba(12,0,0,0.94); }
+
+.outcome-card {
+  background: var(--g1);
+  border-radius: 12px;
+  padding: 28px;
+  max-width: 500px;
   width: 100%;
-  max-width: 700px;
-  max-height: 90vh;
-  overflow: hidden;
+  text-align: center;
+  border: 1px solid var(--g5);
+}
+.outcome-safe   .outcome-card { border-color: var(--g7); box-shadow: var(--glow-md); }
+.outcome-unsafe .outcome-card { border-color: var(--red); box-shadow: 0 0 20px rgba(255,59,59,0.3); }
+
+.outcome-icon  { font-size: 3.5rem; margin-bottom: 12px; }
+.outcome-title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+  padding: 8px 20px;
+  display: inline-block;
+  border-radius: 6px;
+}
+.outcome-safe   .outcome-title { color: var(--g9); border: 1px solid var(--g7); text-shadow: var(--glow-sm); }
+.outcome-unsafe .outcome-title { color: var(--red); border: 1px solid var(--red); }
+
+.outcome-text {
+  font-size: 0.83rem;
+  color: var(--g7);
+  line-height: 1.8;
+  margin: 14px 0;
+  font-family: var(--font-body);
+}
+.outcome-text strong { color: var(--gb); }
+
+.outcome-lesson {
+  background: rgba(57,230,68,0.04);
+  border: 1px solid var(--g5);
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 0.78rem;
+  color: var(--g8);
+  line-height: 1.7;
+  text-align: left;
+  font-family: var(--font-body);
+}
+.outcome-lesson strong { color: var(--g9); display: block; margin-bottom: 4px; }
+
+/* ── Notification Toast ── */
+.toast {
+  position: fixed;
+  top: 16px; right: 16px;
+  background: #071207;
+  border: 1px solid var(--g5);
+  border-left: 3px solid var(--red);
+  border-radius: 8px;
+  padding: 10px 14px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.8);
+  z-index: 9997;
+  width: 260px;
+  display: flex;
+  gap: 10px;
+  transform: translateX(300px);
+  transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+.toast.show { transform: translateX(0); }
+.toast-ico { font-size: 1.3rem; flex-shrink: 0; }
+.toast-app { font-size: 0.58rem; color: var(--g6); letter-spacing: 1px; margin-bottom: 2px; font-family: var(--font-display); }
+.toast-title { font-size: 0.75rem; font-weight: 600; color: var(--white); margin-bottom: 2px; }
+.toast-body  { font-size: 0.67rem; color: var(--g7); line-height: 1.4; }
+
+/* ── Desktop icons (outer desktop) ── */
+.desk-icons {
+  position: absolute;
+  top: 20px; left: 14px;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 0 60px rgba(0,255,65,0.1);
-  animation: slideIn 0.3s ease;
+  gap: 12px;
+  z-index: 10;
 }
-.sim-modal-bar {
-  background: #030f04;
-  border-bottom: 1px solid var(--border);
-  padding: 10px 16px;
+.desk-ico {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
-}
-.sim-dot { width: 10px; height: 10px; border-radius: 50%; }
-.dot-r { background: #ff5f56; } .dot-y { background: #ffbd2e; } .dot-g { background: #27c93f; }
-.sim-modal-title { flex: 1; text-align: center; font-size: 0.7rem; color: var(--green-dim); letter-spacing: 2px; }
-.sim-terminal {
-  flex: 1;
-  overflow-y: auto;
-  padding: 16px;
-  font-family: 'VT323', monospace;
-  font-size: 1.05rem;
-  line-height: 1.5;
-  min-height: 300px;
-  max-height: 400px;
-}
-.sim-terminal .tl { margin-bottom: 1px; }
-.sim-controls {
-  padding: 12px 16px;
-  border-top: 1px solid var(--border);
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.sim-btn {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 0.7rem;
-  letter-spacing: 2px;
-  padding: 7px 16px;
-  border-radius: 2px;
+  gap: 4px;
   cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  width: 68px;
   transition: all 0.2s;
-  border: 1px solid;
 }
-.sim-btn-primary { border-color: var(--green); color: var(--green); background: transparent; }
-.sim-btn-primary:hover { background: var(--green); color: var(--bg); box-shadow: 0 0 16px rgba(0,255,65,0.4); }
-.sim-btn-secondary { border-color: var(--border); color: var(--text-dim); background: transparent; }
-.sim-btn-secondary:hover { border-color: var(--green-dim); color: var(--text); }
-.sim-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-
-.cursor-blink {
-  display: inline-block;
-  width: 9px; height: 15px;
-  background: var(--green);
-  animation: blink 0.9s steps(1) infinite;
-  vertical-align: middle;
-  box-shadow: 0 0 5px var(--green);
+.desk-ico:hover {
+  background: rgba(57,230,68,0.06);
+  border-color: var(--g5);
 }
-@keyframes blink { 50%{opacity:0} }
-
-/* Progress */
-.sim-progress { padding: 0 16px 10px; }
-.sim-prog-bar { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
-.sim-prog-fill { height: 100%; background: linear-gradient(90deg, var(--green-dim), var(--green)); width: 0; transition: width 0.4s ease; box-shadow: 0 0 6px var(--green); }
-
-/* ── RESPONSIVE ── */
-@media(max-width: 600px) {
-  header { padding: 12px 16px; }
-  .hero { padding: 36px 16px 28px; }
-  main { padding: 24px 14px 48px; }
+.desk-ico .die { font-size: 2rem; }
+.desk-ico .dil {
+  font-size: 0.6rem;
+  color: var(--g8);
+  text-align: center;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.9);
+  font-family: var(--font-body);
 }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--g5); border-radius: 2px; }
+
+/* ── Responsive ── */
+@media (max-width: 760px) {
+  #sim-win { left:4px; top:4px; width:calc(100vw - 8px); height:calc(100vh - 56px); }
+  .sim-split { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+  #explain-win { display: none; }
+  .desk-icons { display: none; }
+  .step-label { display: none; }
+}
+
 </style>
 </head>
 <body>
 
-<!-- LIVE SIM MODAL -->
-<div class="sim-modal-overlay" id="simOverlay">
-  <div class="sim-modal">
-    <div class="sim-modal-bar">
-      <div class="sim-dot dot-r"></div>
-      <div class="sim-dot dot-y"></div>
-      <div class="sim-dot dot-g"></div>
-      <div class="sim-modal-title" id="simModalTitle">TERMINAL</div>
-    </div>
-    <div class="sim-terminal" id="simTerminal"></div>
-    <div class="sim-progress"><div class="sim-prog-bar"><div class="sim-prog-fill" id="simProgFill"></div></div></div>
-    <div class="sim-controls">
-      <button class="sim-btn sim-btn-primary" id="btnRunSim" onclick="runSim()">► RUN</button>
-      <button class="sim-btn sim-btn-secondary" onclick="clearSim()">✕ CLEAR</button>
-      <button class="sim-btn sim-btn-secondary" onclick="closeSim()">← CLOSE</button>
-    </div>
+<!-- ════════════════════════════════════
+     EMAIL TOAST NOTIFICATION
+════════════════════════════════════ -->
+<div class="toast" id="toast">
+  <div class="toast-ico">📧</div>
+  <div>
+    <div class="toast-app">NEW EMAIL — JUST NOW</div>
+    <div class="toast-title">Amazon Security Alert</div>
+    <div class="toast-body">Suspicious login from Moscow — action required</div>
   </div>
 </div>
 
-<!-- HEADER -->
-<header>
-  <div class="logo">CYBER<span>SEC</span> GUIDE</div>
-  <div class="header-right">
-    <div class="header-status"><span class="status-dot"></span>KNOW YOUR THREATS</div>
-    <a href="index.html" class="home-btn">⌂ HOMEPAGE</a>
-  </div>
-</header>
+<!-- ════════════════════════════════════
+     DESKTOP
+════════════════════════════════════ -->
+<div class="desktop" id="desktop">
 
-<!-- TICKER -->
-<div class="ticker-wrap">
-  <span class="ticker">
-    ⚠ ALERT: Brute Force — 14M passwords in seconds &nbsp;///&nbsp; ⚠ ALERT: SQL Injection — entire databases stolen &nbsp;///&nbsp; ⚠ ALERT: Phishing — 9% credential harvest rate &nbsp;///&nbsp; ⚠ ALERT: MITM — plaintext HTTP intercepted &nbsp;///&nbsp; ⚠ ALERT: Ransomware — 47,382 files encrypted &nbsp;///&nbsp; ⚠ ALERT: Port Scan — open MongoDB, no auth &nbsp;///&nbsp; ⚠ ALERT: DoS — 500K packets/sec flooding server &nbsp;///&nbsp; ⚠ ALERT: Zero-Day — unpatched CVE exploited &nbsp;///&nbsp; ✔ DEFENSE: Use MFA — blocks 99.9% of automated attacks &nbsp;///&nbsp;
-  </span>
+  <!-- Quick-access desktop icons -->
+  <div class="desk-icons">
+    <div class="desk-ico" onclick="focusWin('sim-win')">
+      <div class="die">💻</div>
+      <div class="dil">Attack Lab</div>
+    </div>
+    <div class="desk-ico" onclick="openWin('explain-win')">
+      <div class="die">📖</div>
+      <div class="dil">Learn More</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════
+       MAIN SIMULATION WINDOW
+  ══════════════════════════════════ -->
+  <div class="window active" id="sim-win" style="left:100px;top:20px;width:calc(100vw - 320px);height:calc(100vh - 88px);">
+    <div class="win-bar" id="sim-bar">
+      <div class="win-dots">
+        <div class="win-dot dot-close" onclick="minimizeWin('sim-win')"></div>
+        <div class="win-dot dot-min"   onclick="minimizeWin('sim-win')"></div>
+        <div class="win-dot dot-max"></div>
+      </div>
+      <div class="win-title">PHISHING ATTACK — LIVE SIMULATION</div>
+    </div>
+
+    <!-- Stage progress strip -->
+    <div class="stage-header">
+      <div class="stage-steps" id="stage-steps">
+        <!-- Built by JS -->
+      </div>
+      <div class="stage-title" id="stage-title" style="flex:1;padding-left:14px;">
+        Press <strong>Start</strong> to begin
+      </div>
+      <div class="edu-badge">EDUCATIONAL · SANDBOXED</div>
+    </div>
+
+    <!-- ── Dual-panel split ── -->
+    <div class="sim-split">
+
+      <!-- LEFT: Attacker's machine -->
+      <div class="panel-attacker">
+        <div class="panel-label label-att">
+          <span class="blink-dot"></span>
+          ATTACKER'S TERMINAL
+        </div>
+
+        <div class="terminal" id="terminal">
+          <div class="t-line t-head">╔══════════════════════════════════════╗</div>
+          <div class="t-line t-head">║  CYBERSIM v3.0 — ATTACK LAB          ║</div>
+          <div class="t-line t-head">╚══════════════════════════════════════╝</div>
+          <div class="t-line t-dim">  Sandboxed · Educational · No real systems</div>
+          <div class="t-line t-dim"> </div>
+          <div class="t-line"><span class="t-prompt">attacker@kali:~$ </span><span class="cursor"></span></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Victim's machine -->
+      <div class="panel-victim">
+        <div class="panel-label label-vic">
+          <span class="blink-dot"></span>
+          VICTIM'S MACHINE — sarah@techcorp.com
+        </div>
+
+        <div class="victim-vm">
+
+          <!-- VIEW 0: Idle splash -->
+          <div class="v-view active" id="v-idle">
+            <div class="v-idle">
+              <div class="idle-monitor">🖥️</div>
+              <div class="idle-text">VICTIM DESKTOP</div>
+              <div class="idle-sub">waiting for simulation to begin...</div>
+            </div>
+          </div>
+
+          <!-- VIEW 1: Victim OS desktop -->
+          <div class="v-view" id="v-desktop">
+            <div class="fake-os">
+              <div class="fake-os-bar">
+                <div class="fake-os-start">⊞ START</div>
+                <div class="fake-os-clock" id="os-clock">11:42</div>
+              </div>
+              <div class="fake-os-desktop">
+                <div class="os-icon" style="top:20px;left:20px;" onclick="focusWin('sim-win')">
+                  <div class="icon-e">📧</div>
+                  <div class="icon-l">Mail</div>
+                </div>
+                <div class="os-icon" style="top:20px;left:88px;">
+                  <div class="icon-e">📁</div>
+                  <div class="icon-l">Files</div>
+                </div>
+                <div class="os-icon" style="top:100px;left:20px;">
+                  <div class="icon-e">🌐</div>
+                  <div class="icon-l">Browser</div>
+                </div>
+                <!-- Annotation: shows "You've got mail!" -->
+                <div class="annotation" id="ann-mail" style="top:60px;left:82px;">
+                  New email arrived! Watch what happens...
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- VIEW 2: Email inbox -->
+          <div class="v-view" id="v-inbox">
+            <div class="email-app">
+              <div class="email-topbar">📧 Mail — sarah.johnson@techcorp.com</div>
+              <div class="email-split">
+                <div class="email-sidebar">
+                  <div class="email-folder active">📥 Inbox <span class="email-badge">1</span></div>
+                  <div class="email-folder">📤 Sent</div>
+                  <div class="email-folder">🗑 Trash</div>
+                </div>
+                <div class="email-list">
+                  <!-- THE phishing email — clicking advances simulation -->
+                  <div class="email-item unread" id="phish-email-item" onclick="clickEmail()">
+                    <div class="e-time">Just now</div>
+                    <div class="e-from">Amazon Security &lt;security@amaz0n.com&gt;</div>
+                    <div class="e-subj">⚠️ URGENT — Suspicious $239 charge on your account</div>
+                    <div class="e-prev">We detected unusual activity. Verify your account now to avoid suspension…</div>
+                  </div>
+                  <!-- Normal emails for realism -->
+                  <div class="email-item">
+                    <div class="e-time">9:15 AM</div>
+                    <div class="e-from">HR Department</div>
+                    <div class="e-subj">Holiday schedule reminder — please review</div>
+                  </div>
+                  <div class="email-item">
+                    <div class="e-time">Yesterday</div>
+                    <div class="e-from">GitHub</div>
+                    <div class="e-subj">Your pull request #47 was merged ✓</div>
+                  </div>
+                  <div class="email-item">
+                    <div class="e-time">Monday</div>
+                    <div class="e-from">Zoom</div>
+                    <div class="e-subj">Recording available: Q4 Planning Mtg</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- VIEW 3: Email open -->
+          <div class="v-view" id="v-email-open">
+            <div class="email-open">
+              <div class="email-open-header">
+                <div class="email-subj-line">⚠️ URGENT — Suspicious $239 charge on your account</div>
+                <div class="email-meta"><strong>From:</strong> Amazon Security &lt;<span class="red-flag">security@amaz0n.com</span>&gt;</div>
+                <div class="email-meta"><strong>To:</strong> sarah.johnson@techcorp.com</div>
+                <div class="email-meta"><strong>Time:</strong> Today 11:42 AM</div>
+              </div>
+              <div class="email-brand-bar">amazon</div>
+              <div class="email-body-text">
+                <p>Dear Customer,</p>
+                <p>We detected a <strong>suspicious $239.00 purchase</strong> from an unrecognized device in <strong>Moscow, Russia</strong>.</p>
+                <p>Your account will be <strong>suspended within 24 hours</strong> unless you verify your identity immediately.</p>
+                <button class="phish-btn" id="phish-btn" onclick="chooseUnsafe()">▶ Secure My Account Now</button>
+                <div class="url-sniff">→ Destination: amaz0n-secure-login.com/verify?id=x9f2</div>
+              </div>
+              <!-- Annotation pointing at the fake domain -->
+              <div class="annotation show" id="ann-domain" style="position:relative;margin-top:8px;opacity:1;">
+                SPOT IT: "amaz<span style="color:var(--red);font-weight:bold;">0</span>n" — that's a ZERO, not the letter O. This is NOT Amazon.
+              </div>
+            </div>
+          </div>
+
+          <!-- VIEW 4a: Safe browser (real Amazon) -->
+          <div class="v-view" id="v-safe-browser">
+            <div class="browser-app">
+              <div class="browser-chrome-bar">
+                <div class="browser-tabs">
+                  <div class="b-tab active"><span class="b-favicon">🔒</span> Amazon.com — Sign In</div>
+                </div>
+                <div class="browser-addr-bar">
+                  <span class="b-lock safe">🔒</span>
+                  <span class="b-url"><span class="url-ok">https://www.amazon.com/ap/signin</span></span>
+                </div>
+              </div>
+              <div class="safe-result">
+                <div class="safe-card">
+                  <div class="safe-check">✅</div>
+                  <div class="safe-title">No suspicious activity found</div>
+                  <div class="safe-body">
+                    You went directly to <strong>amazon.com</strong>.<br>
+                    The email was fake — your account was never in danger.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- VIEW 4b: Fake Amazon login page -->
+          <div class="v-view" id="v-fake-browser">
+            <div class="browser-app">
+              <div class="browser-chrome-bar">
+                <div class="browser-tabs">
+                  <div class="b-tab active"><span class="b-favicon" style="color:var(--red)">⚠️</span> Verify Amazon Account</div>
+                </div>
+                <div class="browser-addr-bar">
+                  <span class="b-lock unsafe">⚠️</span>
+                  <span class="b-url"><span class="url-bad">amaz0n</span><span class="url-ok">-secure-login.com/verify</span></span>
+                </div>
+              </div>
+              <div class="browser-content">
+                <div class="login-card">
+                  <div class="login-warning" id="login-warning">
+                    ⚠️ SIMULATION NOTE: This is the fake site. In a real attack, anything typed here goes straight to the attacker.
+                  </div>
+                  <div class="login-logo">amazon<span>.com</span></div>
+                  <div class="login-title">Sign in to secure your account</div>
+                  <div class="login-field">
+                    <label class="login-label">Email or phone</label>
+                    <input class="login-input" type="email" id="fake-email" placeholder="Enter your email">
+                  </div>
+                  <div class="login-field">
+                    <label class="login-label">Password</label>
+                    <input class="login-input" type="password" id="fake-pass" placeholder="Enter your password">
+                  </div>
+                  <button class="login-submit" onclick="submitFakeCreds()">Continue</button>
+                  <div class="login-fine">By continuing you agree to Amazon's <a>Conditions of Use</a>.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /victim-vm -->
+      </div><!-- /panel-victim -->
+
+      <!-- Outcome overlay sits inside the split -->
+      <div class="outcome-overlay" id="outcome-overlay">
+        <div class="outcome-card">
+          <div class="outcome-icon"  id="outcome-icon"></div>
+          <div class="outcome-title" id="outcome-title"></div>
+          <div class="outcome-text"  id="outcome-text"></div>
+          <div class="outcome-lesson" id="outcome-lesson"></div>
+          <br>
+          <button class="btn btn-primary" onclick="resetSim()">↺ Run Simulation Again</button>
+        </div>
+      </div>
+
+    </div><!-- /sim-split -->
+
+    <!-- Bottom controls bar -->
+    <div class="sim-controls" id="sim-controls">
+      <div class="narrate" id="narrate">
+        Watch a real phishing attack happen step by step — from the attacker's keyboard to the victim's screen. <strong>Press Start.</strong>
+      </div>
+      <button class="btn btn-primary"  id="btn-next"  onclick="advance()">▶ START SIMULATION</button>
+      <button class="btn btn-ghost"    id="btn-reset" onclick="resetSim()" style="display:none">↺ RESET</button>
+    </div>
+  </div><!-- /sim-win -->
+
+
+  <!-- ══════════════════════════════════
+       EXPLAINER WINDOW
+  ══════════════════════════════════ -->
+  <div class="window" id="explain-win" style="right:14px;top:20px;width:290px;">
+    <div class="win-bar" id="explain-bar">
+      <div class="win-dots">
+        <div class="win-dot dot-close" onclick="minimizeWin('explain-win')"></div>
+        <div class="win-dot dot-min"   onclick="minimizeWin('explain-win')"></div>
+        <div class="win-dot dot-max"></div>
+      </div>
+      <div class="win-title">WHAT IS PHISHING?</div>
+    </div>
+    <div class="win-body">
+      <div class="explain-body">
+
+        <div class="explain-section">
+          <div class="explain-h">THE ATTACK</div>
+          <p class="explain-p">
+            A <strong>phishing attack</strong> is a fake email (or text, call, or website)
+            that pretends to be a trusted company like Amazon, your bank, or Apple —
+            to <strong>trick you into handing over your password</strong>.
+          </p>
+          <p class="explain-p">
+            No technical hacking needed. Just a convincing lie.
+            It's the <strong>#1 way accounts get broken into</strong>.
+          </p>
+        </div>
+
+        <div class="explain-section">
+          <div class="explain-h">WHY IT WORKS</div>
+          <p class="explain-p">
+            Every phishing email uses three psychological tricks:
+          </p>
+          <p class="explain-p">
+            <strong>URGENCY</strong> → "Act in 24 hours or lose access!"<br>
+            <strong>FEAR</strong>    → "Unauthorized $239 charge detected"<br>
+            <strong>AUTHORITY</strong> → "Your account team at Amazon"
+          </p>
+          <p class="explain-p">These combine to make you click before you think.</p>
+        </div>
+
+        <div class="explain-section">
+          <div class="explain-h">🚩 RED FLAGS TO SPOT</div>
+          <ul class="flag-list">
+            <li>The sender email is <strong>slightly wrong</strong> — "amaz0n" has a zero</li>
+            <li>Subject is <strong>urgent or scary</strong> — "Act now!" or "Account suspended"</li>
+            <li>Greets you as <strong>"Dear Customer"</strong>, not your real name</li>
+            <li>The link goes to a <strong>strange URL</strong> — hover it before clicking</li>
+            <li>Asks for your <strong>password</strong> — real companies never do this by email</li>
+          </ul>
+        </div>
+
+        <div class="explain-section">
+          <div class="explain-h">🛡 HOW TO STAY SAFE</div>
+          <ul class="tip-list">
+            <li><strong>Never click email links.</strong> Go directly to the website yourself.</li>
+            <li><strong>Check every character</strong> of the sender's email address.</li>
+            <li><strong>Use a password manager</strong> — it won't fill in on a fake site.</li>
+            <li><strong>Turn on 2-factor login</strong> — stolen passwords still can't get in.</li>
+            <li><strong>When unsure, call</strong> the company on their real number.</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div><!-- /desktop -->
+
+<!-- ════════════════════════════════════
+     TASKBAR
+════════════════════════════════════ -->
+<div class="taskbar">
+  <div class="tb-brand">CYBER<em>SIM</em></div>
+  <div class="tb-windows">
+    <button class="tb-btn active" id="tb-sim"     onclick="toggleWin('sim-win','tb-sim')">💻 Attack Lab</button>
+    <button class="tb-btn"        id="tb-explain" onclick="toggleWin('explain-win','tb-explain')">📖 Learn More</button>
+  </div>
+  <div class="tb-right">
+    <div class="tb-status">
+      <div class="status-dot" id="status-dot"></div>
+      <span id="status-text">SANDBOX READY</span>
+    </div>
+    <div class="tb-clock">
+      <span id="clock-time">00:00</span>
+      <small id="clock-date">Mon Jan 1</small>
+    </div>
+  </div>
 </div>
-
-<!-- HERO -->
-<div class="hero">
-  <div class="hero-label">// CYBERSECURITY EDUCATION GUIDE //</div>
-  <h1>KNOW YOUR <span>THREATS</span></h1>
-  <p>A field guide to the most common cyberattacks — how they work, what to watch for, and how to defend yourself. Knowledge is your first line of defense.</p>
-  <div class="legend">
-    <div class="legend-item"><span class="legend-badge badge-critical">CRITICAL</span> Immediate risk of full compromise</div>
-    <div class="legend-item"><span class="legend-badge badge-high">HIGH</span> Significant data or access loss</div>
-    <div class="legend-item"><span class="legend-badge badge-medium">MEDIUM</span> Reconnaissance or partial exposure</div>
-    <div class="legend-item"><span class="legend-badge badge-low">LOW</span> Indirect or preparatory threat</div>
-  </div>
-</div>
-
-<main>
-
-  <!-- QUICK NAV -->
-  <div class="quick-nav">
-    <div class="quick-nav-label">// JUMP TO ATTACK TYPE</div>
-    <a href="#bruteforce">🔓 Brute Force</a>
-    <a href="#sqli">💉 SQL Injection</a>
-    <a href="#phishing">🎣 Phishing</a>
-    <a href="#mitm">👁️ Man-in-the-Middle</a>
-    <a href="#ransomware">🔒 Ransomware</a>
-    <a href="#portscan">📡 Port Scanning</a>
-    <a href="#dos">💥 DoS / DDoS</a>
-    <a href="#zeroday">☢️ Zero-Day</a>
-  </div>
-
-  <div class="section-header">
-    <span class="section-label">// ATTACK THREAT LIBRARY</span>
-    <div class="section-line"></div>
-  </div>
-
-  <!-- ═══════════════════════════════════════════════════════ -->
-  <!-- 1. BRUTE FORCE -->
-  <!-- ═══════════════════════════════════════════════════════ -->
-  <div class="attack-guide" id="bruteforce">
-    <div class="alert-bar alert-bar-critical">
-      <div class="alert-left">
-        <span class="alert-icon">🔓</span>
-        <span class="alert-type-label">■ CRITICAL THREAT — ALERT ID: BF-001</span>
-      </div>
-      <div class="alert-right">
-        <span class="alert-id">CATEGORY: CREDENTIAL ATTACK</span>
-        <button class="expand-btn" onclick="toggleCard('bruteforce-content', this)">▼ EXPAND</button>
-      </div>
-    </div>
-    <div class="card-header" onclick="toggleCard('bruteforce-content', null, this)">
-      <div class="card-icon-big">🔓</div>
-      <div class="card-title-block">
-        <div class="card-title">BRUTE FORCE ATTACK</div>
-        <div class="card-subtitle">An automated attack that tries thousands of username/password combinations per second until one works. Like a robot trying every key on a keyring.</div>
-      </div>
-    </div>
-    <div class="card-content" id="bruteforce-content">
-      <div class="tab-bar">
-        <button class="tab-btn active" onclick="switchTab('bf', 'what', this)">HOW IT WORKS</button>
-        <button class="tab-btn" onclick="switchTab('bf', 'sim', this)">LIVE SIM</button>
-        <button class="tab-btn" onclick="switchTab('bf', 'alerts', this)">ALERTS</button>
-        <button class="tab-btn" onclick="switchTab('bf', 'defend', this)">DEFENSES</button>
-      </div>
-
-      <div class="tab-panel active" id="bf-what">
-        <p class="what-text">Attackers use automated tools (like Hydra) that can test <strong>millions of passwords per hour</strong>. They often use lists of the most common passwords and passwords leaked in previous data breaches. A weak password like "Password1!" can be cracked in seconds.</p>
-        <ol class="steps-list">
-          <li><strong>Target selection</strong> — Attacker identifies a login form (website, SSH, email, VPN).</li>
-          <li><strong>Wordlist loaded</strong> — Tool loads a dictionary of common/leaked passwords (rockyou.txt = 14 million entries).</li>
-          <li><strong>Automated fire</strong> — Thousands of login attempts made per second until a match is found.</li>
-          <li><strong>Session obtained</strong> — On success, attacker gets a live session cookie or auth token.</li>
-          <li><strong>Lateral movement</strong> — If the same password is reused elsewhere, the attacker escalates access.</li>
-        </ol>
-        <div class="mini-terminal">
-          <div class="mt-line"><span class="mt-prompt">root@kali:~# </span><span class="mt-cmd">hydra -l admin -P rockyou.txt 192.168.1.105 http-post</span></div>
-          <div class="mt-line"><span class="mt-out">[ATTEMPT] admin:password → 401</span></div>
-          <div class="mt-line"><span class="mt-out">[ATTEMPT] admin:123456 → 401</span></div>
-          <div class="mt-line"><span class="mt-out">[ATTEMPT] admin:qwerty → 401</span></div>
-          <div class="mt-line"><span class="mt-warn">[ATTEMPT] admin:P@ssw0rd! → checking...</span></div>
-          <div class="mt-line"><span class="mt-ok">[✓ SUCCESS] admin:P@ssw0rd! → 200 OK — SESSION OBTAINED</span></div>
-        </div>
-        <div class="realworld">
-          <div class="realworld-label">// REAL WORLD EXAMPLE</div>
-          <p>In 2022, over 23,000 PayPal accounts were compromised through credential stuffing — a form of brute force using previously leaked email/password combos from other breaches. Users who reused passwords elsewhere were the primary victims.</p>
-        </div>
-      </div>
-
-      <div class="tab-panel" id="bf-sim">
-        <p class="what-text" style="margin-bottom:12px">Watch a simulated brute force attack run in real time. No real systems are touched — this is a sandboxed educational demo.</p>
-        <button class="run-sim-btn" onclick="openSim('bruteforce')">► LAUNCH TERMINAL SIMULATION</button>
-      </div>
-
-      <div class="tab-panel" id="bf-alerts">
-        <div class="alert-example alert-c">
-          <div class="alert-icon-sm">🚨</div>
-          <div class="alert-content">
-            <div class="alert-title-sm">CRITICAL ALERT</div>
-            Multiple failed login attempts from single IP: 192.168.1.9 — 847 attempts in 60 seconds on /admin/login. Account "admin" locked.
-          </div>
-        </div>
-        <div class="alert-example alert-w">
-          <div class="alert-icon-sm">⚠</div>
-          <div class="alert-content">
-            <div class="alert-title-sm">HIGH WARNING</div>
-            Login attempt using known leaked credential hash detected. Password appears in Have I Been Pwned database (breach count: 3).
-          </div>
-        </div>
-        <div class="alert-example alert-i">
-          <div class="alert-icon-sm">ℹ</div>
-          <div class="alert-content">
-            <div class="alert-title-sm">INFO</div>
-            User "jsmith" logged in from new IP: 45.152.101.22 (Romania). Previous login was from New York, USA, 2 hours ago. Impossible travel detected.
-          </div>
-        </div>
-        <ul class="redflag-list" style="margin-top:16px">
-          <li>Sudden spike in failed login attempts in your logs</li>
-          <li>Account lockout emails you didn't trigger</li>
-          <li>Login notification from an unrecognized location or device</li>
-          <li>Password manager flagging your password as "leaked"</li>
-        </ul>
-      </div>
-
-      <div class="tab-panel" id="bf-defend">
-        <div class="defense-grid">
-          <div class="defense-tile">
-            <div class="defense-tile-title">USE STRONG UNIQUE PASSWORDS</div>
-            At least 12 characters with mixed symbols. Use a <strong>password manager</strong> — never reuse passwords across sites.
-          </div>
-          <div class="defense-tile">
-            <div class="defense-tile-title">ENABLE MFA</div>
-            Multi-factor authentication blocks 99.9% of automated credential attacks even if your password is known.
-          </div>
-          <div class="defense-tile">
-            <div class="defense-tile-title">ACCOUNT LOCKOUT POLICY</div>
-            Lock accounts after 5–10 failed attempts. Add progressive delays between attempts.
-          </div>
-          <div class="defense-tile">
-            <div class="defense-tile-title">RATE LIMITING + CAPTCHA</div>
-            Limit login attempts per IP per minute. CAPTCHA challenges stop automated tools immediately.
-          </div>
-          <div class="defense-tile">
-            <div class="defense-tile-title">MONITOR LOGIN LOGS</div>
-            Set alerts for unusual login volumes, new locations, or off-hours access patterns.
-          </div>
-          <div class="defense-tile">
-            <div class="defense-tile-title">CHECK HAVE I BEEN PWNED</div>
-            Visit <strong>haveibeenpwned.com</strong> regularly to see if your credentials have appeared in known breaches.
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════════════════════════════════ -->
-  <!-- 2. SQL INJECTION -->
-  <!-- ═══════════════════════════════════════════════════════ -->
-  <div class="attack-guide" id="sqli">
-    <div class="alert-bar alert-bar-critical">
-      <div class="alert-left">
-        <span class="alert-icon">💉</span>
-        <span class="alert-type-label">■ CRITICAL THREAT — ALERT ID: SQLI-002</span>
-      </div>
-      <div class="alert-right">
-        <span class="alert-id">CATEGORY: WEB APPLICATION ATTACK</span>
-        <button class="expand-btn" onclick="toggleCard('sqli-content', this)">▼ EXPAND</button>
-      </div>
-    </div>
-    <div class="card-header" onclick="toggleCard('sqli-content', null, this)">
-      <div class="card-icon-big">💉</div>
-      <div class="card-title-block">
-        <div class="card-title">SQL INJECTION (SQLi)</div>
-        <div class="card-subtitle">Attackers insert malicious database commands into input fields on a website. If the site isn't protected, it executes those commands — handing over your entire database.</div>
-      </div>
-    </div>
-    <div class="card-content" id="sqli-content">
-      <div class="tab-bar">
-        <button class="tab-btn active" onclick="switchTab('sq', 'what', this)">HOW IT WORKS</button>
-        <button class="tab-btn" onclick="switchTab('sq', 'sim', this)">LIVE SIM</button>
-        <button class="tab-btn" onclick="switchTab('sq', 'alerts', this)">ALERTS</button>
-        <button class="tab-btn" onclick="switchTab('sq', 'defend', this)">DEFENSES</button>
-      </div>
-      <div class="tab-panel active" id="sq-what">
-        <p class="what-text">Imagine a login form that asks for a username. Normally it checks: <em>"find user where name = 'alice'"</em>. An attacker types: <em>alice' OR '1'='1</em> — the database now runs: <em>"find user where name = 'alice' OR 1=1"</em> — which is always true. Login bypassed.</p>
-        <ol class="steps-list">
-          <li><strong>Find an input field</strong> — Login boxes, search bars, URL parameters, anything that talks to a database.</li>
-          <li><strong>Test for injection</strong> — Enter a single quote <code>'</code>. If the site errors, it's likely vulnerable.</li>
-          <li><strong>Inject the payload</strong> — Craft SQL that bypasses login or dumps data.</li>
-          <li><strong>Exfiltrate data</strong> — Extract usernames, hashed passwords, emails, credit cards — the entire table.</li>
-          <li><strong>Escalate</strong> — On some systems, execute OS commands directly from the database.</li>
-        </ol>
-        <div class="mini-terminal">
-          <div class="mt-line"><span class="mt-warn">Normal query: SELECT * FROM users WHERE user='alice' AND pass='...'</span></div>
-          <div class="mt-line"><span class="mt-err">Injected:     SELECT * FROM users WHERE user='alice' OR '1'='1'--'</span></div>
-          <div class="mt-line"><span class="mt-out">Result: Returns ALL rows — authentication bypassed</span></div>
-          <div class="mt-line"></div>
-          <div class="mt-line"><span class="mt-ok">[DUMPED] 847 user records exfiltrated from users_production</span></div>
-        </div>
-        <div class="realworld">
-          <div class="realworld-label">// REAL WORLD EXAMPLE</div>
-          <p>The 2008 Heartland Payment Systems breach (130M credit card records) began with SQL injection. It remains one of the largest data breaches in US history. SQLi consistently ranks #1 or #2 in OWASP's Top 10 web vulnerabilities every year.</p>
-        </div>
-      </div>
-      <div class="tab-panel" id="sq-sim">
-        <p class="what-text" style="margin-bottom:12px">Watch a simulated SQLi attack using sqlmap — showing how an automated tool extracts an entire database through a single vulnerable parameter.</p>
-        <button class="run-sim-btn" onclick="openSim('sqli')">► LAUNCH TERMINAL SIMULATION</button>
-      </div>
-      <div class="tab-panel" id="sq-alerts">
-        <div class="alert-example alert-c">
-          <div class="alert-icon-sm">🚨</div>
-          <div class="alert-content">
-            <div class="alert-title-sm">CRITICAL ALERT</div>
-            WAF detected SQL injection pattern in POST parameter "username": <code>' OR '1'='1'--</code>. Request blocked. Source IP: 185.220.101.34.
-          </div>
-        </div>
-        <div class="alert-example alert-w">
-          <div class="alert-icon-sm">⚠</div>
-          <div class="alert-content">
-            <div class="alert-title-sm">HIGH WARNING</div>
-            Abnormal database query volume: 2,400 SELECT statements in 10 seconds from single session. Possible automated dump in progress.
-          </div>
-        </div>
-        <div class="alert-example alert-i">
-          <div class="alert-icon-sm">ℹ</div>
-          <div class="alert-content">
-            <div class="alert-title-sm">INFO</div>
-            Database error message exposed in HTTP response: "You have an error in your SQL syntax near '1=1'..." — reveals injection point to attackers.
-          </div>
-        </div>
-        <ul class="redflag-list" style="margin-top:16px">
-          <li>Error messages on a web form containing SQL syntax</li>
-          <li>Odd characters like <code>' " ; --</code> accepted in input fields without errors</li>
-          <li>Extremely slow search results (time-based blind SQLi)</li>
-          <li>Unexpected data appearing in your own search results</li>
-        </ul>
-      </div>
-      <div class="tab-panel" id="sq-defend">
-        <div class="defense-grid">
-          <div class="defense-tile"><div class="defense-tile-title">PARAMETERIZED QUERIES</div>The #1 fix. Use prepared statements — input is treated as data, never as executable SQL code.</div>
-          <div class="defense-tile"><div class="defense-tile-title">INPUT VALIDATION</div>Reject special characters like <strong>' " ; --</strong> in fields that don't need them. Whitelist expected formats.</div>
-          <div class="defense-tile"><div class="defense-tile-title">WEB APPLICATION FIREWALL</div>A WAF automatically detects and blocks known SQLi patterns before they reach your database.</div>
-          <div class="defense-tile"><div class="defense-tile-title">LEAST PRIVILEGE DB ACCOUNTS</div>Your web app's DB user should only have SELECT access — not DROP, CREATE, or EXECUTE.</div>
-          <div class="defense-tile"><div class="defense-tile-title">HIDE ERROR MESSAGES</div>Never show raw database errors to users. Log them server-side only — errors reveal your DB structure to attackers.</div>
-          <div class="defense-tile"><div class="defense-tile-title">USE AN ORM</div>Object-Relational Mappers (like Django ORM, Hibernate) handle query building safely, eliminating most SQLi risks.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════════════════════════════════ -->
-  <!-- 3. PHISHING -->
-  <!-- ═══════════════════════════════════════════════════════ -->
-  <div class="attack-guide" id="phishing">
-    <div class="alert-bar alert-bar-high">
-      <div class="alert-left">
-        <span class="alert-icon">🎣</span>
-        <span class="alert-type-label">▲ HIGH THREAT — ALERT ID: PH-003</span>
-      </div>
-      <div class="alert-right">
-        <span class="alert-id">CATEGORY: SOCIAL ENGINEERING</span>
-        <button class="expand-btn" onclick="toggleCard('phishing-content', this)">▼ EXPAND</button>
-      </div>
-    </div>
-    <div class="card-header" onclick="toggleCard('phishing-content', null, this)">
-      <div class="card-icon-big">🎣</div>
-      <div class="card-title-block">
-        <div class="card-title">PHISHING ATTACK</div>
-        <div class="card-subtitle">Deceptive emails, texts, or calls that impersonate trusted organizations to trick you into clicking malicious links or revealing credentials. The #1 attack vector today.</div>
-      </div>
-    </div>
-    <div class="card-content" id="phishing-content">
-      <div class="tab-bar">
-        <button class="tab-btn active" onclick="switchTab('ph', 'what', this)">HOW IT WORKS</button>
-        <button class="tab-btn" onclick="switchTab('ph', 'sim', this)">LIVE SIM</button>
-        <button class="tab-btn" onclick="switchTab('ph', 'alerts', this)">ALERTS + RED FLAGS</button>
-        <button class="tab-btn" onclick="switchTab('ph', 'defend', this)">DEFENSES</button>
-      </div>
-      <div class="tab-panel active" id="ph-what">
-        <p class="what-text">Phishing exploits <strong>human trust</strong> rather than software bugs. An email appearing to be from your bank or IT department directs you to a fake login page that captures your credentials. Spear-phishing targets specific individuals with personalized details, making it far more convincing.</p>
-        <ol class="steps-list">
-          <li><strong>Research the target</strong> — Attacker collects details from LinkedIn, company website, social media to personalize the lure.</li>
-          <li><strong>Spoof the sender</strong> — Email domain is typosquatted: <em>corp-secure.com</em> vs <em>c0rp-secure.com</em>. Looks identical at a glance.</li>
-          <li><strong>Create urgency</strong> — "Your account will be suspended in 24 hours." Panic bypasses critical thinking.</li>
-          <li><strong>Fake login page</strong> — Victim clicks and enters credentials on a pixel-perfect copy of the real site.</li>
-          <li><strong>Harvest & use</strong> — Attacker logs in immediately before the victim notices. May install malware too.</li>
-        </ol>
-        <div class="realworld">
-          <div class="realworld-label">// REAL WORLD EXAMPLE</div>
-          <p>The 2016 DNC hack began with a single spear-phishing email to campaign chairman John Podesta. A staffer misclassified the email as "legitimate" — one click led to 50,000 emails being exfiltrated, impacting a presidential election.</p>
-        </div>
-      </div>
-      <div class="tab-panel" id="ph-sim">
-        <p class="what-text" style="margin-bottom:12px">Watch a simulated phishing campaign — showing how attackers send spoofed emails and harvest credentials from a percentage of targets.</p>
-        <button class="run-sim-btn" onclick="openSim('phishing')">► LAUNCH TERMINAL SIMULATION</button>
-      </div>
-      <div class="tab-panel" id="ph-alerts">
-        <div class="alert-example alert-c">
-          <div class="alert-icon-sm">🚨</div><div class="alert-content"><div class="alert-title-sm">CRITICAL ALERT</div>Employee credentials submitted to non-company domain. User "janderson" typed password into <strong>c0rp-secure.com</strong> (not corp.com). Immediate password reset required.</div>
-        </div>
-        <div class="alert-example alert-w">
-          <div class="alert-icon-sm">⚠</div><div class="alert-content"><div class="alert-title-sm">HIGH WARNING</div>Email from "it-helpdesk@c0rp-secure.com" failed DMARC check. Subject: [URGENT] Password Reset Required. Contains link to external domain. Quarantined.</div>
-        </div>
-        <div class="alert-example alert-i">
-          <div class="alert-icon-sm">ℹ</div><div class="alert-content"><div class="alert-title-sm">INFO</div>18% click rate on simulated phishing exercise targeting Finance team. Industry average: 7–15%. Security awareness training recommended.</div>
-        </div>
-        <ul class="redflag-list" style="margin-top:16px">
-          <li>Urgent or threatening subject line ("Act now or your account will close")</li>
-          <li>Sender email doesn't match the organization's actual domain — look carefully</li>
-          <li>Hovering over a link shows a URL completely different from where it claims to go</li>
-          <li>Generic greeting ("Dear Customer") from a company that knows your name</li>
-          <li>Requests personal info, passwords, or payment that a real company would never email for</li>
-          <li>Spelling/grammar errors or off-brand logo that looks slightly wrong</li>
-        </ul>
-      </div>
-      <div class="tab-panel" id="ph-defend">
-        <div class="defense-grid">
-          <div class="defense-tile"><div class="defense-tile-title">SLOW DOWN + VERIFY</div>Never click links in unexpected emails. Go directly to the website by typing the URL yourself or using bookmarks.</div>
-          <div class="defense-tile"><div class="defense-tile-title">SPF / DKIM / DMARC</div>Email authentication protocols that verify the sender is who they claim to be. Every org should have these configured.</div>
-          <div class="defense-tile"><div class="defense-tile-title">PASSWORD MANAGERS DETECT FAKES</div>A good password manager only autofills on the real domain — it won't fill on <em>c0rp-secure.com</em>, alerting you instantly.</div>
-          <div class="defense-tile"><div class="defense-tile-title">SECURITY AWARENESS TRAINING</div>Run regular simulated phishing exercises. Employees who learn to spot fakes are your best defense layer.</div>
-          <div class="defense-tile"><div class="defense-tile-title">REPORT SUSPICIOUS EMAILS</div>Use your email client's "Report Phishing" button. This feeds back into spam filters protecting everyone.</div>
-          <div class="defense-tile"><div class="defense-tile-title">MFA AS SAFETY NET</div>Even if credentials are stolen, MFA means the attacker still can't log in without your second factor.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════════════════════════════════ -->
-  <!-- 4. MITM -->
-  <!-- ═══════════════════════════════════════════════════════ -->
-  <div class="attack-guide" id="mitm">
-    <div class="alert-bar alert-bar-high">
-      <div class="alert-left"><span class="alert-icon">👁️</span><span class="alert-type-label">▲ HIGH THREAT — ALERT ID: MITM-004</span></div>
-      <div class="alert-right"><span class="alert-id">CATEGORY: NETWORK INTERCEPTION</span><button class="expand-btn" onclick="toggleCard('mitm-content', this)">▼ EXPAND</button></div>
-    </div>
-    <div class="card-header" onclick="toggleCard('mitm-content', null, this)">
-      <div class="card-icon-big">👁️</div>
-      <div class="card-title-block">
-        <div class="card-title">MAN-IN-THE-MIDDLE (MITM)</div>
-        <div class="card-subtitle">The attacker secretly positions themselves between you and a server — reading or modifying every message you exchange. Like someone secretly opening your mail, reading it, then resealing it.</div>
-      </div>
-    </div>
-    <div class="card-content" id="mitm-content">
-      <div class="tab-bar">
-        <button class="tab-btn active" onclick="switchTab('mi', 'what', this)">HOW IT WORKS</button>
-        <button class="tab-btn" onclick="switchTab('mi', 'sim', this)">LIVE SIM</button>
-        <button class="tab-btn" onclick="switchTab('mi', 'alerts', this)">ALERTS</button>
-        <button class="tab-btn" onclick="switchTab('mi', 'defend', this)">DEFENSES</button>
-      </div>
-      <div class="tab-panel active" id="mi-what">
-        <p class="what-text">Most common on public Wi-Fi. The attacker uses <strong>ARP spoofing</strong> to convince your device that they are the router. All your traffic flows through them. Unencrypted (HTTP) traffic is fully readable. They may also strip HTTPS (SSL stripping) to downgrade your connection.</p>
-        <ol class="steps-list">
-          <li><strong>Join the same network</strong> — Attacker connects to the same public Wi-Fi as the victim, or creates a rogue "Free_Airport_WiFi" hotspot.</li>
-          <li><strong>ARP poisoning</strong> — Sends fake ARP broadcasts telling victim's device: "I am the router." Victim's traffic now routes through attacker.</li>
-          <li><strong>Passive sniffing</strong> — All HTTP traffic is fully readable. Passwords, session cookies, anything unencrypted is captured.</li>
-          <li><strong>SSL stripping</strong> — Intercepts HTTPS upgrades so the victim's browser uses plain HTTP, exposing encrypted content.</li>
-          <li><strong>Content injection</strong> — Attacker inserts malicious JavaScript into web pages as they pass through.</li>
-        </ol>
-        <div class="mini-terminal">
-          <div class="mt-line"><span class="mt-prompt">root@kali:~# </span><span class="mt-cmd">arpspoof -i wlan0 -t 192.168.1.10 192.168.1.1</span></div>
-          <div class="mt-line"><span class="mt-out">ARP cache poisoned — victim now routes through attacker</span></div>
-          <div class="mt-line"><span class="mt-warn">[HTTP INTERCEPT] POST: username=alice&password=hunter2</span></div>
-          <div class="mt-line"><span class="mt-ok">[✓ CAPTURED] alice / hunter2 @ login.example.com</span></div>
-          <div class="mt-line"><span class="mt-info">Note: HTTPS would have prevented this credential capture</span></div>
-        </div>
-        <div class="realworld">
-          <div class="realworld-label">// REAL WORLD EXAMPLE</div>
-          <p>In 2015, Lenovo shipped laptops with "Superfish" adware pre-installed that intercepted HTTPS traffic using a self-signed root certificate — a classic MITM attack by a manufacturer. 750,000 devices were affected, exposing banking and email traffic.</p>
-        </div>
-      </div>
-      <div class="tab-panel" id="mi-sim">
-        <p class="what-text" style="margin-bottom:12px">Watch how ARP poisoning intercepts plaintext traffic and captures credentials from an unsuspecting victim on the same network.</p>
-        <button class="run-sim-btn" onclick="openSim('mitm')">► LAUNCH TERMINAL SIMULATION</button>
-      </div>
-      <div class="tab-panel" id="mi-alerts">
-        <div class="alert-example alert-c"><div class="alert-icon-sm">🚨</div><div class="alert-content"><div class="alert-title-sm">CRITICAL ALERT</div>ARP table anomaly detected: MAC address for default gateway changed from AA:BB:CC to DD:EE:FF in the last 30 seconds. Possible ARP spoofing in progress.</div></div>
-        <div class="alert-example alert-w"><div class="alert-icon-sm">⚠</div><div class="alert-content"><div class="alert-title-sm">HIGH WARNING</div>SSL certificate mismatch on banking.example.com. Expected CN=banking.example.com, got CN=unknown-proxy. Connection may be intercepted — do NOT proceed.</div></div>
-        <div class="alert-example alert-i"><div class="alert-icon-sm">ℹ</div><div class="alert-content"><div class="alert-title-sm">INFO</div>Browser detected HTTP downgrade on this network. Site https://mail.corp.com redirected to http://mail.corp.com. HSTS violation — possible SSL stripping.</div></div>
-        <ul class="redflag-list" style="margin-top:16px">
-          <li>Browser certificate warning on a site you've visited before without issues</li>
-          <li>Lock icon missing or showing "Not Secure" on a site that was previously secure</li>
-          <li>Unusually slow connection on public Wi-Fi</li>
-          <li>Pop-up asking you to install a certificate or trust a new root authority</li>
-        </ul>
-      </div>
-      <div class="tab-panel" id="mi-defend">
-        <div class="defense-grid">
-          <div class="defense-tile"><div class="defense-tile-title">USE A VPN</div>All traffic is encrypted end-to-end. Even if intercepted, the attacker sees only encrypted gibberish.</div>
-          <div class="defense-tile"><div class="defense-tile-title">ALWAYS USE HTTPS</div>Check for the padlock icon. Never submit passwords on HTTP sites. Use browser extensions that force HTTPS.</div>
-          <div class="defense-tile"><div class="defense-tile-title">AVOID PUBLIC WI-FI</div>For sensitive tasks (banking, work), use mobile data or a trusted VPN. Free airport/café Wi-Fi is a high-risk environment.</div>
-          <div class="defense-tile"><div class="defense-tile-title">HSTS</div>HTTP Strict Transport Security forces browsers to only connect via HTTPS, preventing downgrade attacks.</div>
-          <div class="defense-tile"><div class="defense-tile-title">CERTIFICATE PINNING</div>Apps can pin expected certificates — if the cert changes (MITM inserted their own), the app refuses to connect.</div>
-          <div class="defense-tile"><div class="defense-tile-title">TRUST CERTIFICATE WARNINGS</div>Never click "Proceed anyway" on a certificate error. That warning means something is genuinely wrong.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════════════════════════════════ -->
-  <!-- 5. RANSOMWARE -->
-  <!-- ═══════════════════════════════════════════════════════ -->
-  <div class="attack-guide" id="ransomware">
-    <div class="alert-bar alert-bar-critical">
-      <div class="alert-left"><span class="alert-icon">🔒</span><span class="alert-type-label">■ CRITICAL THREAT — ALERT ID: RW-005</span></div>
-      <div class="alert-right"><span class="alert-id">CATEGORY: MALWARE / EXTORTION</span><button class="expand-btn" onclick="toggleCard('ransomware-content', this)">▼ EXPAND</button></div>
-    </div>
-    <div class="card-header" onclick="toggleCard('ransomware-content', null, this)">
-      <div class="card-icon-big">🔒</div>
-      <div class="card-title-block">
-        <div class="card-title">RANSOMWARE</div>
-        <div class="card-subtitle">Malware that encrypts all your files and demands cryptocurrency payment to restore access. Even hospitals and pipelines have been shut down. Average ransom demand: $1.54 million.</div>
-      </div>
-    </div>
-    <div class="card-content" id="ransomware-content">
-      <div class="tab-bar">
-        <button class="tab-btn active" onclick="switchTab('rw', 'what', this)">HOW IT WORKS</button>
-        <button class="tab-btn" onclick="switchTab('rw', 'sim', this)">LIVE SIM</button>
-        <button class="tab-btn" onclick="switchTab('rw', 'alerts', this)">ALERTS</button>
-        <button class="tab-btn" onclick="switchTab('rw', 'defend', this)">DEFENSES</button>
-      </div>
-      <div class="tab-panel active" id="rw-what">
-        <p class="what-text">Ransomware is typically delivered via a <strong>phishing email with an attached Word document</strong>. When macros are enabled, a downloader runs silently, installs the ransomware, deletes backup shadow copies, then starts encrypting every file on your system and mapped network drives.</p>
-        <ol class="steps-list">
-          <li><strong>Initial access</strong> — Phishing email delivers malicious macro-enabled document. One click enables macros.</li>
-          <li><strong>Dropper installs</strong> — Hidden executable downloads to <code>%APPDATA%</code>. Added to startup registry for persistence.</li>
-          <li><strong>Kill backups</strong> — Deletes Windows Volume Shadow Copies (VSS) — making recovery far harder.</li>
-          <li><strong>Encryption</strong> — AES-256 encrypts every file. The decryption key is held on attacker's C2 server.</li>
-          <li><strong>Ransom note</strong> — README_DECRYPT.txt drops on every folder with Bitcoin payment instructions.</li>
-          <li><strong>Spread</strong> — Propagates across network drives, infecting connected machines.</li>
-        </ol>
-        <div class="mini-terminal">
-          <div class="mt-line"><span class="mt-warn">[STAGE 1] Invoice_Q4.docx macro executed — payload downloading...</span></div>
-          <div class="mt-line"><span class="mt-out">[STAGE 2] Dropper: %APPDATA%/svchost32.exe installed + registry key set</span></div>
-          <div class="mt-line"><span class="mt-err">[STAGE 3] Shadow copies deleted — Windows Restore: DISABLED</span></div>
-          <div class="mt-line"><span class="mt-err">[STAGE 4] Encrypting C:\Users\*.*  [██████████] 100%</span></div>
-          <div class="mt-line"><span class="mt-err">47,382 files encrypted. Demand: 3.5 BTC (~$210,000)</span></div>
-        </div>
-        <div class="realworld">
-          <div class="realworld-label">// REAL WORLD EXAMPLE</div>
-          <p>The 2021 Colonial Pipeline attack (DarkSide ransomware) shut down 45% of the US East Coast's fuel supply for 6 days. The company paid $4.4 million in Bitcoin. The attackers gained entry through a single compromised VPN password with no MFA.</p>
-        </div>
-      </div>
-      <div class="tab-panel" id="rw-sim">
-        <p class="what-text" style="margin-bottom:12px">Watch the 6 stages of a ransomware infection — from macro execution to file encryption and ransom demand.</p>
-        <button class="run-sim-btn" onclick="openSim('ransomware')">► LAUNCH TERMINAL SIMULATION</button>
-      </div>
-      <div class="tab-panel" id="rw-alerts">
-        <div class="alert-example alert-c"><div class="alert-icon-sm">🚨</div><div class="alert-content"><div class="alert-title-sm">CRITICAL ALERT</div>Ransomware behavior detected: vssadmin.exe delete shadows /all executed. Mass file rename with unknown extension .l0ck3d in progress. ISOLATE MACHINE IMMEDIATELY.</div></div>
-        <div class="alert-example alert-w"><div class="alert-icon-sm">⚠</div><div class="alert-content"><div class="alert-title-sm">HIGH WARNING</div>Unusual process writing to 10,000+ files per minute across C:\Users. Possible encryption event. EDR flagged svchost32.exe (non-standard name).</div></div>
-        <div class="alert-example alert-s"><div class="alert-icon-sm">✔</div><div class="alert-content"><div class="alert-title-sm">PROTECTED</div>Macros disabled — Invoice_Q4_2024.docx opened without executing embedded VBA. Attachment sent to security team for analysis.</div></div>
-        <ul class="redflag-list" style="margin-top:16px">
-          <li>Files suddenly have strange extensions (.encrypted, .l0ck3d, .WNCRY)</li>
-          <li>You can't open files that were working moments ago</li>
-          <li>README or DECRYPT_ME text files appearing everywhere</li>
-          <li>CPU running at 100% with disk activity spiking for no reason</li>
-          <li>A full-screen ransom note with countdown timer</li>
-        </ul>
-      </div>
-      <div class="tab-panel" id="rw-defend">
-        <div class="defense-grid">
-          <div class="defense-tile"><div class="defense-tile-title">BACKUP: 3-2-1 RULE</div><strong>3</strong> copies, on <strong>2</strong> different media, <strong>1</strong> offsite/offline. An offline backup ransomware can't touch is your ultimate recovery option.</div>
-          <div class="defense-tile"><div class="defense-tile-title">DISABLE OFFICE MACROS</div>Block macros from running in Word/Excel by default. The vast majority of ransomware entry points are macro-enabled documents.</div>
-          <div class="defense-tile"><div class="defense-tile-title">PATCH EVERYTHING</div>Keep OS, software, and firmware updated. Ransomware frequently exploits known vulnerabilities that have patches available.</div>
-          <div class="defense-tile"><div class="defense-tile-title">ENDPOINT DETECTION (EDR)</div>EDR tools detect ransomware behavior (mass file writes, shadow copy deletion) and can halt the process before full encryption.</div>
-          <div class="defense-tile"><div class="defense-tile-title">NETWORK SEGMENTATION</div>Divide your network so ransomware can't spread from one machine to infect everything. Contain the blast radius.</div>
-          <div class="defense-tile"><div class="defense-tile-title">NEVER PAY (IF POSSIBLE)</div>Paying funds criminal operations and doesn't guarantee recovery. Report to FBI IC3 and restore from backup instead.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════════════════════════════════ -->
-  <!-- 6. PORT SCANNING -->
-  <!-- ═══════════════════════════════════════════════════════ -->
-  <div class="attack-guide" id="portscan">
-    <div class="alert-bar alert-bar-medium">
-      <div class="alert-left"><span class="alert-icon">📡</span><span class="alert-type-label">◆ MEDIUM THREAT — ALERT ID: PS-006</span></div>
-      <div class="alert-right"><span class="alert-id">CATEGORY: RECONNAISSANCE</span><button class="expand-btn" onclick="toggleCard('portscan-content', this)">▼ EXPAND</button></div>
-    </div>
-    <div class="card-header" onclick="toggleCard('portscan-content', null, this)">
-      <div class="card-icon-big">📡</div>
-      <div class="card-title-block">
-        <div class="card-title">PORT SCANNING & RECONNAISSANCE</div>
-        <div class="card-subtitle">The first step of almost every attack — mapping what "doors" are open on a target system. Like a burglar walking around your house trying every window and door before deciding how to break in.</div>
-      </div>
-    </div>
-    <div class="card-content" id="portscan-content">
-      <div class="tab-bar">
-        <button class="tab-btn active" onclick="switchTab('ps', 'what', this)">HOW IT WORKS</button>
-        <button class="tab-btn" onclick="switchTab('ps', 'sim', this)">LIVE SIM</button>
-        <button class="tab-btn" onclick="switchTab('ps', 'alerts', this)">ALERTS</button>
-        <button class="tab-btn" onclick="switchTab('ps', 'defend', this)">DEFENSES</button>
-      </div>
-      <div class="tab-panel active" id="ps-what">
-        <p class="what-text">Every service on a computer listens on a numbered "port." Web = 80/443, email = 25, database = 3306. A port scan knocks on all 65,535 doors to see which ones open — and then identifies <em>what software</em> is listening, including version numbers that can be cross-referenced with known vulnerabilities.</p>
-        <ol class="steps-list">
-          <li><strong>Host discovery</strong> — Ping sweep to find which IP addresses are live on a network.</li>
-          <li><strong>Port sweep</strong> — SYN scan on all 65,535 ports to find which are open, closed, or filtered.</li>
-          <li><strong>Service detection</strong> — Banner grabbing identifies the exact software and version on each open port.</li>
-          <li><strong>OS fingerprinting</strong> — TCP/IP stack behavior reveals the operating system and version.</li>
-          <li><strong>Vulnerability mapping</strong> — Version info is cross-referenced with CVE databases to find exploitable flaws.</li>
-        </ol>
-        <div class="mini-terminal">
-          <div class="mt-line"><span class="mt-prompt">root@kali:~# </span><span class="mt-cmd">nmap -sV -sC -O -p- 192.168.1.105</span></div>
-          <div class="mt-line"><span class="mt-out">22/tcp   open  ssh     OpenSSH 7.4</span></div>
-          <div class="mt-line"><span class="mt-warn">3306/tcp open  mysql   MySQL 5.7.32 (EXPOSED TO INTERNET!)</span></div>
-          <div class="mt-line"><span class="mt-err">27017/tcp open  mongodb (NO AUTH REQUIRED!)</span></div>
-          <div class="mt-line"><span class="mt-info">CVE-2021-41617 (OpenSSH) — CRITICAL found</span></div>
-        </div>
-        <div class="realworld">
-          <div class="realworld-label">// REAL WORLD EXAMPLE</div>
-          <p>The 2017 Equifax breach (147M records) was facilitated partly by an unpatched Apache Struts server that was discoverable via port scanning. Security researchers had warned about the CVE for months, but the exposed port was never identified internally.</p>
-        </div>
-      </div>
-      <div class="tab-panel" id="ps-sim">
-        <p class="what-text" style="margin-bottom:12px">Watch nmap scan all 65,535 ports, identify services, detect misconfigurations, and flag critical CVEs on a target system.</p>
-        <button class="run-sim-btn" onclick="openSim('portscan')">► LAUNCH TERMINAL SIMULATION</button>
-      </div>
-      <div class="tab-panel" id="ps-alerts">
-        <div class="alert-example alert-w"><div class="alert-icon-sm">⚠</div><div class="alert-content"><div class="alert-title-sm">HIGH WARNING</div>Port scan detected: 65,535 SYN packets from 185.220.101.55 in under 60 seconds. Full TCP port sweep in progress. Source blocked by IDS.</div></div>
-        <div class="alert-example alert-c"><div class="alert-icon-sm">🚨</div><div class="alert-content"><div class="alert-title-sm">CRITICAL ALERT</div>MongoDB port 27017 accessible from public internet with no authentication. Database contains 2.1M customer records. IMMEDIATE ACTION REQUIRED.</div></div>
-        <div class="alert-example alert-i"><div class="alert-icon-sm">ℹ</div><div class="alert-content"><div class="alert-title-sm">INFO</div>Service banner for port 22 exposes version string: "OpenSSH_7.4". This version has 6 known CVEs. Consider upgrading and suppressing banners.</div></div>
-        <ul class="redflag-list" style="margin-top:16px">
-          <li>IDS/firewall logs showing thousands of SYN packets from one source</li>
-          <li>Unexpected spike in connection-refused responses in server logs</li>
-          <li>Database or admin ports (3306, 5432, 27017) accessible from public internet</li>
-          <li>Services running on default ports with default credentials</li>
-        </ul>
-      </div>
-      <div class="tab-panel" id="ps-defend">
-        <div class="defense-grid">
-          <div class="defense-tile"><div class="defense-tile-title">FIREWALL: CLOSE EVERYTHING</div>Only expose ports that the public legitimately needs (80, 443). Block everything else at the firewall — especially databases.</div>
-          <div class="defense-tile"><div class="defense-tile-title">INTRUSION DETECTION (IDS)</div>IDS tools detect and alert on port scan patterns, allowing you to block the attacker before they can exploit what they find.</div>
-          <div class="defense-tile"><div class="defense-tile-title">SUPPRESS VERSION BANNERS</div>Configure services to hide their version strings so attackers can't instantly match your software to known CVEs.</div>
-          <div class="defense-tile"><div class="defense-tile-title">SCAN YOURSELF FIRST</div>Run Nmap on your own systems regularly. Find your exposures before attackers do. Know your attack surface.</div>
-          <div class="defense-tile"><div class="defense-tile-title">USE NON-DEFAULT PORTS</div>Moving SSH from 22 to a high port number eliminates the vast majority of automated scanning noise (security through obscurity — supplement, don't replace, real security).</div>
-          <div class="defense-tile"><div class="defense-tile-title">PATCH AGGRESSIVELY</div>Every CVE found in a port scan has a patch available. Patching removes the exploitable path even if the port is discovered.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════════════════════════════════ -->
-  <!-- 7. DoS / DDoS -->
-  <!-- ═══════════════════════════════════════════════════════ -->
-  <div class="attack-guide" id="dos">
-    <div class="alert-bar alert-bar-high">
-      <div class="alert-left"><span class="alert-icon">💥</span><span class="alert-type-label">▲ HIGH THREAT — ALERT ID: DOS-007</span></div>
-      <div class="alert-right"><span class="alert-id">CATEGORY: AVAILABILITY ATTACK</span><button class="expand-btn" onclick="toggleCard('dos-content', this)">▼ EXPAND</button></div>
-    </div>
-    <div class="card-header" onclick="toggleCard('dos-content', null, this)">
-      <div class="card-icon-big">💥</div>
-      <div class="card-title-block">
-        <div class="card-title">DoS / DDoS ATTACK</div>
-        <div class="card-subtitle">Overwhelms a server with so much traffic it can't respond to real users — taking a website or service completely offline. DDoS uses thousands of hijacked "zombie" computers simultaneously.</div>
-      </div>
-    </div>
-    <div class="card-content" id="dos-content">
-      <div class="tab-bar">
-        <button class="tab-btn active" onclick="switchTab('do', 'what', this)">HOW IT WORKS</button>
-        <button class="tab-btn" onclick="switchTab('do', 'alerts', this)">ALERTS</button>
-        <button class="tab-btn" onclick="switchTab('do', 'defend', this)">DEFENSES</button>
-      </div>
-      <div class="tab-panel active" id="do-what">
-        <p class="what-text">A <strong>DoS (Denial of Service)</strong> attack floods a target with more traffic than it can handle. A <strong>DDoS (Distributed DoS)</strong> uses a botnet — thousands of infected computers worldwide — to amplify the attack massively. The target goes offline for everyone. No data is stolen; the goal is pure disruption.</p>
-        <ol class="steps-list">
-          <li><strong>Build or rent botnet</strong> — Thousands of malware-infected devices (IoT, PCs) are controlled by a Command & Control server.</li>
-          <li><strong>Choose attack vector</strong> — Volume-based (flood bandwidth), protocol attacks (exploit TCP handshake), or application-layer (exhaust web server resources).</li>
-          <li><strong>Coordinate the flood</strong> — All bots simultaneously send traffic to the target. 100Gbps+ attacks are common.</li>
-          <li><strong>Target overwhelmed</strong> — Server runs out of bandwidth, memory, or CPU. Legitimate users get errors or timeouts.</li>
-          <li><strong>Extortion or cover</strong> — Attacker demands payment to stop, or uses DDoS as a distraction while another attack runs simultaneously.</li>
-        </ol>
-        <div class="mini-terminal">
-          <div class="mt-line"><span class="mt-warn">Botnet activated: 47,000 compromised devices firing</span></div>
-          <div class="mt-line"><span class="mt-err">Incoming traffic: 487 Gbps (SYN flood) → target.com:443</span></div>
-          <div class="mt-line"><span class="mt-err">Server CPU: 100% | Memory: 100% | Queue: FULL</span></div>
-          <div class="mt-line"><span class="mt-err">Status: target.com — OFFLINE (all requests timing out)</span></div>
-          <div class="mt-line"><span class="mt-warn">Downtime cost: ~$5,600/min for e-commerce targets</span></div>
-        </div>
-        <div class="realworld">
-          <div class="realworld-label">// REAL WORLD EXAMPLE</div>
-          <p>The 2016 Mirai botnet DDoS attack infected 600,000 IoT devices (cameras, routers) and launched a 1.2 Tbps attack on Dyn DNS — taking down Twitter, Netflix, Reddit, and CNN simultaneously for hours across the US East Coast.</p>
-        </div>
-      </div>
-      <div class="tab-panel" id="do-alerts">
-        <div class="alert-example alert-c"><div class="alert-icon-sm">🚨</div><div class="alert-content"><div class="alert-title-sm">CRITICAL ALERT</div>DDoS attack in progress: 487 Gbps volumetric flood detected. Traffic origin: 47,000 IPs across 83 countries. Upstream scrubbing center engaged. Service degraded.</div></div>
-        <div class="alert-example alert-w"><div class="alert-icon-sm">⚠</div><div class="alert-content"><div class="alert-title-sm">HIGH WARNING</div>SYN flood detected: 500,000 half-open TCP connections in 30 seconds. SYN cookies enabled. Web server response time degraded to 4,200ms (normal: 80ms).</div></div>
-        <div class="alert-example alert-i"><div class="alert-icon-sm">ℹ</div><div class="alert-content"><div class="alert-title-sm">INFO</div>Unusual request pattern: 95% of traffic requesting a single 50MB PDF file. Possible application-layer (Layer 7) DoS targeting bandwidth exhaustion.</div></div>
-        <ul class="redflag-list" style="margin-top:16px">
-          <li>Website suddenly returns 503 errors or times out completely</li>
-          <li>Network bandwidth meter spikes to maximum for no business reason</li>
-          <li>Server logs show millions of requests from geographically diverse IPs all at once</li>
-          <li>Legitimate users reporting the service is down while internal monitoring shows servers "up"</li>
-        </ul>
-      </div>
-      <div class="tab-panel" id="do-defend">
-        <div class="defense-grid">
-          <div class="defense-tile"><div class="defense-tile-title">CDN + DDoS PROTECTION</div>Services like Cloudflare, AWS Shield absorb attack traffic at their massive global infrastructure — the attack never reaches your server.</div>
-          <div class="defense-tile"><div class="defense-tile-title">RATE LIMITING</div>Limit requests per IP per second. Legitimate users rarely send more than a few requests/second; bots send thousands.</div>
-          <div class="defense-tile"><div class="defense-tile-title">ANYCAST DIFFUSION</div>Spread your service across many global data centers — a DDoS is diluted across all of them instead of overwhelming one.</div>
-          <div class="defense-tile"><div class="defense-tile-title">BLOCK UNUSED PROTOCOLS</div>If you only serve HTTPS, block UDP and ICMP at the border — common DDoS amplification vectors.</div>
-          <div class="defense-tile"><div class="defense-tile-title">INCIDENT RESPONSE PLAN</div>Know in advance which scrubbing service to call, which upstream provider to contact, and who makes decisions when an attack starts.</div>
-          <div class="defense-tile"><div class="defense-tile-title">SECURE YOUR OWN DEVICES</div>Infected IoT devices fuel botnets. Change default passwords on routers/cameras and keep firmware updated.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════════════════════════════════ -->
-  <!-- 8. ZERO-DAY -->
-  <!-- ═══════════════════════════════════════════════════════ -->
-  <div class="attack-guide" id="zeroday">
-    <div class="alert-bar alert-bar-critical">
-      <div class="alert-left"><span class="alert-icon">☢️</span><span class="alert-type-label">■ CRITICAL THREAT — ALERT ID: ZD-008</span></div>
-      <div class="alert-right"><span class="alert-id">CATEGORY: EXPLOIT / VULNERABILITY</span><button class="expand-btn" onclick="toggleCard('zeroday-content', this)">▼ EXPAND</button></div>
-    </div>
-    <div class="card-header" onclick="toggleCard('zeroday-content', null, this)">
-      <div class="card-icon-big">☢️</div>
-      <div class="card-title-block">
-        <div class="card-title">ZERO-DAY EXPLOIT</div>
-        <div class="card-subtitle">An attack that exploits a software vulnerability that the vendor doesn't know about yet — so there's literally zero days to patch it. The most dangerous class of attack; used by nation-states and elite criminals.</div>
-      </div>
-    </div>
-    <div class="card-content" id="zeroday-content">
-      <div class="tab-bar">
-        <button class="tab-btn active" onclick="switchTab('zd', 'what', this)">HOW IT WORKS</button>
-        <button class="tab-btn" onclick="switchTab('zd', 'alerts', this)">ALERTS</button>
-        <button class="tab-btn" onclick="switchTab('zd', 'defend', this)">DEFENSES</button>
-      </div>
-      <div class="tab-panel active" id="zd-what">
-        <p class="what-text">A zero-day is a <strong>secret flaw in software</strong> that attackers discover before the software vendor does. Because no patch exists, every installation worldwide is vulnerable. Attackers (or governments) may keep these flaws secret and weaponize them for months or years.</p>
-        <ol class="steps-list">
-          <li><strong>Discovery</strong> — Researcher (or attacker) finds a flaw through reverse engineering, fuzzing, or source code analysis.</li>
-          <li><strong>Exploit development</strong> — Code is crafted to reliably trigger the vulnerability and deliver a payload.</li>
-          <li><strong>Silent exploitation</strong> — Attacker uses the exploit against targets before the vendor knows it exists. No patch is available.</li>
-          <li><strong>Disclosure (eventually)</strong> — Vendor is notified (or discovers it themselves) and races to write a patch. Zero-day becomes "n-day" once a CVE is published.</li>
-          <li><strong>Patch race</strong> — Organizations must apply the emergency patch immediately before attackers pivot to newly patched (now public) targets.</li>
-        </ol>
-        <div class="mini-terminal">
-          <div class="mt-line"><span class="mt-info">CVE-2024-XXXX — Status: UNPATCHED (0 days since discovery)</span></div>
-          <div class="mt-line"><span class="mt-err">Exploit: Remote Code Execution via heap overflow in libssl</span></div>
-          <div class="mt-line"><span class="mt-err">Affected: All systems running OpenSSL &lt; 3.0.7</span></div>
-          <div class="mt-line"><span class="mt-warn">Patch available: NOT YET — vendor notified 6 hours ago</span></div>
-          <div class="mt-line"><span class="mt-err">Active exploitation in the wild: CONFIRMED</span></div>
-        </div>
-        <div class="realworld">
-          <div class="realworld-label">// REAL WORLD EXAMPLE</div>
-          <p>Stuxnet (2010) used <em>four</em> simultaneous zero-day exploits to destroy Iranian nuclear centrifuges — still considered the most sophisticated cyberweapon ever deployed. Log4Shell (2021) was a zero-day in a library used by millions of servers globally; attackers had 72 hours to exploit before most organizations could patch.</p>
-        </div>
-      </div>
-      <div class="tab-panel" id="zd-alerts">
-        <div class="alert-example alert-c"><div class="alert-icon-sm">🚨</div><div class="alert-content"><div class="alert-title-sm">CRITICAL ALERT</div>CISA Emergency Directive: Active zero-day exploitation of CVE-2024-XXXX in Apache HTTP Server. Patch or take offline within 24 hours. All affected systems flagged.</div></div>
-        <div class="alert-example alert-w"><div class="alert-icon-sm">⚠</div><div class="alert-content"><div class="alert-title-sm">HIGH WARNING</div>Anomalous process behavior detected: svchost.exe spawning cmd.exe unexpectedly. No known CVE matches — possible novel exploit or zero-day in use. Isolate host.</div></div>
-        <div class="alert-example alert-i"><div class="alert-icon-sm">ℹ</div><div class="alert-content"><div class="alert-title-sm">INFO</div>Threat intel feed: APT group observed using weaponized PDF zero-day targeting finance sector. Indicator of Compromise (IoC) hashes distributed to EDR platforms.</div></div>
-        <ul class="redflag-list" style="margin-top:16px">
-          <li>Processes behaving in ways that don't match any known malware signature</li>
-          <li>Emergency out-of-band patches released by vendors (apply immediately)</li>
-          <li>Threat intelligence reports of "actively exploited" CVEs in your software</li>
-          <li>System doing unusual things with no explanation — trust your gut and investigate</li>
-        </ul>
-      </div>
-      <div class="tab-panel" id="zd-defend">
-        <div class="defense-grid">
-          <div class="defense-tile"><div class="defense-tile-title">DEFENSE IN DEPTH</div>No single control stops a zero-day. Layer defenses: network segmentation + EDR + least privilege + monitoring so even a successful exploit can't go far.</div>
-          <div class="defense-tile"><div class="defense-tile-title">PATCH IMMEDIATELY</div>When a zero-day becomes a CVE, patch within hours — not weeks. Attackers pivot to newly disclosed (now public) exploits instantly.</div>
-          <div class="defense-tile"><div class="defense-tile-title">SUBSCRIBE TO THREAT INTEL</div>CISA alerts, vendor security bulletins, and threat intel feeds give you early warning. Subscribe and act immediately on emergency advisories.</div>
-          <div class="defense-tile"><div class="defense-tile-title">BEHAVIORAL DETECTION</div>Signature-based AV can't catch zero-days. EDR/XDR tools that watch for <em>behavior</em> (unusual process calls, memory anomalies) can detect novel exploits.</div>
-          <div class="defense-tile"><div class="defense-tile-title">LEAST PRIVILEGE</div>Even if an exploit runs code, limiting what that code can access (no admin rights, no network) dramatically reduces the blast radius.</div>
-          <div class="defense-tile"><div class="defense-tile-title">VIRTUAL PATCHING (WAF)</div>While a software patch is pending, a WAF can be configured with virtual patch rules to block the specific exploit pattern at the network edge.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- GLOSSARY -->
-  <div class="section-header" style="margin-top:48px">
-    <span class="section-label">// KEY TERMS GLOSSARY</span>
-    <div class="section-line"></div>
-  </div>
-  <div class="glossary-grid">
-    <div class="gloss-item"><div class="gloss-term">CVE</div><div class="gloss-def">Common Vulnerabilities and Exposures — the official registry of known security flaws. Every CVE has an ID and severity score.</div></div>
-    <div class="gloss-item"><div class="gloss-term">MFA</div><div class="gloss-def">Multi-Factor Authentication — requires a second proof beyond password (app code, hardware key). Blocks 99.9% of automated attacks.</div></div>
-    <div class="gloss-item"><div class="gloss-term">C2 SERVER</div><div class="gloss-def">Command and Control — the attacker's server that sends instructions to compromised machines (malware, botnets).</div></div>
-    <div class="gloss-item"><div class="gloss-term">PAYLOAD</div><div class="gloss-def">The malicious code an exploit delivers after gaining access — could be a backdoor, ransomware, data exfiltration tool.</div></div>
-    <div class="gloss-item"><div class="gloss-term">FIREWALL</div><div class="gloss-def">Network security device that filters incoming/outgoing traffic based on rules. First line of network defense.</div></div>
-    <div class="gloss-item"><div class="gloss-term">EDR / XDR</div><div class="gloss-def">Endpoint/Extended Detection & Response — monitors device behavior to catch attacks that bypass traditional antivirus.</div></div>
-    <div class="gloss-item"><div class="gloss-term">EXPLOIT</div><div class="gloss-def">Code that takes advantage of a specific vulnerability to gain unauthorized access or execute commands.</div></div>
-    <div class="gloss-item"><div class="gloss-term">IOC</div><div class="gloss-def">Indicator of Compromise — evidence that an attack has occurred: suspicious file hashes, IP addresses, domain names.</div></div>
-    <div class="gloss-item"><div class="gloss-term">PRIVILEGE ESCALATION</div><div class="gloss-def">After initial access, attacker gains higher permissions (admin/root) to do more damage or access more systems.</div></div>
-    <div class="gloss-item"><div class="gloss-term">LATERAL MOVEMENT</div><div class="gloss-def">After compromising one machine, attacker moves to other systems on the same network to expand access.</div></div>
-    <div class="gloss-item"><div class="gloss-term">DMARC / SPF / DKIM</div><div class="gloss-def">Email authentication standards that verify the sender's domain is legitimate, blocking email spoofing and phishing.</div></div>
-    <div class="gloss-item"><div class="gloss-term">ZERO TRUST</div><div class="gloss-def">Security model: "Never trust, always verify." Every access request is authenticated regardless of network location.</div></div>
-  </div>
-
-</main>
-
-<footer>
-  CYBERSEC GUIDE — FOR EDUCATIONAL USE ONLY<br>
-  Use this knowledge to <strong>defend yourself and others</strong> — not to harm. Knowledge is the best firewall.<br>
-  <span style="color:#1a4020">// KNOW YOUR THREATS. PATCH YOUR SYSTEMS. ENABLE MFA. BACKUP YOUR DATA. //</span>
-</footer>
 
 <script>
-// ── CARD TOGGLE ────────────────────────────────────────────────
-function toggleCard(contentId, btn, headerEl) {
-  const content = document.getElementById(contentId);
-  const isOpen = content.classList.contains('open');
+/* =====================================================
+   sim.js — CyberSim Simulation Engine
+   ===================================================== */
 
-  // find the expand button if not passed directly
-  if (!btn) {
-    const card = content.closest('.attack-guide');
-    btn = card.querySelector('.expand-btn');
-  }
-
-  if (isOpen) {
-    content.classList.remove('open');
-    if (btn) btn.textContent = '▼ EXPAND';
-  } else {
-    content.classList.add('open');
-    if (btn) btn.textContent = '▲ CLOSE';
-  }
+// ── Clock ──
+function updateClock() {
+  const now = new Date();
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('clock-time').textContent = `${h}:${m}`;
+  document.getElementById('clock-date').textContent = `${days[now.getDay()]} ${months[now.getMonth()]} ${now.getDate()}`;
+  const osClock = document.getElementById('os-clock');
+  if (osClock) osClock.textContent = `${h}:${m}`;
 }
+updateClock();
+setInterval(updateClock, 1000);
 
-// ── TAB SWITCHING ──────────────────────────────────────────────
-function switchTab(prefix, tab, btnEl) {
-  // Hide all panels for this prefix
-  document.querySelectorAll(`[id^="${prefix}-"]`).forEach(el => {
-    el.classList.remove('active');
-  });
-  // Deactivate all buttons in the same tab-bar
-  btnEl.closest('.tab-bar').querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+// ── Utility ──
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const term  = () => document.getElementById('terminal');
 
-  // Activate selected
-  const panel = document.getElementById(`${prefix}-${tab}`);
-  if (panel) panel.classList.add('active');
-  btnEl.classList.add('active');
-}
+// ── Step definitions for the progress bar ──
+const STEPS = ['RECON', 'SETUP', 'EMAIL', 'OPEN', 'DECIDE'];
 
-// ── SIMULATION DATA ────────────────────────────────────────────
-const simData = {
-  bruteforce: {
-    title: '[ BRUTE FORCE SIMULATION ]',
-    steps: [
-      {d:0,    cls:'t-prompt', text:'root@kali:~# hydra -l admin -P rockyou.txt 192.168.1.105 http-post'},
-      {d:600,  cls:'t-out',   text:'Hydra v9.4 — testing 14,344,391 passwords against admin@192.168.1.105'},
-      {d:1000, cls:'t-dim',   text:'[ATTEMPT] admin:password → 401 Unauthorized'},
-      {d:1300, cls:'t-dim',   text:'[ATTEMPT] admin:123456 → 401 Unauthorized'},
-      {d:1600, cls:'t-dim',   text:'[ATTEMPT] admin:qwerty → 401 Unauthorized'},
-      {d:1900, cls:'t-dim',   text:'[ATTEMPT] admin:letmein → 401 Unauthorized'},
-      {d:2200, cls:'t-dim',   text:'[ATTEMPT] admin:dragon → 401 Unauthorized'},
-      {d:2500, cls:'t-dim',   text:'[ATTEMPT] admin:master → 401 Unauthorized'},
-      {d:2800, cls:'t-dim',   text:'[ATTEMPT] admin:admin123 → 401 Unauthorized'},
-      {d:3100, cls:'t-warning',text:'[ATTEMPT] admin:P@ssw0rd! → checking...'},
-      {d:3700, cls:'t-success',text:'[✓ SUCCESS] admin:P@ssw0rd! → 200 OK — SESSION COOKIE OBTAINED'},
-      {d:4200, cls:'t-error',  text:'>>> AUTHENTICATED AS: admin | Role: SUPERUSER <<<'},
-      {d:4700, cls:'t-info',   text:'KEY LESSON: P@ssw0rd! is in rockyou.txt. Use a random 16-char passphrase + MFA.'},
-    ]
-  },
-  sqli: {
-    title: '[ SQL INJECTION SIMULATION ]',
-    steps: [
-      {d:0,    cls:'t-prompt',  text:"root@kali:~# sqlmap -u 'http://target.com/login' --data='user=admin&pass=x' --dbs"},
-      {d:600,  cls:'t-out',    text:'sqlmap 1.7.8 — testing parameter "user" for injection'},
-      {d:1100, cls:'t-info',   text:"Payload injected: admin' OR '1'='1'--"},
-      {d:1600, cls:'t-info',   text:"Query becomes: SELECT * FROM users WHERE user='admin' OR '1'='1'--'"},
-      {d:2100, cls:'t-success',text:'[✓] Parameter "user" is INJECTABLE — authentication bypassed'},
-      {d:2600, cls:'t-out',    text:'Backend: MySQL 8.0.28 — enumerating databases...'},
-      {d:3100, cls:'t-data',   text:'  [DB] information_schema'},
-      {d:3300, cls:'t-data',   text:'  [DB] appdb'},
-      {d:3500, cls:'t-data',   text:'  [DB] users_production'},
-      {d:3900, cls:'t-out',    text:'Dumping users_production.accounts...'},
-      {d:4300, cls:'t-data',   text:'  admin | $2b$12$9FzK... | admin@corp.com'},
-      {d:4600, cls:'t-data',   text:'  jsmith | $2b$12$xMqP... | j.smith@corp.com'},
-      {d:4900, cls:'t-error',  text:'>>> 847 rows exfiltrated. Entire user table dumped. <<<'},
-      {d:5400, cls:'t-info',   text:'KEY LESSON: Use parameterized queries — treat user input as DATA, never as SQL.'},
-    ]
-  },
-  phishing: {
-    title: '[ PHISHING CAMPAIGN SIMULATION ]',
-    steps: [
-      {d:0,    cls:'t-prompt', text:'root@kali:~# gophish --campaign phish.json --targets corp_employees.csv'},
-      {d:500,  cls:'t-out',   text:'GoPhish — spoofing sender: it-helpdesk@c0rp-secure.com'},
-      {d:1000, cls:'t-info',  text:'Subject: [URGENT] Password Reset Required — IT Security Team'},
-      {d:1500, cls:'t-out',   text:'Sending to 250 employees...'},
-      {d:2000, cls:'t-dim',   text:'[SENT] → j.anderson@corp.com | [SENT] → m.chen@corp.com'},
-      {d:2500, cls:'t-dim',   text:'[SENT] → r.williams@corp.com | [SENT] → t.patel@corp.com'},
-      {d:3000, cls:'t-warning',text:'[OPENED] → j.anderson@corp.com — link clicked! (11:42 AM)'},
-      {d:3500, cls:'t-warning',text:'[CREDS HARVESTED] → j.anderson : Summer2024! @ fake-corp-login.com'},
-      {d:4000, cls:'t-warning',text:'[OPENED] → m.chen@corp.com — link clicked! (11:44 AM)'},
-      {d:4500, cls:'t-warning',text:'[CREDS HARVESTED] → m.chen : Corp#9821 @ fake-corp-login.com'},
-      {d:5000, cls:'t-out',   text:'Campaign stats: 47/250 clicked (18.8%) | 23/250 submitted creds (9.2%)'},
-      {d:5500, cls:'t-error', text:'>>> 23 live credentials harvested from a single email blast <<<'},
-      {d:6000, cls:'t-info',  text:'KEY LESSON: Verify sender domain carefully. Use MFA. Never click urgency emails.'},
-    ]
-  },
-  mitm: {
-    title: '[ MAN-IN-THE-MIDDLE SIMULATION ]',
-    steps: [
-      {d:0,    cls:'t-prompt', text:'root@kali:~# arpspoof -i wlan0 -t 192.168.1.10 192.168.1.1 &'},
-      {d:500,  cls:'t-out',   text:'ARP cache poisoned — victim 192.168.1.10 now routes through attacker'},
-      {d:1000, cls:'t-info',  text:'Victim thinks attacker MAC = router MAC. All traffic flows through us.'},
-      {d:1500, cls:'t-prompt',text:'root@kali:~# ettercap -T -q -i wlan0 -M arp:remote'},
-      {d:2000, cls:'t-out',   text:'Sniffing all traffic on wlan0...'},
-      {d:2500, cls:'t-dim',   text:'[PKT] 192.168.1.10:52341 → bank.com:443 (HTTPS — encrypted, safe)'},
-      {d:3000, cls:'t-dim',   text:'[PKT] 192.168.1.10:52342 → forum.com:80 (HTTP — PLAINTEXT!)'},
-      {d:3500, cls:'t-warning',text:'[INTERCEPT] GET http://login.example.com/auth'},
-      {d:4000, cls:'t-warning',text:'[INTERCEPT] POST: username=alice&password=hunter2'},
-      {d:4500, cls:'t-success',text:'[✓ CAPTURED] alice / hunter2 @ login.example.com'},
-      {d:5000, cls:'t-error', text:'>>> Credentials stolen on public Wi-Fi in 4 seconds <<<'},
-      {d:5500, cls:'t-info',  text:'KEY LESSON: HTTPS protects you. Always use VPN on public Wi-Fi.'},
-    ]
-  },
-  ransomware: {
-    title: '[ RANSOMWARE INFECTION SIMULATION ]',
-    steps: [
-      {d:0,    cls:'t-out',   text:'[STAGE 1] User opened Invoice_Q4_2024.docx — macros enabled'},
-      {d:700,  cls:'t-warning',text:'Macro executing — downloading payload from C2: 185.220.101.34...'},
-      {d:1400, cls:'t-out',   text:'[STAGE 2] Dropper installed: %APPDATA%/svchost32.exe'},
-      {d:2000, cls:'t-out',   text:'Persistence: HKCU\\Run\\WindowsUpdate = svchost32.exe'},
-      {d:2600, cls:'t-out',   text:'[STAGE 3] Killing backup processes: vssadmin, wbadmin, bcdedit...'},
-      {d:3200, cls:'t-error', text:'Shadow copies DELETED — Windows restore points: GONE'},
-      {d:3800, cls:'t-out',   text:'[STAGE 4] Encryption phase: AES-256 + RSA-2048 key exchange'},
-      {d:4300, cls:'t-dim',   text:'Encrypting C:\\Users\\alice\\Documents\\ [████████░░] 82%'},
-      {d:4800, cls:'t-dim',   text:'Encrypting mapped drives Z:\\ [██████████] 100%'},
-      {d:5300, cls:'t-error', text:'>>> 47,382 files encrypted. Extension renamed: .l0ck3d <<<'},
-      {d:5800, cls:'t-warning',text:'Ransom note dropped: README_DECRYPT.txt on all drives'},
-      {d:6300, cls:'t-error', text:'DEMAND: 3.5 BTC (~$210,000) — 72 hour deadline'},
-      {d:6800, cls:'t-info',  text:'KEY LESSON: Offline backups + disabled macros = survival. Patch everything.'},
-    ]
-  },
-  portscan: {
-    title: '[ PORT SCAN RECONNAISSANCE ]',
-    steps: [
-      {d:0,    cls:'t-prompt',text:'root@kali:~# nmap -sV -sC -O -p- --min-rate 1000 192.168.1.105'},
-      {d:500,  cls:'t-out',  text:'Nmap 7.94 — scanning all 65,535 ports on 192.168.1.105'},
-      {d:1200, cls:'t-data', text:'PORT      STATE  SERVICE        VERSION'},
-      {d:1600, cls:'t-data', text:'21/tcp    open   ftp            vsftpd 3.0.3'},
-      {d:1900, cls:'t-warning',text:'22/tcp    open   ssh            OpenSSH 7.4 (OUTDATED!)'},
-      {d:2200, cls:'t-data', text:'80/tcp    open   http           Apache 2.4.41'},
-      {d:2500, cls:'t-warning',text:'443/tcp   open   https          cert expires in 3 days!'},
-      {d:2800, cls:'t-error',text:'3306/tcp  open   mysql          MySQL 5.7.32 (EXPOSED TO INTERNET!)'},
-      {d:3100, cls:'t-data', text:'8080/tcp  open   http-alt       Tomcat 9.0.45'},
-      {d:3400, cls:'t-error',text:'27017/tcp open   mongodb        NO AUTH REQUIRED!'},
-      {d:3800, cls:'t-out',  text:'OS: Linux 4.15–5.8 (Ubuntu 18.04–20.04)'},
-      {d:4300, cls:'t-info', text:'CVE-2021-41617 (OpenSSH 7.4) — CRITICAL: Privilege escalation'},
-      {d:4800, cls:'t-error',text:'>>> 7 open ports, unauthenticated MongoDB, 2 critical CVEs <<<'},
-      {d:5300, cls:'t-info', text:'KEY LESSON: Scan yourself with nmap. Close everything you dont need.'},
-    ]
-  }
-};
+function buildSteps() {
+  const container = document.getElementById('stage-steps');
+  container.innerHTML = '';
+  STEPS.forEach((label, i) => {
+    const item = document.createElement('div');
+    item.className = 'step-item';
+    item.id = `step-item-${i}`;
 
-// ── SIM ENGINE ─────────────────────────────────────────────────
-let currentSim = null, simRunning = false, simTimers = [];
+    const circle = document.createElement('div');
+    circle.className = 'step-circle';
+    circle.id = `step-${i}`;
+    circle.textContent = i + 1;
 
-function openSim(id) {
-  currentSim = id;
-  const sim = simData[id];
-  document.getElementById('simModalTitle').textContent = sim.title;
-  document.getElementById('simTerminal').innerHTML = '<span style="color:#2a5c2e">// ready — press RUN to start simulation</span><br><span class="cursor-blink"></span>';
-  document.getElementById('simProgFill').style.width = '0';
-  document.getElementById('btnRunSim').disabled = false;
-  document.getElementById('simOverlay').classList.add('open');
-  simRunning = false;
-}
+    const lbl = document.createElement('span');
+    lbl.className = 'step-label';
+    lbl.id = `step-lbl-${i}`;
+    lbl.textContent = label;
 
-function closeSim() {
-  clearSim();
-  document.getElementById('simOverlay').classList.remove('open');
-}
+    item.appendChild(circle);
+    item.appendChild(lbl);
 
-function clearSim() {
-  simTimers.forEach(clearTimeout);
-  simTimers = [];
-  simRunning = false;
-  if (currentSim) {
-    document.getElementById('simTerminal').innerHTML = '<span style="color:#2a5c2e">// cleared — press RUN to restart</span>';
-    document.getElementById('simProgFill').style.width = '0';
-    document.getElementById('btnRunSim').disabled = false;
-  }
-}
-
-function runSim() {
-  if (!currentSim || simRunning) return;
-  simRunning = true;
-  document.getElementById('btnRunSim').disabled = true;
-  const term = document.getElementById('simTerminal');
-  term.innerHTML = '';
-  const steps = simData[currentSim].steps;
-  const total = steps[steps.length - 1].d + 1000;
-
-  steps.forEach((s, i) => {
-    const t = setTimeout(() => {
+    if (i < STEPS.length - 1) {
       const line = document.createElement('div');
-      line.style.marginBottom = '1px';
-      if (s.cls === 't-prompt') {
-        line.innerHTML = `<span style="color:var(--green-dim)">root@kali:~# </span><span style="color:var(--green)">${s.text}</span>`;
-      } else {
-        const colors = {
-          't-out': '#5a8c60', 't-dim': '#2a5c2e', 't-warning': 'var(--amber)',
-          't-error': 'var(--red)', 't-success': 'var(--green)', 't-info': 'var(--cyan)',
-          't-data': '#c8ffc8'
-        };
-        line.style.color = colors[s.cls] || '#5a8c60';
-        if (s.cls === 't-success') line.style.textShadow = '0 0 6px var(--green)';
-        line.innerHTML = s.text;
-      }
-      term.appendChild(line);
-      term.scrollTop = term.scrollHeight;
-      document.getElementById('simProgFill').style.width = (((i + 1) / steps.length) * 100) + '%';
-    }, s.d);
-    simTimers.push(t);
-  });
+      line.className = 'step-line';
+      line.id = `step-line-${i}`;
+      item.appendChild(line);
+    }
 
-  const done = setTimeout(() => {
-    simRunning = false;
-    document.getElementById('btnRunSim').disabled = false;
-    const cur = document.createElement('span');
-    cur.className = 'cursor-blink';
-    term.appendChild(cur);
-  }, total);
-  simTimers.push(done);
+    container.appendChild(item);
+  });
+}
+buildSteps();
+
+function setStep(active) {
+  STEPS.forEach((_, i) => {
+    const circ = document.getElementById(`step-${i}`);
+    const lbl  = document.getElementById(`step-lbl-${i}`);
+    const line = document.getElementById(`step-line-${i}`);
+    if (i < active) {
+      circ.className = 'step-circle done';
+      lbl.className  = 'step-label done';
+      if (line) line.className = 'step-line done';
+    } else if (i === active) {
+      circ.className = 'step-circle current';
+      lbl.className  = 'step-label current';
+    } else {
+      circ.className = 'step-circle';
+      lbl.className  = 'step-label';
+      if (line) line.className = 'step-line';
+    }
+  });
 }
 
-// Close modal on overlay click
-document.getElementById('simOverlay').addEventListener('click', function(e) {
-  if (e.target === this) closeSim();
+// ── Terminal helpers ──
+function addLine(text, cls = 't-out') {
+  const t = term();
+  const cursor = t.querySelector('.cursor');
+  const div = document.createElement('div');
+  div.className = 't-line';
+  div.innerHTML = `<span class="${cls}">${text}</span>`;
+  if (cursor) t.insertBefore(div, cursor.parentElement);
+  else t.appendChild(div);
+  t.scrollTop = t.scrollHeight;
+}
+
+function addPromptLine(text, cls = 't-cmd') {
+  const t = term();
+  const cursor = t.querySelector('.cursor');
+  const div = document.createElement('div');
+  div.className = 't-line';
+  div.innerHTML = `<span class="t-prompt">attacker@kali:~$ </span><span class="${cls}">${text}</span>`;
+  if (cursor) t.insertBefore(div, cursor.parentElement);
+  else t.appendChild(div);
+  t.scrollTop = t.scrollHeight;
+}
+
+async function runLines(lines) {
+  for (const [text, cls, delay, isCmd] of lines) {
+    await sleep(delay || 300);
+    if (isCmd) addPromptLine(text, cls || 't-cmd');
+    else addLine(text, cls);
+  }
+}
+
+// ── View switching ──
+function showView(id) {
+  document.querySelectorAll('.v-view').forEach(v => v.classList.remove('active'));
+  const v = document.getElementById(id);
+  if (v) v.classList.add('active');
+}
+
+// ── Narration ──
+function setNarrate(html) {
+  document.getElementById('narrate').innerHTML = html;
+}
+function setStageTitle(html) {
+  document.getElementById('stage-title').innerHTML = html;
+}
+
+// ── Status indicator ──
+function setStatus(text, alert = false) {
+  document.getElementById('status-text').textContent = text;
+  const dot = document.getElementById('status-dot');
+  dot.className = alert ? 'status-dot red' : 'status-dot';
+}
+
+// ── Toast ──
+function showToast() {
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 4500);
+}
+
+// ── Button helpers ──
+function showNextBtn(label) {
+  const btn = document.getElementById('btn-next');
+  btn.style.display = 'block';
+  btn.textContent   = label;
+  btn.disabled      = false;
+  if (currentStage > 0) document.getElementById('btn-reset').style.display = 'block';
+}
+
+function hideNextBtn() {
+  document.getElementById('btn-next').disabled = true;
+}
+
+function showDecisionBtns() {
+  hideNextBtn();
+  document.getElementById('btn-next').style.display  = 'none';
+  document.getElementById('btn-reset').style.display = 'block';
+
+  const controls = document.getElementById('sim-controls');
+  if (!document.getElementById('dec-safe')) {
+    const s = document.createElement('button');
+    s.className = 'btn btn-safe';
+    s.id        = 'dec-safe';
+    s.innerHTML = '✅ Go directly to Amazon.com';
+    s.onclick   = chooseSafe;
+    controls.appendChild(s);
+
+    const u = document.createElement('button');
+    u.className = 'btn btn-danger';
+    u.id        = 'dec-unsafe';
+    u.innerHTML = '⚠️ Click the link in the email';
+    u.onclick   = chooseUnsafe;
+    controls.appendChild(u);
+  }
+}
+
+function removeDecisionBtns() {
+  ['dec-safe','dec-unsafe'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+  });
+}
+
+// ════════════════════════════════════════════════
+// SIMULATION STAGES
+// ════════════════════════════════════════════════
+let currentStage = 0;
+
+async function stage1_recon() {
+  setStep(0);
+  setStageTitle('<strong>Step 1:</strong> Attacker researches the victim');
+  setStatus('RECON IN PROGRESS', true);
+
+  setNarrate('The attacker starts by <strong>finding out information about the victim</strong> — name, email, where they work. This is called <em>reconnaissance</em>. It\'s done using Google, LinkedIn, and data breach sites. It takes about 5 minutes.');
+
+  await runLines([
+    ['', 't-dim', 200],
+    ['# Step 1 — Find a target and learn about them', 't-dim', 100],
+    ['whois techcorp.com', 't-cmd', 500, true],
+    ['  Registrant Email: admin@techcorp.com', 't-out', 600],
+    ['  Organization:     TechCorp Inc.', 't-out', 300],
+    ['', 't-dim', 200],
+    ['# Search LinkedIn for employees...', 't-dim', 300],
+    ['python3 linkedin_scrape.py --company techcorp', 't-cmd', 400, true],
+    ['  [FOUND] sarah.johnson@techcorp.com — Finance Manager', 't-hit', 700],
+    ['  [FOUND] mike.chen@techcorp.com — IT Admin', 't-hit', 400],
+    ['', 't-dim', 200],
+    ['# Check HaveIBeenPwned database for leaked passwords...', 't-dim', 300],
+    ['python3 breach_check.py --email sarah.johnson@techcorp.com', 't-cmd', 400, true],
+    ['  [!] Email found in 2 data breaches', 't-warn', 600],
+    ['  [!] Common password patterns identified', 't-warn', 400],
+    ['', 't-dim', 100],
+    ['# Target selected. Now build the fake site.', 't-dim', 400],
+  ]);
+
+  showView('v-desktop');
+  setTimeout(() => {
+    const ann = document.getElementById('ann-mail');
+    if (ann) ann.classList.add('show');
+  }, 1200);
+
+  showNextBtn('Next: Build Fake Website →');
+}
+
+async function stage2_setup() {
+  setStep(1);
+  setStageTitle('<strong>Step 2:</strong> Attacker builds a fake website');
+  setStatus('PHISH SITE LIVE', true);
+
+  setNarrate('Now the attacker <strong>clones the Amazon login page</strong> and hosts it on a server with a domain that looks almost identical. The only difference: <em>amaz<strong style="color:var(--red)">0</strong>n</em> — a zero instead of the letter O. Most people don\'t notice.');
+
+  await runLines([
+    ['', 't-dim', 200],
+    ['# Step 2 — Clone Amazon login page & host it', 't-dim', 100],
+    ['git clone https://github.com/kit/amazon-clone', 't-cmd', 500, true],
+    ['  Cloning...  done.', 't-out', 700],
+    ['', 't-dim', 200],
+    ['# Register a lookalike domain', 't-dim', 300],
+    ['python3 register_domain.py --name "amaz0n-secure-login.com"', 't-cmd', 400, true],
+    ['  [OK] Domain registered for $8.99', 't-info', 700],
+    ['', 't-dim', 200],
+    ['# Install credential harvester (captures any login typed)', 't-dim', 300],
+    ['./install_harvester.sh --site amazon --target amaz0n-secure-login.com', 't-cmd', 400, true],
+    ['  [OK] Harvester installed', 't-info', 500],
+    ['  [OK] Stolen creds → attacker@protonmail.com', 't-info', 400],
+    ['  [OK] Auto-redirect to real amazon.com after theft', 't-info', 400],
+    ['', 't-dim', 200],
+    ['  FAKE SITE LIVE: amaz0n-secure-login.com', 't-hit', 600],
+    ['  Looks 100% identical to real Amazon login.', 't-hit', 300],
+  ]);
+
+  showNextBtn('Next: Send the Phishing Email →');
+}
+
+async function stage3_sendEmail() {
+  setStep(2);
+  setStageTitle('<strong>Step 3:</strong> Phishing email sent to victim');
+  setStatus('EMAIL DEPLOYED', true);
+  showView('v-inbox');
+  setTimeout(showToast, 800);
+
+  setNarrate('The attacker sends a carefully crafted email <strong>designed to cause fear and urgency</strong>. The subject line mentions a scary charge. The sender looks almost like Amazon. The goal: make Sarah panic and click without thinking.');
+
+  await runLines([
+    ['', 't-dim', 200],
+    ['# Step 3 — Craft and send the phishing email', 't-dim', 100],
+    ['cat phish_template.txt', 't-cmd', 400, true],
+    ['  FROM:    Amazon Security <security@amaz0n.com>', 't-out', 500],
+    ['  SUBJECT: URGENT — Suspicious $239 charge on your account', 't-out', 400],
+    ['  BODY:    Fear + urgency + fake link to our site', 't-out', 400],
+    ['', 't-dim', 200],
+    ['python3 send_email.py --target sarah.johnson@techcorp.com', 't-cmd', 400, true],
+    ['  [SEND] Delivering... (spoofed as Amazon)', 't-warn', 700],
+    ['  [OK]   Email delivered to inbox!', 't-hit', 600],
+    ['  [WAIT] Tracking pixel active — will alert when opened', 't-info', 400],
+    ['', 't-dim', 200],
+    ['# Now we wait for Sarah to open her email...', 't-dim', 500],
+  ]);
+
+  setNarrate('Email delivered! Sarah sees an <strong>urgent Amazon alert</strong> in her inbox. The attacker now waits. <strong>Click the email</strong> to see what Sarah sees when she opens it.');
+  showNextBtn('Open the Email →');
+}
+
+async function stage4_openEmail() {
+  setStep(3);
+  setStageTitle('<strong>Step 4:</strong> Victim opens the email');
+  setStatus('EMAIL OPENED — TARGET ACTIVE', true);
+  showView('v-email-open');
+  document.getElementById('login-warning').style.display = 'none';
+
+  await runLines([
+    ['', 't-dim', 200],
+    ['  [TRACK] Email opened: 11:47 AM — Chrome on Windows', 't-warn', 800],
+    ['  [TRACK] Location resolved: New York, USA', 't-out', 500],
+    ['  [WAIT]  Waiting for link click...', 't-dim', 400],
+  ]);
+
+  setNarrate('Sarah opened the email. Now she faces a choice. <strong>Look at the email carefully</strong> — can you spot the trick? The sender says "Amazon Security" but the email address says <em>security@amaz<strong style="color:var(--red)">0</strong>n.com</em>. And hovering the button reveals the fake URL.');
+
+  setStep(4);
+  showDecisionBtns();
+  setNarrate('⚡ <strong>Decision time:</strong> What does Sarah do?');
+}
+
+// ── SAFE PATH ──
+async function chooseSafe() {
+  removeDecisionBtns();
+  setStageTitle('<strong>Result:</strong> Smart move — she didn\'t take the bait ✅');
+  setStatus('ATTACK FAILED', false);
+  showView('v-safe-browser');
+
+  await runLines([
+    ['', 't-dim', 200],
+    ['  [TRACK] Link click: NONE', 't-out', 800],
+    ['  [WARN]  Target opened browser manually — went to amazon.com', 't-warn', 700],
+    ['  [FAIL]  Credentials NOT captured.', 't-err', 500],
+    ['  [INFO]  Attack failed for this target.', 't-err', 400],
+    ['', 't-dim', 300],
+    ['# Phishing only needs a ~5% success rate to be profitable.', 't-dim', 500],
+    ['# Thousands of emails are sent — some will always fall for it.', 't-dim', 400],
+  ]);
+
+  await sleep(1800);
+  showOutcome('safe',
+    '✅',
+    'ATTACK BLOCKED',
+    'Sarah went directly to <strong>Amazon.com</strong> instead of clicking the email link. The fake site was never visited. Her credentials are completely safe.',
+    '<strong>What protected her:</strong> She opened Amazon\'s website herself rather than trusting the link. A password manager would have also refused to auto-fill on a fake domain — and multi-factor authentication (MFA) would have been a final safety net.'
+  );
+}
+
+// ── UNSAFE PATH ──
+async function chooseUnsafe() {
+  removeDecisionBtns();
+  setStageTitle('<strong>Result:</strong> She clicked — credentials being stolen ❌');
+  setStatus('CREDENTIALS CAPTURED', true);
+  showView('v-fake-browser');
+  setTimeout(() => {
+    document.getElementById('login-warning').style.display = 'block';
+  }, 600);
+
+  await runLines([
+    ['', 't-dim', 200],
+    ['  [HIT!]  Link clicked! Victim landed on our fake site.', 't-hit', 600],
+    ['  [HIT!]  URL: amaz0n-secure-login.com', 't-hit', 400],
+    ['  [WAIT]  Waiting for login submission...', 't-warn', 500],
+  ]);
+
+  setNarrate('Sarah clicked the link and landed on the <strong>fake Amazon page</strong>. It looks completely real — same logo, same layout. She doesn\'t notice the URL. She types her email and password...');
+}
+
+// Called when victim submits the fake form
+async function submitFakeCreds() {
+  const email = document.getElementById('fake-email').value || 'sarah.johnson@techcorp.com';
+  const pass  = document.getElementById('fake-pass').value  || '(hidden)';
+
+  await runLines([
+    ['', 't-dim', 100],
+    ['  ╔══════════════════════════════════════╗', 't-hit', 300],
+    ['  ║  💀 CREDENTIALS STOLEN               ║', 't-hit', 200],
+    [`  ║  Email:    ${email}`, 't-hit', 200],
+    [`  ║  Password: ${pass}`, 't-hit', 200],
+    ['  ╚══════════════════════════════════════╝', 't-hit', 200],
+    ['  [OK]  Victim silently redirected to real amazon.com', 't-out', 500],
+    ['  [OK]  She sees no error. She won\'t suspect a thing.', 't-out', 400],
+    ['', 't-dim', 300],
+    ['  [NEXT] Testing stolen creds on Gmail, banking sites...', 't-warn', 700],
+  ]);
+
+  await sleep(1800);
+  showOutcome('unsafe',
+    '🚨',
+    'CREDENTIALS STOLEN',
+    'Sarah typed her email and password into the fake site. They were <strong>instantly sent to the attacker</strong>. She was then quietly redirected to real Amazon — she may never know it happened.',
+    '<strong>What would have stopped this:</strong> (1) Always check the URL before entering a password. (2) A password manager refuses to fill on fake domains. (3) Multi-factor authentication (MFA/2FA) means the attacker still can\'t log in — even with the correct password. (4) Never click links in unexpected emails — go to the website directly.'
+  );
+}
+
+function showOutcome(type, icon, title, text, lesson) {
+  const overlay = document.getElementById('outcome-overlay');
+  document.getElementById('outcome-icon').textContent  = icon;
+  document.getElementById('outcome-title').textContent = title;
+  document.getElementById('outcome-text').innerHTML    = text;
+  document.getElementById('outcome-lesson').innerHTML  = lesson;
+  overlay.className = `outcome-overlay show outcome-${type}`;
+}
+
+// ── Advance ──
+function advance() {
+  currentStage++;
+  hideNextBtn();
+  switch (currentStage) {
+    case 1: stage1_recon();     break;
+    case 2: stage2_setup();     break;
+    case 3: stage3_sendEmail(); break;
+    case 4: stage4_openEmail(); break;
+  }
+}
+
+function clickEmail() {
+  if (currentStage >= 3) stage4_openEmail();
+}
+
+// ── Reset ──
+function resetSim() {
+  currentStage = 0;
+
+  term().innerHTML = `
+    <div class="t-line t-head">╔══════════════════════════════════════╗</div>
+    <div class="t-line t-head">║  CYBERSIM v3.0 — ATTACK LAB          ║</div>
+    <div class="t-line t-head">╚══════════════════════════════════════╝</div>
+    <div class="t-line t-dim">  Sandboxed · Educational · No real systems</div>
+    <div class="t-line t-dim"> </div>
+    <div class="t-line"><span class="t-prompt">attacker@kali:~$ </span><span class="cursor"></span></div>
+  `;
+
+  showView('v-idle');
+  buildSteps();
+  removeDecisionBtns();
+  document.getElementById('outcome-overlay').className = 'outcome-overlay';
+
+  const fe = document.getElementById('fake-email');
+  const fp = document.getElementById('fake-pass');
+  if (fe) fe.value = '';
+  if (fp) fp.value = '';
+  const lw = document.getElementById('login-warning');
+  if (lw) lw.style.display = 'none';
+
+  const nb = document.getElementById('btn-next');
+  nb.style.display = 'block';
+  nb.textContent   = '▶ START SIMULATION';
+  nb.disabled      = false;
+
+  document.getElementById('btn-reset').style.display = 'none';
+
+  setNarrate('Watch a real phishing attack happen step by step — from the attacker\'s keyboard to the victim\'s screen. <strong>Press Start.</strong>');
+  setStageTitle('Press <strong>Start</strong> to begin');
+  setStatus('SANDBOX READY', false);
+}
+
+// ════════════════════════════════════════════════
+// WINDOW MANAGEMENT
+// ════════════════════════════════════════════════
+
+document.querySelectorAll('.window').forEach(w => {
+  w.addEventListener('mousedown', () => focusWin(w.id));
 });
+
+function focusWin(id) {
+  document.querySelectorAll('.window').forEach(w => {
+    w.classList.remove('active');
+    w.style.zIndex = '10';
+  });
+  const win = document.getElementById(id);
+  if (!win) return;
+  win.classList.add('active');
+  win.style.zIndex = '100';
+  win.classList.remove('minimized');
+
+  document.querySelectorAll('.tb-btn').forEach(b => b.classList.remove('active'));
+  const tbId = 'tb-' + id.replace('-win','');
+  const tb = document.getElementById(tbId);
+  if (tb) tb.classList.add('active');
+}
+
+function minimizeWin(id) {
+  const win = document.getElementById(id);
+  if (win) win.classList.add('minimized');
+}
+
+function openWin(id) {
+  const win = document.getElementById(id);
+  if (win) { win.classList.remove('minimized'); focusWin(id); }
+}
+
+function toggleWin(winId, btnId) {
+  const win = document.getElementById(winId);
+  if (!win) return;
+  if (win.classList.contains('minimized')) {
+    openWin(winId);
+  } else if (win.classList.contains('active')) {
+    minimizeWin(winId);
+    document.getElementById(btnId)?.classList.remove('active');
+  } else {
+    focusWin(winId);
+  }
+}
+
+// Drag
+let dragWin = null, dragOffX = 0, dragOffY = 0;
+document.querySelectorAll('.win-bar').forEach(bar => {
+  bar.addEventListener('mousedown', e => {
+    if (e.button !== 0) return;
+    dragWin  = bar.closest('.window');
+    const r  = dragWin.getBoundingClientRect();
+    dragOffX = e.clientX - r.left;
+    dragOffY = e.clientY - r.top;
+    focusWin(dragWin.id);
+    e.preventDefault();
+  });
+});
+
+document.addEventListener('mousemove', e => {
+  if (!dragWin) return;
+  const d = document.getElementById('desktop').getBoundingClientRect();
+  dragWin.style.left   = (e.clientX - d.left  - dragOffX) + 'px';
+  dragWin.style.top    = (e.clientY - d.top   - dragOffY) + 'px';
+  dragWin.style.right  = 'auto';
+  dragWin.style.bottom = 'auto';
+});
+
+document.addEventListener('mouseup', () => { dragWin = null; });
+
 </script>
 </body>
 </html>

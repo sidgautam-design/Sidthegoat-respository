@@ -4,12 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
     <link rel ="stylesheet" href="styles2.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 </head>
 <body>
+  <div class="dropdown">
+  <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Menu
+  </button>
+  <ul class="dropdown-menu">
+    <li><a class="dropdown-item" "btn btn-secondary" href="index3.html">Simulation</a></li>
+    <li><a class="dropdown-item" href="index.html">Homepage</a></li>
+  </ul>
+</div>
     <header>
 <h1 id="heading1">Cybersecurity Education Fundamentals</h1> </header> 
-<img src="wall-talking.gif" width="700" height="320">
-<a href="index.html"><button>Homepage</button></a>
+
 <details id="cybersecurity">
     <summary>What is Cybersecurity?</summary>
     <p> The definition of Cybersecurity is protecting computers, networks, systems, and keeping data save that can be subjected to unauthorized use. 
@@ -37,13 +46,34 @@
 
 <details id="cybersecurity">
     <summary>What’s the difference between a threat, vulnerability, and risk?</summary> 
-   <p>Threat = potential attacker/event, vulnerability = weakness, risk = likelihood × impact that the threat exploits the vulnerability.</p>
+   <p>Threat
+A threat is anything that has the potential to cause harm to a system, network, or data.
+Example: Hackers, malware, natural disasters.
+
+Vulnerability
+A vulnerability is a weakness or gap in a system that a threat can exploit.
+Example: Outdated software, weak passwords, unpatched security flaws.
+
+Risk
+Risk is the chance that a threat will exploit a vulnerability and cause damage.
+Simple way to think about it:
+Risk = Threat × Vulnerability</p>
 </details> 
 
 <details id="cybersecurity">
     <summary>What is a virus, worm, trojan, and ransomware?</summary> 
-   <p>Threat = potential attacker/event, vulnerability = weakness, risk = likelihood × impact that the threat exploits the vulnerability.</p>
+   <p>Virus
+A virus is malicious code that attaches itself to a file or program and spreads when that file is opened or shared. It usually requires user action to activate.
 
+Worm
+A worm is malware that spreads automatically across networks without needing user interaction. It can replicate itself rapidly and consume system resources.
+
+Trojan (Trojan Horse)
+A trojan is malware disguised as legitimate or useful software. Once installed, it can give attackers access to the system or steal data.
+
+Ransomware
+Ransomware is malware that locks or encrypts a victim’s files and demands payment (a ransom) to restore access.</p>
 <script src="script.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 </body>
 </html>
