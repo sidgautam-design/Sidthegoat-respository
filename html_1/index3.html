@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cybersecurity Hero Simulation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #050a0e;
+      --panel: #0b1520;
+      --panel2: #0f1e2e;
+      --cyan: #00f5d4;
+      --blue: #00b4d8;
+      --purple: #9b5de5;
+      --red: #ff4d6d;
+      --yellow: #ffd60a;
+      --green: #06d6a0;
+      --text: #e0f7fa;
+      --muted: #607d8b;
+      --border: rgba(0,245,212,0.15);
+      --glow-cyan: 0 0 20px rgba(0,245,212,0.4);
+      --glow-red: 0 0 20px rgba(255,77,109,0.4);
+      --glow-green: 0 0 20px rgba(6,214,160,0.4);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Exo 2', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      background-image:
+        radial-gradient(ellipse at 20% 20%, rgba(0,180,216,0.05) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(155,93,229,0.05) 0%, transparent 50%);
+    }
+
+    /* Scanline overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.03) 2px,
+        rgba(0,0,0,0.03) 4px
+      );
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    /* ── HEADER ── */
+    header {
+      text-align: center;
+      padding: 40px 20px 20px;
+      position: relative;
+    }
+    header h1 {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(1.4rem, 4vw, 2.6rem);
+      font-weight: 900;
+      letter-spacing: 2px;
+      background: linear-gradient(90deg, var(--cyan), var(--blue), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: none;
+      filter: drop-shadow(0 0 20px rgba(0,245,212,0.5));
+    }
+    header p {
+      margin-top: 8px;
+      color: var(--muted);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+    }
+
+    /* ── SCORE BAR ── */
+    #scorebar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+      padding: 16px 20px;
+      background: var(--panel);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .score-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .score-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .score-value {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--cyan);
+      text-shadow: var(--glow-cyan);
+      transition: all 0.3s;
+    }
+    .score-value.bump {
+      transform: scale(1.4);
+      color: var(--yellow);
+    }
+
+    /* ── PROGRESS DOTS ── */
+    #progress-dots {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      padding: 20px;
+    }
+    .dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: var(--muted);
+      transition: all 0.4s;
+      border: 2px solid transparent;
+    }
+    .dot.active { background: var(--cyan); border-color: var(--cyan); box-shadow: var(--glow-cyan); }
+    .dot.done { background: var(--green); border-color: var(--green); }
+
+    /* ── MAIN CONTAINER ── */
+    #app {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 20px 60px;
+    }
+
+    /* ── SCENARIO CARD ── */
+    .scenario-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      position: relative;
+      overflow: hidden;
+      animation: slideIn 0.5s ease;
+    }
+    .scenario-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--cyan), var(--purple));
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .scenario-badge {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 3px;
+      color: var(--cyan);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .scenario-badge::before {
+      content: '▶';
+      color: var(--purple);
+    }
+
+    .scenario-title {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(1.1rem, 3vw, 1.6rem);
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .scenario-desc {
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+
+    /* ── BUTTONS ── */
+    .btn-row {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 24px;
+    }
+    .btn {
+      padding: 13px 28px;
+      border: 2px solid;
+      border-radius: 8px;
+      font-family: 'Orbitron', monospace;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      cursor: pointer;
+      background: transparent;
+      transition: all 0.2s;
+      text-transform: uppercase;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: currentColor;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .btn:hover::after { opacity: 0.08; }
+    .btn:active { transform: scale(0.97); }
+
+    .btn-safe  { color: var(--green);  border-color: var(--green);  }
+    .btn-safe:hover  { box-shadow: var(--glow-green); }
+    .btn-danger { color: var(--red);   border-color: var(--red);    }
+    .btn-danger:hover { box-shadow: var(--glow-red); }
+    .btn-primary { color: var(--cyan); border-color: var(--cyan);   }
+    .btn-primary:hover { box-shadow: var(--glow-cyan); }
+    .btn-warn  { color: var(--yellow); border-color: var(--yellow); }
+    .btn-warn:hover  { box-shadow: 0 0 20px rgba(255,214,10,0.4); }
+
+    /* ── FEEDBACK PANEL ── */
+    #feedback {
+      margin-top: 24px;
+      padding: 20px 24px;
+      border-radius: 10px;
+      border-left: 4px solid;
+      font-size: 0.95rem;
+      line-height: 1.7;
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+    #feedback.correct {
+      border-color: var(--green);
+      background: rgba(6,214,160,0.07);
+      color: var(--green);
+    }
+    #feedback.wrong {
+      border-color: var(--red);
+      background: rgba(255,77,109,0.07);
+      color: #ff8fa3;
+    }
+    #feedback .feedback-icon {
+      font-size: 1.6rem;
+      display: block;
+      margin-bottom: 8px;
+    }
+    #feedback strong {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateX(-10px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    .next-btn {
+      margin-top: 18px;
+      display: none;
+    }
+
+    /* ── SCENARIO 1: EMAIL ── */
+    .email-card {
+      background: #0a1929;
+      border: 1px solid rgba(0,245,212,0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      font-family: 'Share Tech Mono', monospace;
+    }
+    .email-header {
+      background: #061120;
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(0,245,212,0.1);
+    }
+    .email-field {
+      font-size: 0.78rem;
+      margin: 3px 0;
+      color: var(--muted);
+    }
+    .email-field span { color: var(--text); }
+    .email-field .suspicious { color: var(--red); }
+    .email-subject {
+      font-size: 0.95rem;
+      color: var(--yellow);
+      margin-top: 8px;
+      font-weight: bold;
+    }
+    .email-body {
+      padding: 18px;
+      font-size: 0.82rem;
+      line-height: 1.8;
+      color: #b0c4cc;
+    }
+    .email-body .link {
+      color: var(--red);
+      text-decoration: underline;
+      cursor: default;
+    }
+    .red-flags {
+      margin-top: 14px;
+      padding: 12px 16px;
+      background: rgba(255,77,109,0.06);
+      border-radius: 8px;
+      border: 1px dashed rgba(255,77,109,0.3);
+    }
+    .red-flags h4 {
+      font-size: 0.72rem;
+      letter-spacing: 2px;
+      color: var(--red);
+      font-family: 'Share Tech Mono', monospace;
+      margin-bottom: 6px;
+    }
+    .red-flag-item {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin: 4px 0;
+      padding-left: 12px;
+      position: relative;
+    }
+    .red-flag-item::before {
+      content: '⚠';
+      position: absolute;
+      left: -4px;
+      color: var(--yellow);
+    }
+
+    /* ── SCENARIO 2: PASSWORD ── */
+    .pw-input-wrap {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    .pw-input {
+      width: 100%;
+      padding: 14px 18px;
+      background: #061120;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 1rem;
+      letter-spacing: 2px;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+    .pw-input:focus { border-color: var(--cyan); box-shadow: var(--glow-cyan); }
+
+    .strength-bar-wrap {
+      height: 8px;
+      background: #061120;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .strength-bar {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.5s ease, background 0.5s ease;
+      width: 0%;
+    }
+
+    .strength-label {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      margin-bottom: 16px;
+    }
+
+    .pw-criteria {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .criterion {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      transition: color 0.3s;
+    }
+    .criterion.met { color: var(--green); }
+    .criterion .check {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      border: 2px solid currentColor;
+      display: grid;
+      place-items: center;
+      font-size: 0.6rem;
+      flex-shrink: 0;
+      transition: all 0.3s;
+    }
+    .criterion.met .check {
+      background: var(--green);
+      border-color: var(--green);
+      color: #000;
+    }
+
+    /* ── SCENARIO 3: UPDATE POPUP ── */
+    .desktop-mock {
+      background: #020810;
+      border-radius: 10px;
+      padding: 30px;
+      position: relative;
+      border: 1px solid rgba(0,180,216,0.1);
+      min-height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .desktop-mock .bg-icons {
+      position: absolute;
+      inset: 0;
+      opacity: 0.03;
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      align-items: center;
+      justify-items: center;
+      font-size: 1.5rem;
+      padding: 10px;
+      pointer-events: none;
+    }
+    .update-popup {
+      background: var(--panel2);
+      border: 1px solid rgba(0,245,212,0.3);
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 340px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.8), var(--glow-cyan);
+      animation: popIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+      position: relative;
+      z-index: 2;
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.7); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+    .popup-icon {
+      font-size: 2.5rem;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .popup-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.95rem;
+      color: var(--cyan);
+      text-align: center;
+      margin-bottom: 6px;
+    }
+    .popup-version {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 14px;
+    }
+    .popup-desc {
+      font-size: 0.82rem;
+      color: #7ecfdf;
+      line-height: 1.6;
+      margin-bottom: 18px;
+      text-align: center;
+    }
+    .popup-btns {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .popup-btn {
+      padding: 10px;
+      border-radius: 7px;
+      font-family: 'Orbitron', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 1px;
+      cursor: pointer;
+      border: 2px solid;
+      background: transparent;
+      transition: all 0.2s;
+      text-transform: uppercase;
+    }
+    .popup-btn.good { color: var(--green); border-color: var(--green); }
+    .popup-btn.good:hover { background: rgba(6,214,160,0.1); box-shadow: var(--glow-green); }
+    .popup-btn.bad  { color: var(--muted); border-color: #2a3a4a; }
+    .popup-btn.bad:hover  { background: rgba(255,77,109,0.05); color: var(--red); border-color: var(--red); }
+
+    /* ── RESULTS SCREEN ── */
+    #results-screen {
+      display: none;
+      text-align: center;
+      animation: slideIn 0.6s ease;
+    }
+    .results-trophy {
+      font-size: 5rem;
+      margin: 20px 0;
+      animation: bounce 1s infinite alternate;
+    }
+    @keyframes bounce {
+      from { transform: translateY(0); }
+      to   { transform: translateY(-10px); }
+    }
+    .results-title {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(1.2rem, 4vw, 2rem);
+      font-weight: 900;
+      margin-bottom: 10px;
+      background: linear-gradient(90deg, var(--cyan), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .results-score-big {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(2rem, 8vw, 4rem);
+      font-weight: 900;
+      color: var(--yellow);
+      text-shadow: 0 0 30px rgba(255,214,10,0.5);
+      margin: 10px 0;
+    }
+    .results-msg {
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.7;
+      max-width: 500px;
+      margin: 0 auto 30px;
+    }
+    .results-breakdown {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
+    }
+    .result-chip {
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.82rem;
+      border: 1px solid;
+    }
+    .result-chip.pass { color: var(--green); border-color: var(--green); background: rgba(6,214,160,0.07); }
+    .result-chip.fail { color: var(--red);   border-color: var(--red);   background: rgba(255,77,109,0.07); }
+
+    .replay-btn {
+      padding: 14px 36px;
+      background: linear-gradient(135deg, rgba(0,245,212,0.15), rgba(155,93,229,0.15));
+      border: 2px solid var(--cyan);
+      border-radius: 10px;
+      color: var(--cyan);
+      font-family: 'Orbitron', monospace;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+    }
+    .replay-btn:hover {
+      box-shadow: var(--glow-cyan);
+      transform: translateY(-2px);
+    }
+
+    /* Particle burst */
+    .particle {
+      position: fixed;
+      pointer-events: none;
+      font-size: 1.2rem;
+      animation: particle-fly 1s ease forwards;
+      z-index: 9999;
+    }
+    @keyframes particle-fly {
+      from { opacity: 1; transform: translate(0,0) scale(1); }
+      to   { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0.3); }
+    }
+
+    /* disabled */
+    .btn:disabled, .popup-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    @media (max-width: 500px) {
+      .pw-criteria { grid-template-columns: 1fr; }
+      .btn-row { flex-direction: column; }
+      .scenario-card { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🛡 Cybersecurity Hero Simulation</h1>
+  <p>// TRAIN · PROTECT · DEFEND //</p>
+</header>
+
+<div id="scorebar">
+  <div class="score-item">
+    <span class="score-label">Score</span>
+    <span class="score-value" id="score-display">0</span>
+  </div>
+  <div class="score-item">
+    <span class="score-label">Scenario</span>
+    <span class="score-value" id="scenario-num">1 / 3</span>
+  </div>
+  <div class="score-item">
+    <span class="score-label">Rank</span>
+    <span class="score-value" id="rank-display" style="font-size:0.9rem">RECRUIT</span>
+  </div>
+</div>
+
+<div id="progress-dots">
+  <div class="dot active" id="dot-0"></div>
+  <div class="dot" id="dot-1"></div>
+  <div class="dot" id="dot-2"></div>
+</div>
+
+<div id="app">
+
+  <!-- ══ SCENARIO 1 ══ -->
+  <div id="scenario-1" class="scenario-card">
+    <div class="scenario-badge">Scenario 01 — Phishing Detection</div>
+    <div class="scenario-title">Suspicious Email Received</div>
+    <p class="scenario-desc">You just got this email. Is it safe, or is it a phishing attack? Analyze carefully!</p>
+
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-field">FROM: <span class="suspicious">security-alerts@paypa1-support.net</span></div>
+        <div class="email-field">TO: <span>you@youremail.com</span></div>
+        <div class="email-field">TIME: <span>Today, 2:47 AM</span></div>
+        <div class="email-subject">⚠️ URGENT: Your account has been SUSPENDED!</div>
+      </div>
+      <div class="email-body">
+        Dear Valued Customer,<br><br>
+        We have detected <strong style="color:#ff8fa3">suspicious activity</strong> on your PayPal account. Your account will be permanently deleted in <strong style="color:#ff8fa3">24 hours</strong> unless you verify your identity immediately.<br><br>
+        Click here to restore your account now:<br>
+        <span class="link">→ http://paypa1-verify-login.xyz/restore?token=abc123</span><br><br>
+        Regards,<br>
+        PayPal Security Team™
+      </div>
+    </div>
+
+    <div class="red-flags" id="flags-hint" style="display:none">
+      <h4>⚠ RED FLAGS SPOTTED</h4>
+      <div class="red-flag-item">Sender domain is "paypa1-support.net" (fake! uses number 1 not letter l)</div>
+      <div class="red-flag-item">Sent at 2:47 AM — bots don't sleep</div>
+      <div class="red-flag-item">Creates panic with "24 hours" urgency</div>
+      <div class="red-flag-item">Link goes to "paypa1-verify-login.xyz" — NOT paypal.com</div>
+      <div class="red-flag-item">No personal name used — just "Valued Customer"</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-safe" onclick="answer(1, true)">✅ Block It — It's Phishing</button>
+      <button class="btn btn-danger" onclick="answer(1, false)">❌ Trust It — Looks Legit</button>
+    </div>
+
+    <div id="feedback"></div>
+    <button class="btn btn-primary next-btn" id="next-1" onclick="goToScenario(2)">NEXT SCENARIO →</button>
+  </div>
+
+  <!-- ══ SCENARIO 2 ══ -->
+  <div id="scenario-2" class="scenario-card" style="display:none">
+    <div class="scenario-badge">Scenario 02 — Password Strength</div>
+    <div class="scenario-title">Build a Strong Password</div>
+    <p class="scenario-desc">Type a password below and watch it get analyzed in real time. Hit "Submit" when you have a Strong or Very Strong password!</p>
+
+    <div class="pw-input-wrap">
+      <input type="text" class="pw-input" id="pw-input" placeholder="Type your password here..." oninput="checkPassword()" autocomplete="off" spellcheck="false"/>
+    </div>
+
+    <div class="strength-bar-wrap">
+      <div class="strength-bar" id="strength-bar"></div>
+    </div>
+    <div class="strength-label" id="strength-label" style="color: var(--muted)">Strength: —</div>
+
+    <div class="pw-criteria">
+      <div class="criterion" id="c-length"><div class="check">✓</div> 8+ characters</div>
+      <div class="criterion" id="c-upper"><div class="check">✓</div> Uppercase letter</div>
+      <div class="criterion" id="c-lower"><div class="check">✓</div> Lowercase letter</div>
+      <div class="criterion" id="c-number"><div class="check">✓</div> Number</div>
+      <div class="criterion" id="c-special"><div class="check">✓</div> Special character (!@#$...)</div>
+      <div class="criterion" id="c-long"><div class="check">✓</div> 12+ characters (bonus)</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="pw-submit" onclick="submitPassword()" disabled>SUBMIT PASSWORD</button>
+    </div>
+
+    <div id="feedback"></div>
+    <button class="btn btn-primary next-btn" id="next-2" onclick="goToScenario(3)">NEXT SCENARIO →</button>
+  </div>
+
+  <!-- ══ SCENARIO 3 ══ -->
+  <div id="scenario-3" class="scenario-card" style="display:none">
+    <div class="scenario-badge">Scenario 03 — Software Updates</div>
+    <div class="scenario-title">Update Notification</div>
+    <p class="scenario-desc">A system update is available. Updates often contain critical security patches. What do you do?</p>
+
+    <div class="desktop-mock">
+      <div class="bg-icons">
+        <span>📁</span><span>🖥</span><span>📊</span><span>🔒</span>
+        <span>📧</span><span>🌐</span><span>⚙️</span><span>📷</span>
+        <span>🎵</span><span>📝</span><span>🔍</span><span>💾</span>
+        <span>📁</span><span>🖥</span><span>📊</span><span>🔒</span>
+      </div>
+      <div class="update-popup">
+        <div class="popup-icon">🔐</div>
+        <div class="popup-title">Security Update Available</div>
+        <div class="popup-version">Version 14.7.2 — Critical Patch</div>
+        <div class="popup-desc">This update patches <strong style="color:var(--red)">3 critical vulnerabilities</strong> that hackers are actively exploiting. Your data may be at risk without it.</div>
+        <div class="popup-btns">
+          <button class="popup-btn good" id="update-now" onclick="answer(3, true)">🔄 Update Now</button>
+          <button class="popup-btn bad" id="update-later" onclick="answer(3, false)">⏰ Remind Me in 10 Years</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="feedback"></div>
+    <button class="btn btn-primary next-btn" id="next-3" onclick="showResults()">SEE MY RESULTS →</button>
+  </div>
+
+  <!-- ══ RESULTS ══ -->
+  <div id="results-screen">
+    <div class="results-trophy" id="results-trophy">🏆</div>
+    <div class="results-title" id="results-title">Mission Complete!</div>
+    <div class="results-score-big" id="results-score">0 pts</div>
+    <p class="results-msg" id="results-msg"></p>
+    <div class="results-breakdown" id="results-breakdown"></div>
+    <button class="replay-btn" onclick="restartGame()">↺ PLAY AGAIN</button>
+  </div>
+
+</div>
+
+<script>
+  const state = {
+    score: 0,
+    results: [],
+    pwStrong: false,
+  };
+
+  const ranks = [
+    { min: 0,   label: 'RECRUIT',    color: '#607d8b' },
+    { min: 100, label: 'ANALYST',    color: '#00b4d8' },
+    { min: 200, label: 'DEFENDER',   color: '#06d6a0' },
+    { min: 300, label: 'CYBER HERO', color: '#ffd60a' },
+  ];
+
+  function updateRank() {
+    const rank = [...ranks].reverse().find(r => state.score >= r.min) || ranks[0];
+    const el = document.getElementById('rank-display');
+    el.textContent = rank.label;
+    el.style.color = rank.color;
+  }
+
+  function addScore(pts) {
+    state.score += pts;
+    const el = document.getElementById('score-display');
+    el.textContent = state.score;
+    el.classList.add('bump');
+    setTimeout(() => el.classList.remove('bump'), 400);
+    updateRank();
+  }
+
+  // ── SCENARIO 1: PHISHING ──
+  function answer(scenario, correct) {
+    const fb = document.getElementById('feedback');
+    const btns = document.querySelectorAll(`#scenario-${scenario} .btn, #scenario-${scenario} .popup-btn`);
+    btns.forEach(b => b.disabled = true);
+
+    if (scenario === 1) {
+      document.getElementById('flags-hint').style.display = 'block';
+      if (correct) {
+        fb.className = 'correct'; fb.style.display = 'block';
+        fb.innerHTML = `<span class="feedback-icon">🎉</span><strong>CORRECT! +100 PTS</strong><br>
+          Great eye! This was a classic phishing email. The fake domain "paypa1-support.net" (using the number 1), the fake urgency, and the suspicious link to ".xyz" are dead giveaways. Real companies never ask for login details via email.`;
+        addScore(100);
+        state.results.push({ label: 'Phishing Detection', pass: true });
+      } else {
+        fb.className = 'wrong'; fb.style.display = 'block';
+        fb.innerHTML = `<span class="feedback-icon">🚨</span><strong>PHISHING DETECTED! +0 PTS</strong><br>
+          That email was a phishing scam! Notice the fake domain "paypa1-support.net" using a number 1 instead of the letter l. The link goes to ".xyz" — not paypal.com. The urgency and generic greeting are also red flags. Never click links in suspicious emails!`;
+        state.results.push({ label: 'Phishing Detection', pass: false });
+      }
+      document.getElementById('next-1').style.display = 'inline-block';
+    }
+
+    if (scenario === 3) {
+      if (correct) {
+        fb.className = 'correct'; fb.style.display = 'block';
+        fb.innerHTML = `<span class="feedback-icon">✅</span><strong>SMART CHOICE! +100 PTS</strong><br>
+          Updating immediately is always the right call. Security patches fix known vulnerabilities — hackers exploit unpatched systems within hours of a vulnerability being made public. Keeping software up to date is one of the easiest ways to stay protected.`;
+        addScore(100);
+        state.results.push({ label: 'Software Updates', pass: true });
+      } else {
+        fb.className = 'wrong'; fb.style.display = 'block';
+        fb.innerHTML = `<span class="feedback-icon">💀</span><strong>SYSTEM COMPROMISED! +0 PTS</strong><br>
+          Delaying updates is extremely risky. Hackers scan the internet 24/7 for unpatched systems. Those 3 critical vulnerabilities? Cybercriminals could use them to steal your data, install ransomware, or spy on your activity. Always update ASAP!`;
+        state.results.push({ label: 'Software Updates', pass: false });
+      }
+      document.getElementById('next-3').style.display = 'inline-block';
+    }
+
+    spawnParticles(correct);
+  }
+
+  // ── SCENARIO 2: PASSWORD ──
+  function checkPassword() {
+    const pw = document.getElementById('pw-input').value;
+
+    const checks = {
+      length:  pw.length >= 8,
+      upper:   /[A-Z]/.test(pw),
+      lower:   /[a-z]/.test(pw),
+      number:  /[0-9]/.test(pw),
+      special: /[^a-zA-Z0-9]/.test(pw),
+      long:    pw.length >= 12,
+    };
+
+    const ids = { length:'c-length', upper:'c-upper', lower:'c-lower', number:'c-number', special:'c-special', long:'c-long' };
+    Object.keys(checks).forEach(k => {
+      document.getElementById(ids[k]).classList.toggle('met', checks[k]);
+    });
+
+    const score = Object.values(checks).filter(Boolean).length;
+    const bar = document.getElementById('strength-bar');
+    const label = document.getElementById('strength-label');
+
+    const levels = [
+      { pct: 0,   color: '#333',          text: 'Strength: —',          strong: false },
+      { pct: 15,  color: '#ff4d6d',        text: 'Strength: Very Weak',  strong: false },
+      { pct: 30,  color: '#ff9a3c',        text: 'Strength: Weak',       strong: false },
+      { pct: 55,  color: '#ffd60a',        text: 'Strength: Fair',       strong: false },
+      { pct: 75,  color: '#00b4d8',        text: 'Strength: Strong',     strong: true  },
+      { pct: 90,  color: '#06d6a0',        text: 'Strength: Very Strong',strong: true  },
+      { pct: 100, color: '#00f5d4',        text: 'Strength: UNBREAKABLE',strong: true  },
+    ];
+
+    const lvl = levels[Math.min(score, levels.length - 1)];
+    bar.style.width = lvl.pct + '%';
+    bar.style.background = lvl.color;
+    label.textContent = pw.length === 0 ? 'Strength: —' : lvl.text;
+    label.style.color = lvl.color;
+
+    state.pwStrong = lvl.strong && pw.length > 0;
+    document.getElementById('pw-submit').disabled = !state.pwStrong;
+  }
+
+  function submitPassword() {
+    const fb = document.getElementById('feedback');
+    const pw = document.getElementById('pw-input').value;
+    document.getElementById('pw-submit').disabled = true;
+    document.getElementById('pw-input').disabled = true;
+
+    fb.className = 'correct'; fb.style.display = 'block';
+    fb.innerHTML = `<span class="feedback-icon">🔐</span><strong>GREAT PASSWORD! +100 PTS</strong><br>
+      Your password has the right ingredients. Special characters and length are the most important factors — they make brute-force attacks exponentially harder. A 12-character password with symbols could take <em>centuries</em> to crack vs seconds for a simple word.`;
+    addScore(100);
+    state.results.push({ label: 'Password Strength', pass: true });
+    spawnParticles(true);
+    document.getElementById('next-2').style.display = 'inline-block';
+  }
+
+  // ── NAVIGATION ──
+  function goToScenario(num) {
+    document.getElementById(`scenario-${num - 1}`).style.display = 'none';
+    document.getElementById(`scenario-${num}`).style.display = 'block';
+    document.getElementById('scenario-num').textContent = `${num} / 3`;
+
+    document.getElementById(`dot-${num - 2}`).classList.replace('active', 'done');
+    document.getElementById(`dot-${num - 1}`).classList.add('active');
+
+    // reset feedback for new scenario
+    const fb = document.getElementById('feedback');
+    fb.style.display = 'none'; fb.className = '';
+  }
+
+  function showResults() {
+    document.getElementById('scenario-3').style.display = 'none';
+    document.getElementById('dot-2').classList.replace('active', 'done');
+
+    const screen = document.getElementById('results-screen');
+    screen.style.display = 'block';
+
+    const total = state.score;
+    document.getElementById('results-score').textContent = total + ' pts';
+
+    const passed = state.results.filter(r => r.pass).length;
+    const msgs = [
+      "Don't worry — cybersecurity is a skill anyone can learn. Review the tips and try again!",
+      "Good start! You're learning the ropes. One more pass and you'll be a cyber defender.",
+      "Solid performance! You caught most threats. Keep sharpening those instincts.",
+      "PERFECT SCORE! You're a true Cybersecurity Hero. The internet is safer with you on it! 🌐",
+    ];
+
+    document.getElementById('results-msg').textContent = msgs[passed] || msgs[0];
+    document.getElementById('results-title').textContent =
+      passed === 3 ? 'CYBER HERO ACHIEVED!' : passed >= 2 ? 'Well Done, Defender!' : 'Mission Debrief';
+    document.getElementById('results-trophy').textContent =
+      passed === 3 ? '🏆' : passed >= 2 ? '🥈' : '🎓';
+
+    const breakdown = document.getElementById('results-breakdown');
+    breakdown.innerHTML = state.results.map(r =>
+      `<div class="result-chip ${r.pass ? 'pass' : 'fail'}">${r.pass ? '✅' : '❌'} ${r.label}</div>`
+    ).join('');
+
+    // Big celebration if perfect
+    if (passed === 3) {
+      for (let i = 0; i < 20; i++) {
+        setTimeout(() => spawnParticles(true, true), i * 80);
+      }
+    }
+  }
+
+  function restartGame() {
+    state.score = 0; state.results = []; state.pwStrong = false;
+    document.getElementById('score-display').textContent = '0';
+    document.getElementById('scenario-num').textContent = '1 / 3';
+    document.getElementById('rank-display').textContent = 'RECRUIT';
+    document.getElementById('rank-display').style.color = '';
+
+    document.getElementById('results-screen').style.display = 'none';
+    document.getElementById('scenario-2').style.display = 'none';
+    document.getElementById('scenario-3').style.display = 'none';
+    document.getElementById('scenario-1').style.display = 'block';
+
+    // reset dots
+    ['dot-0','dot-1','dot-2'].forEach((id,i) => {
+      const d = document.getElementById(id);
+      d.className = 'dot' + (i === 0 ? ' active' : '');
+    });
+
+    // reset scenario 1
+    document.getElementById('flags-hint').style.display = 'none';
+    document.querySelectorAll('#scenario-1 .btn').forEach(b => b.disabled = false);
+    document.getElementById('next-1').style.display = 'none';
+
+    // reset scenario 2
+    document.getElementById('pw-input').value = '';
+    document.getElementById('pw-input').disabled = false;
+    document.getElementById('strength-bar').style.width = '0';
+    document.getElementById('strength-label').textContent = 'Strength: —';
+    document.getElementById('strength-label').style.color = 'var(--muted)';
+    ['c-length','c-upper','c-lower','c-number','c-special','c-long'].forEach(id =>
+      document.getElementById(id).classList.remove('met')
+    );
+    document.getElementById('pw-submit').disabled = true;
+    document.getElementById('next-2').style.display = 'none';
+
+    // reset scenario 3
+    document.getElementById('update-now').disabled = false;
+    document.getElementById('update-later').disabled = false;
+    document.getElementById('next-3').style.display = 'none';
+
+    // reset all feedback
+    document.querySelectorAll('#feedback').forEach(f => { f.style.display='none'; f.className=''; });
+
+    updateRank();
+  }
+
+  // ── PARTICLES ──
+  function spawnParticles(good, big = false) {
+    const emojis = good
+      ? ['✅','🎉','⭐','🔐','🛡','💪','🚀']
+      : ['❌','💀','🚨','⚠️','🔓'];
+    const count = big ? 6 : 3;
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      p.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      const x = window.innerWidth / 2 + (Math.random() - 0.5) * 400;
+      const y = window.innerHeight / 2 + (Math.random() - 0.5) * 200;
+      p.style.left = x + 'px';
+      p.style.top  = y + 'px';
+      p.style.setProperty('--tx', (Math.random() - 0.5) * 200 + 'px');
+      p.style.setProperty('--ty', -(Math.random() * 150 + 50) + 'px');
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 1000);
+    }
+  }
+</script>
+</body>
+</html>
