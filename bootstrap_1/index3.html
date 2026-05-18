@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CyberSec Explained</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#00ff41;--gd:#00b833;--gk:#003d11;--gg:#00ff4115;
+  --bg:#060b06;--bgp:#0a100a;--bgs:#0e160e;--bgr:#141e14;
+  --bo:#1e321e;--bb:#00ff4130;
+  --tx:#d4f5d4;--td:#6a8a6a;--tm:#304830;
+  --fm:'Share Tech Mono',monospace;--fi:'Inter',sans-serif;--fd:'Orbitron',monospace;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--tx);font-family:var(--fi);overflow-x:hidden;min-height:100vh}
+#mx{position:fixed;inset:0;z-index:0;opacity:.05;pointer-events:none}
+.scl{position:fixed;inset:0;z-index:1;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.08) 3px,rgba(0,0,0,.08) 6px)}
+.shell{position:relative;z-index:2;min-height:100vh}
+#home{display:block}#detail{display:none}
+
+/* HERO */
+.hero{text-align:center;padding:3.5rem 1.5rem 2.5rem;max-width:700px;margin:0 auto}
+.hero-badge{display:inline-block;font-family:var(--fm);font-size:.6rem;letter-spacing:.15em;color:var(--g);border:1px solid var(--gk);background:var(--gg);padding:4px 14px;margin-bottom:1.2rem}
+.hero-title{font-family:var(--fd);font-size:clamp(1.6rem,5vw,2.6rem);font-weight:900;color:var(--g);letter-spacing:.08em;text-shadow:0 0 40px rgba(0,255,65,.25);line-height:1.15;margin-bottom:.8rem}
+.hero-title span{color:#fff}
+.hero-sub{font-size:1rem;color:var(--td);line-height:1.7;max-width:500px;margin:0 auto 2rem}
+.hero-scroll{font-family:var(--fm);font-size:.65rem;color:var(--tm);letter-spacing:.1em;animation:bounce 2s ease-in-out infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}
+
+/* GRID */
+.grid-wrap{padding:0 1.2rem 3rem;max-width:1100px;margin:0 auto}
+.grid-label{font-family:var(--fm);font-size:.6rem;letter-spacing:.12em;color:var(--tm);margin-bottom:1rem;padding-left:.2rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.9rem}
+.card{background:var(--bgp);border:1px solid var(--bo);border-radius:4px;padding:1.3rem;cursor:pointer;transition:transform .2s,box-shadow .2s,border-color .2s;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .2s}
+.card:hover{transform:translateY(-4px)}
+.card:hover::before{opacity:1}
+.card-glow{position:absolute;top:-40px;right:-40px;width:100px;height:100px;border-radius:50%;opacity:.06;pointer-events:none}
+.card-sev{font-family:var(--fm);font-size:.52rem;font-weight:700;letter-spacing:.12em;padding:2px 8px;border-radius:2px;display:inline-block;margin-bottom:.8rem}
+.sev-critical{background:rgba(255,50,50,.15);color:#ff5050;border:1px solid rgba(255,50,50,.3)}
+.sev-high{background:rgba(255,160,0,.12);color:#ffb800;border:1px solid rgba(255,160,0,.3)}
+.sev-medium{background:rgba(0,200,255,.1);color:#00d4ff;border:1px solid rgba(0,200,255,.25)}
+.card-icon{font-size:2.2rem;display:block;margin-bottom:.7rem;line-height:1}
+.card-name{font-family:var(--fd);font-size:.78rem;font-weight:700;letter-spacing:.07em;margin-bottom:.5rem}
+.card-tagline{font-size:.78rem;color:var(--td);line-height:1.5}
+.card-arrow{position:absolute;bottom:.9rem;right:.9rem;font-size:.7rem;color:var(--tm);transition:all .2s}
+.card:hover .card-arrow{color:var(--g);transform:translateX(3px)}
+.c-sql{border-color:#ff8c00}.c-sql:hover{border-color:#ff8c00;box-shadow:0 8px 30px rgba(255,140,0,.12)}.c-sql .card-glow{background:#ff8c00}.c-sql .card-name{color:#ff8c00}
+.c-xss{border-color:#a855f7}.c-xss:hover{border-color:#a855f7;box-shadow:0 8px 30px rgba(168,85,247,.12)}.c-xss .card-glow{background:#a855f7}.c-xss .card-name{color:#a855f7}
+.c-cmd{border-color:#ef4444}.c-cmd:hover{border-color:#ef4444;box-shadow:0 8px 30px rgba(239,68,68,.12)}.c-cmd .card-glow{background:#ef4444}.c-cmd .card-name{color:#ef4444}
+.c-phish{border-color:#f97316}.c-phish:hover{border-color:#f97316;box-shadow:0 8px 30px rgba(249,115,22,.12)}.c-phish .card-glow{background:#f97316}.c-phish .card-name{color:#f97316}
+.c-social{border-color:#ec4899}.c-social:hover{border-color:#ec4899;box-shadow:0 8px 30px rgba(236,72,153,.12)}.c-social .card-glow{background:#ec4899}.c-social .card-name{color:#ec4899}
+.c-mitm{border-color:#eab308}.c-mitm:hover{border-color:#eab308;box-shadow:0 8px 30px rgba(234,179,8,.12)}.c-mitm .card-glow{background:#eab308}.c-mitm .card-name{color:#eab308}
+.c-ddos{border-color:#ff4444}.c-ddos:hover{border-color:#ff4444;box-shadow:0 8px 30px rgba(255,68,68,.12)}.c-ddos .card-glow{background:#ff4444}.c-ddos .card-name{color:#ff4444}
+.c-dns{border-color:#3b82f6}.c-dns:hover{border-color:#3b82f6;box-shadow:0 8px 30px rgba(59,130,246,.12)}.c-dns .card-glow{background:#3b82f6}.c-dns .card-name{color:#3b82f6}
+.c-brute{border-color:#00d4ff}.c-brute:hover{border-color:#00d4ff;box-shadow:0 8px 30px rgba(0,212,255,.12)}.c-brute .card-glow{background:#00d4ff}.c-brute .card-name{color:#00d4ff}
+.c-spray{border-color:#06b6d4}.c-spray:hover{border-color:#06b6d4;box-shadow:0 8px 30px rgba(6,182,212,.12)}.c-spray .card-glow{background:#06b6d4}.c-spray .card-name{color:#06b6d4}
+.c-csrf{border-color:#f59e0b}.c-csrf:hover{border-color:#f59e0b;box-shadow:0 8px 30px rgba(245,158,11,.12)}.c-csrf .card-glow{background:#f59e0b}.c-csrf .card-name{color:#f59e0b}
+.c-cj{border-color:#8b5cf6}.c-cj:hover{border-color:#8b5cf6;box-shadow:0 8px 30px rgba(139,92,246,.12)}.c-cj .card-glow{background:#8b5cf6}.c-cj .card-name{color:#8b5cf6}
+.c-ransom{border-color:#dc2626}.c-ransom:hover{border-color:#dc2626;box-shadow:0 8px 30px rgba(220,38,38,.15)}.c-ransom .card-glow{background:#dc2626}.c-ransom .card-name{color:#dc2626}
+
+/* DETAIL */
+#detail{min-height:100vh}
+.det-header{padding:1.2rem 1.5rem;border-bottom:1px solid var(--bb);display:flex;align-items:center;gap:1rem;position:sticky;top:0;background:rgba(6,11,6,.95);backdrop-filter:blur(8px);z-index:10}
+.back-btn{font-family:var(--fm);font-size:.68rem;color:var(--td);background:var(--bgp);border:1px solid var(--bo);padding:.4rem .9rem;cursor:pointer;transition:all .15s;letter-spacing:.05em}
+.back-btn:hover{color:var(--g);border-color:var(--gk)}
+.det-head-title{font-family:var(--fd);font-size:.85rem;color:var(--g);letter-spacing:.1em}
+.det-body{max-width:900px;margin:0 auto;padding:2rem 1.5rem 4rem}
+.det-hero{display:flex;align-items:flex-start;gap:1.5rem;margin-bottom:2.5rem;flex-wrap:wrap}
+.det-icon-wrap{flex-shrink:0;width:80px;height:80px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:2.8rem;border:1px solid var(--bo);background:var(--bgp)}
+.det-intro .det-sev{margin-bottom:.5rem}
+.det-intro h1{font-family:var(--fd);font-size:clamp(1.2rem,4vw,1.7rem);font-weight:900;letter-spacing:.08em;margin-bottom:.6rem}
+.det-intro p{font-size:.95rem;color:var(--td);line-height:1.75;max-width:600px}
+
+/* ANALOGY */
+.analogy{background:var(--bgr);border:1px solid var(--bo);border-left:4px solid var(--g);padding:1.2rem 1.4rem;margin-bottom:2rem;border-radius:0 4px 4px 0}
+.analogy-label{font-family:var(--fm);font-size:.58rem;letter-spacing:.12em;color:var(--g);margin-bottom:.5rem}
+.analogy-text{font-size:.92rem;color:var(--tx);line-height:1.7}
+.analogy-text strong{color:var(--g)}
+
+/* DIAGRAM */
+.diag-wrap{background:var(--bgp);border:1px solid var(--bo);border-radius:4px;padding:1.5rem;margin-bottom:2rem;overflow:hidden}
+.diag-label{font-family:var(--fm);font-size:.58rem;letter-spacing:.12em;color:var(--tm);margin-bottom:1.2rem}
+.diagram{display:flex;align-items:center;justify-content:center;gap:.5rem;flex-wrap:wrap;min-height:100px}
+.d-node{background:var(--bgr);border:1px solid var(--bo);border-radius:6px;padding:.7rem .9rem;text-align:center;min-width:80px}
+.d-node.bad{border-color:#ff4444;background:#1a0505}
+.d-node.good{border-color:var(--gd);background:#021002}
+.d-node .d-ico{font-size:1.6rem;display:block;margin-bottom:.3rem}
+.d-node .d-lbl{font-size:.62rem;color:var(--td);letter-spacing:.04em;line-height:1.3}
+.d-node .d-sub{font-size:.56rem;color:var(--tm);margin-top:.15rem}
+.d-arrow{display:flex;flex-direction:column;align-items:center;gap:.2rem;min-width:50px}
+.d-arrow .d-line{width:40px;height:2px;background:var(--bo);position:relative;overflow:visible}
+.d-arrow .d-line::after{content:'▶';position:absolute;right:-8px;top:-7px;font-size:.7rem;color:var(--bo)}
+.d-arrow .d-line.danger{background:#ff4444}.d-arrow .d-line.danger::after{color:#ff4444}
+.d-arrow .d-tag{font-size:.56rem;color:var(--tm);white-space:nowrap;text-align:center;max-width:80px;line-height:1.3}
+.d-arrow .d-tag.red{color:#ff7070}
+.pkt{display:inline-block;font-size:.55rem;padding:1px 5px;border-radius:2px;margin-top:.2rem;white-space:nowrap}
+.pkt.safe{background:rgba(0,255,65,.15);color:var(--g);border:1px solid var(--gk)}
+.pkt.stolen{background:rgba(255,68,68,.15);color:#ff7070;border:1px solid #aa2222}
+
+/* SECTIONS */
+.section-title{font-family:var(--fd);font-size:.72rem;letter-spacing:.12em;margin-bottom:1rem;display:flex;align-items:center;gap:.6rem}
+.section-title::after{content:'';flex:1;height:1px;background:var(--bo)}
+
+/* STEPS */
+.steps{display:grid;gap:.7rem;margin-bottom:2rem}
+.step{display:flex;gap:1rem;align-items:flex-start;background:var(--bgp);border:1px solid var(--bo);padding:.9rem 1.1rem;border-radius:4px}
+.step-num{font-family:var(--fd);font-size:1.1rem;font-weight:900;min-width:28px;line-height:1}
+.step-body .step-title{font-size:.85rem;font-weight:600;color:var(--tx);margin-bottom:.25rem}
+.step-body .step-desc{font-size:.8rem;color:var(--td);line-height:1.6}
+.step-body .step-desc code{color:#ffb800;background:var(--bgr);padding:1px 5px;font-family:var(--fm);font-size:.78em;border-radius:2px}
+
+/* CONSEQUENCES */
+.conseqs{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.6rem;margin-bottom:2rem}
+.conseq{background:rgba(255,50,50,.05);border:1px solid rgba(255,50,50,.2);border-radius:4px;padding:.75rem .9rem;text-align:center}
+.conseq .cq-ico{font-size:1.4rem;display:block;margin-bottom:.4rem}
+.conseq .cq-txt{font-size:.73rem;color:#ff8888;line-height:1.4}
+
+/* PROTECTIONS */
+.protections{display:grid;gap:.6rem;margin-bottom:2rem}
+.prot{display:flex;align-items:flex-start;gap:.8rem;background:rgba(0,255,65,.04);border:1px solid rgba(0,255,65,.15);border-radius:4px;padding:.75rem 1rem}
+.prot-ico{font-size:1.1rem;flex-shrink:0;margin-top:.05rem}
+.prot-text{font-size:.82rem;color:var(--tx);line-height:1.5}
+.prot-text strong{color:var(--g)}
+
+/* REAL WORLD */
+.rw-box{background:var(--bgr);border:1px solid var(--bo);border-radius:4px;padding:1rem 1.2rem;margin-bottom:2rem}
+.rw-label{font-family:var(--fm);font-size:.56rem;letter-spacing:.12em;color:var(--tm);margin-bottom:.5rem}
+.rw-text{font-size:.82rem;color:var(--td);line-height:1.7}
+.rw-text strong{color:#ffb800}
+
+/* SIMULATION NOTE */
+.sim-box{background:#0a1a0f;border:1px solid rgba(0,255,65,.25);border-left:4px solid var(--g);border-radius:0 4px 4px 0;padding:1.1rem 1.3rem;margin-bottom:2rem}
+.sim-box-header{display:flex;align-items:center;gap:.6rem;margin-bottom:.7rem}
+.sim-box-icon{font-size:1.2rem}
+.sim-box-title{font-family:var(--fd);font-size:.65rem;letter-spacing:.1em;color:var(--g)}
+.sim-steps{display:grid;gap:.45rem}
+.sim-step{display:flex;align-items:flex-start;gap:.7rem;font-size:.82rem;color:var(--td);line-height:1.6}
+.sim-step-num{font-family:var(--fm);font-size:.65rem;color:var(--g);background:var(--gk);border:1px solid rgba(0,255,65,.2);padding:1px 6px;border-radius:2px;flex-shrink:0;margin-top:.1rem}
+.sim-step strong{color:var(--tx)}
+.sim-step code{color:#ffb800;background:var(--bgr);padding:1px 4px;font-family:var(--fm);font-size:.78em;border-radius:2px}
+
+/* VIDEO SECTION */
+.video-section{background:var(--bgp);border:1px solid var(--bb);border-radius:4px;overflow:hidden;margin-bottom:2rem}
+.video-section-header{display:flex;align-items:center;justify-content:space-between;gap:.8rem;padding:1rem 1.3rem;border-bottom:1px solid var(--bo)}
+.video-section-left{display:flex;align-items:center;gap:.7rem}
+.video-section-icon{font-size:1.3rem}
+.video-section-title{font-family:var(--fd);font-size:.68rem;letter-spacing:.1em;color:var(--g)}
+.video-section-sub{font-size:.72rem;color:var(--td)}
+/* embed */
+.video-embed-wrap{position:relative;padding-bottom:56.25%;height:0;overflow:hidden;background:#000}
+.video-embed-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
+/* external link */
+.video-ext-link{display:flex;align-items:center;gap:1rem;padding:1.1rem 1.3rem;text-decoration:none;transition:background .15s}
+.video-ext-link:hover{background:var(--bgr)}
+.video-ext-thumb{width:42px;height:42px;border-radius:4px;background:var(--bgr);border:1px solid var(--bo);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+.video-ext-info{}
+.video-ext-label{font-family:var(--fm);font-size:.6rem;letter-spacing:.08em;color:var(--tm);margin-bottom:.2rem}
+.video-ext-url{font-size:.78rem;color:#60b4ff;word-break:break-all;line-height:1.4}
+.video-ext-arrow{margin-left:auto;color:var(--tm);font-size:.85rem;flex-shrink:0;transition:transform .15s}
+.video-ext-link:hover .video-ext-arrow{transform:translateX(3px);color:var(--g)}
+/* no video placeholder */
+.video-placeholder{padding:1.5rem 1.3rem;display:flex;align-items:center;gap:1rem}
+.vph-icon{font-size:1.6rem;opacity:.3}
+.vph-text{font-size:.78rem;color:var(--tm);line-height:1.6}
+.vph-text code{color:var(--td);font-family:var(--fm);font-size:.75em;background:var(--bgr);padding:1px 5px;border-radius:2px}
+
+/* NAV */
+.det-nav{display:flex;justify-content:space-between;align-items:center;padding:1rem 0;border-top:1px solid var(--bo);margin-top:1rem}
+.det-nav button{font-family:var(--fm);font-size:.65rem;letter-spacing:.06em;color:var(--td);background:var(--bgp);border:1px solid var(--bo);padding:.45rem 1rem;cursor:pointer;transition:all .15s}
+.det-nav button:hover{color:var(--g);border-color:var(--gk)}
+.det-nav .dn-pos{font-family:var(--fm);font-size:.6rem;color:var(--tm);letter-spacing:.08em}
+
+/* FOOTER */
+.footer{background:var(--bgp);border-top:1px solid var(--bb);padding:.6rem 1.5rem;display:flex;justify-content:space-between;align-items:center;font-family:var(--fm);font-size:.58rem;color:var(--tm);letter-spacing:.07em}
+.footer-blink{color:var(--g);animation:blink 1s steps(1) infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+code{font-family:var(--fm);color:#ffb800;background:var(--bgr);padding:1px 4px;font-size:.82em;border-radius:2px}
+@media(max-width:600px){
+  .det-hero{flex-direction:column}
+  .diagram{gap:.3rem}
+  .d-node{min-width:65px;padding:.5rem .6rem}
+  .d-arrow .d-line{width:28px}
+}
+</style>
+</head>
+<body>
+<canvas id="mx"></canvas>
+<div class="scl"></div>
+<div class="shell">
+
+<!-- HOME -->
+<div id="home">
+  <div class="hero">
+    <div class="hero-badge">// BEGINNER'S GUIDE TO CYBER ATTACKS</div>
+    <h1 class="hero-title">Every Attack <span>Explained</span><br/>Simply.</h1>
+    <p class="hero-sub">No prior cybersecurity knowledge needed. Learn how each attack works, why it's dangerous, and how to defend against it — with plain English, visuals, and real examples.</p>
+    <div class="hero-scroll">▼ &nbsp; Click the attacks below to learn more &nbsp; ▼</div>
+  </div>
+  <div class="grid-wrap">
+    <div class="grid-label">// 13 ATTACKS — SELECT ONE TO EXPLORE</div>
+    <div class="grid" id="card-grid"></div>
+  </div>
+  <div class="footer">
+    <span>CYBERSEC EXPLAINED // 13 MODULES // FOR BEGINNERS</span>
+    <span class="footer-blink">▮</span>
+  </div>
+</div>
+
+<!-- DETAIL -->
+<div id="detail">
+  <div class="det-header">
+    <button class="back-btn" id="back-btn">← ALL ATTACKS</button>
+    <span class="det-head-title" id="det-head-title"></span>
+  </div>
+  <div class="det-body" id="det-body"></div>
+  <div class="footer">
+    <span>CYBERSEC EXPLAINED // EDUCATIONAL USE ONLY</span>
+    <span class="footer-blink">▮</span>
+  </div>
+</div>
+
+</div><!-- /shell -->
+
+<script>
+/* ── MATRIX ── */
+(function(){
+  const c=document.getElementById('mx'),ctx=c.getContext('2d');
+  const CH='アイウエオ0123456789ABCDEF<>{}[]\\!@#$';const FS=12;let cols,drops;
+  function resize(){c.width=innerWidth;c.height=innerHeight;cols=Math.floor(c.width/FS);drops=Array.from({length:cols},()=>Math.random()*-60)}
+  function draw(){
+    ctx.fillStyle='rgba(6,11,6,.05)';ctx.fillRect(0,0,c.width,c.height);ctx.font=`${FS}px "Share Tech Mono",monospace`;
+    for(let i=0;i<drops.length;i++){ctx.fillStyle=Math.random()>.97?'#fff':'#00ff41';ctx.globalAlpha=Math.random()*.4+.1;ctx.fillText(CH[Math.floor(Math.random()*CH.length)],i*FS,drops[i]*FS);if(drops[i]*FS>c.height&&Math.random()>.975)drops[i]=0;drops[i]+=.3;}ctx.globalAlpha=1;
+  }
+  resize();window.addEventListener('resize',resize);setInterval(draw,60);
+})();
+
+/* ══════════════════════════════════════════════════════════════════════
+   ATTACK DATA
+   ─────────────────────────────────────────────────────────────────────
+   To add a video to any attack, paste the URL into the videoUrl field.
+
+   Supported formats:
+     YouTube:  'https://www.youtube.com/watch?v=VIDEO_ID'
+               'https://youtu.be/VIDEO_ID'
+               'https://www.youtube.com/shorts/VIDEO_ID'
+     Any URL:  'https://vimeo.com/...'  or any other link
+
+   YouTube videos embed directly on the page.
+   All other URLs display as a styled clickable link.
+
+   Leave videoUrl as '' to show a "no video" placeholder.
+══════════════════════════════════════════════════════════════════════ */
+const ATTACKS = [
+
+  {
+    id:'sql', cls:'c-sql', icon:'⛁', sev:'HIGH', sevCls:'sev-high',
+    name:'SQL Injection',
+    tagline:'Breaking into a database by speaking its language',
+
+    // ── SQL INJECTION — PASTE VIDEO URL BETWEEN THE QUOTES BELOW ──────
+    videoUrl: 'https://www.youtube.com/watch?v=qFUOLkEk8AQ',
+    // ─────────────────────────────────────────────────────────────
+
+    intro:'Databases store everything — passwords, bank details, personal records. SQL Injection tricks the database into obeying the attacker instead of the app. It\'s one of the oldest and most common attacks on the web.',
+    analogy:'Imagine telling a hotel receptionist <strong>"My name is John OR give me everyone\'s room key."</strong> If the receptionist doesn\'t check properly, they might actually do it. SQL Injection is the same — slipping extra instructions into a login box.',
+    diagram:`<div class="d-node"><span class="d-ico">👤</span><div class="d-lbl">Attacker</div><div class="d-sub"><span class="pkt stolen">admin'--</span></div></div><div class="d-arrow"><div class="d-line danger"></div><div class="d-tag red">injects SQL</div></div><div class="d-node bad"><span class="d-ico">📋</span><div class="d-lbl">Login Form</div><div class="d-sub">no filter</div></div><div class="d-arrow"><div class="d-line danger"></div><div class="d-tag red">broken query</div></div><div class="d-node bad"><span class="d-ico">🗄️</span><div class="d-lbl">Database</div><div class="d-sub"><span class="pkt stolen">ALL rows!</span></div></div>`,
+    steps:[
+      {n:'01',title:'A login form asks for your username',desc:'The server takes what you type and builds a database question: <code>WHERE username = \'alice\'</code>'},
+      {n:'02',title:'The attacker types special characters',desc:'They enter something like <code>\' OR \'1\'=\'1</code> — the quote mark closes the string early and adds their own logic.'},
+      {n:'03',title:'The database gets confused and obeys',desc:'The query now means "return every row where 1 equals 1" — which is always true. Every account gets returned.'},
+    ],
+    conseqs:['🔑 All passwords stolen','📊 Full database leaked','🔓 Admin access gained','🗑️ Data deleted'],
+    prots:[
+      {i:'🛡️',t:'<strong>Parameterized queries</strong> — send user input as data, not as code. The database can\'t misread it.'},
+      {i:'🔍',t:'<strong>Input validation</strong> — reject anything that contains characters like quotes or semicolons.'},
+      {i:'🔒',t:'<strong>Least privilege</strong> — the login system should only have read access, not the ability to dump the whole DB.'},
+    ],
+    realworld:'In 2009, attackers stole <strong>130 million credit card numbers</strong> from Heartland Payment Systems using SQL Injection. It was one of the largest data breaches in history.',
+    sim:[
+      {t:'Try the <strong>correct credentials</strong> first — username <code>admin</code>, password <code>secret123</code> — and click Login. You\'ll see the safe version of the query.'},
+      {t:'Now click the <strong>OR 1=1</strong> payload button. It auto-fills an attack string. Hit Login again and watch the raw query below break open.'},
+      {t:'Notice the result: instead of 1 matching row, the database returns <strong>all 3 accounts</strong>. The attacker is in without knowing anyone\'s password.'},
+    ],
+  },
+
+  {
+    id:'xss', cls:'c-xss', icon:'✦', sev:'HIGH', sevCls:'sev-high',
+    name:'Cross-Site Scripting',
+    tagline:'Hiding malicious code in a website others trust',
+
+    // ── CROSS-SITE SCRIPTING (XSS) — PASTE VIDEO URL BETWEEN THE QUOTES BELOW ──────
+    videoUrl: 'https://www.youtube.com/watch?v=PKgw0CLZIhE',
+    // ─────────────────────────────────────────────────────────────
+
+    intro:'XSS lets attackers plant invisible scripts inside websites you visit. When you load the page, their script runs silently in your browser — stealing cookies, redirecting you, or logging what you type.',
+    analogy:'Imagine a community bulletin board where anyone can post. Someone pins a note that says <strong>"Whoever reads this, send me your house key immediately."</strong> The board delivered the message — it had no idea it was malicious. XSS works the same way.',
+    diagram:`<div class="d-node bad"><span class="d-ico">👾</span><div class="d-lbl">Attacker</div><div class="d-sub">posts script</div></div><div class="d-arrow"><div class="d-line danger"></div><div class="d-tag red">stored on server</div></div><div class="d-node"><span class="d-ico">🌐</span><div class="d-lbl">Website</div><div class="d-sub">no escaping</div></div><div class="d-arrow"><div class="d-line danger"></div><div class="d-tag red">served to victim</div></div><div class="d-node bad"><span class="d-ico">👤</span><div class="d-lbl">Victim</div><div class="d-sub"><span class="pkt stolen">cookie sent!</span></div></div>`,
+    steps:[
+      {n:'01',title:'The attacker finds a comment box',desc:'Any place users can type text and others see it — a comment section, a search bar, a profile bio.'},
+      {n:'02',title:'They post a hidden script',desc:'Instead of normal text, they type <code>&lt;script&gt;steal(document.cookie)&lt;/script&gt;</code>. The website stores it.'},
+      {n:'03',title:'Every visitor unknowingly runs it',desc:'When anyone loads the page, the browser sees the script and runs it — sending the visitor\'s login cookie to the attacker.'},
+    ],
+    conseqs:['🍪 Session cookies stolen','🔀 Page redirected to fake site','⌨️ Keystrokes recorded','💳 Auto-submitted forms'],
+    prots:[
+      {i:'🔤',t:'<strong>Escape user input</strong> — convert <code>&lt;</code> and <code>&gt;</code> to harmless text characters before displaying.'},
+      {i:'🛡️',t:'<strong>Content Security Policy (CSP)</strong> — a browser rule that blocks scripts from unknown sources.'},
+      {i:'🍪',t:'<strong>HttpOnly cookies</strong> — a flag that prevents JavaScript from ever reading your session cookie.'},
+    ],
+    realworld:'In 2018, <strong>British Airways</strong> was hit by an XSS-style attack that skimmed credit card details from 500,000 customers. The malicious script ran silently on their checkout page for weeks.',
+    sim:[
+      {t:'The mode starts on <strong>UNSAFE</strong> — raw HTML is rendered in comments. Click the <strong>Cookie theft</strong> payload to auto-fill a script, then click POST.'},
+      {t:'Watch the <strong>red theft log</strong> appear — it shows the session cookie being read and sent to the attacker\'s server. This happens silently on every visitor\'s browser.'},
+      {t:'Now toggle <strong>SAFE MODE</strong> and post the same payload. The script renders as plain visible text instead of running — one setting change stops the entire attack.'},
+    ],
+  },
+
+  {
+    id:'cmd', cls:'c-cmd', icon:'$', sev:'CRITICAL', sevCls:'sev-critical',
+    name:'Command Injection',
+    tagline:'Running system commands through a web form',
+
+    // ── COMMAND INJECTION — PASTE VIDEO URL BETWEEN THE QUOTES BELOW ──────
+    videoUrl: 'https://www.youtube.com/watch?v=yrLNypP69sk',
+    // ─────────────────────────────────────────────────────────────
+
+    intro:'Some websites run system commands based on what you type — like a network tool that pings an IP address. If user input isn\'t filtered, an attacker can sneak extra commands in and take full control of the server.',
+    analogy:'You call a secretary and say <strong>"Please send this letter AND while you\'re at it, empty the filing cabinet and send me everything."</strong> If she just does what she\'s told without thinking, both things happen. That\'s Command Injection.',
+    diagram:`<div class="d-node bad"><span class="d-ico">👾</span><div class="d-lbl">Attacker</div><div class="d-sub"><span class="pkt stolen">8.8.8.8; whoami</span></div></div><div class="d-arrow"><div class="d-line danger"></div><div class="d-tag red">injected input</div></div><div class="d-node bad"><span class="d-ico">⚙️</span><div class="d-lbl">Web App</div><div class="d-sub">runs shell</div></div><div class="d-arrow"><div class="d-line danger"></div><div class="d-tag red">full OS access</div></div><div class="d-node bad"><span class="d-ico">🖥️</span><div class="d-lbl">Server OS</div><div class="d-sub"><span class="pkt stolen">compromised</span></div></div>`,
+    steps:[
+      {n:'01',title:'An app runs a system command for you',desc:'Example: a "ping" tool that checks if a website is online. You type an IP, it runs <code>ping 8.8.8.8</code> on the server.'},
+      {n:'02',title:'The attacker adds extra commands',desc:'They type <code>8.8.8.8 ; cat /etc/passwd</code>. The semicolon says "now run this next command too."'},
+      {n:'03',title:'The server runs both commands',desc:'It pings the IP — then reads the system password file and sends it back. The attacker now has server credentials.'},
+    ],
+    conseqs:['📁 All files read or deleted','🔑 Server credentials stolen','🔓 Backdoor installed','💥 Entire server wiped'],
+    prots:[
+      {i:'🚫',t:'<strong>Never pass user input to shell commands.</strong> Use language libraries instead — e.g. Python\'s <code>socket</code> instead of calling <code>ping</code>.'},
+      {i:'✅',t:'<strong>Whitelist validation</strong> — only allow exact IP formats like <code>8.8.8.8</code>. Reject any input containing <code>;</code> or <code>&</code>.'},
+      {i:'📦',t:'<strong>Sandboxing</strong> — run the app in a container with no access to system files or other processes.'},
+    ],
+    realworld:'The <strong>2014 Shellshock bug</strong> was a Command Injection vulnerability in the Bash shell. Within hours of discovery, attackers compromised millions of web servers, routers, and even medical devices worldwide.',
+    sim:[
+      {t:'Type a normal IP like <code>8.8.8.8</code> and click <strong>PING</strong>. You\'ll see a clean, successful ping response — the app working as intended.'},
+      {t:'Now click a payload like <strong>whoami</strong>. It adds <code>; whoami</code> after the IP. The server runs the ping AND the extra command.'},
+      {t:'The terminal shows both outputs. The second command reveals the server\'s username — proof the attacker now has <strong>direct access to the operating system</strong>.'},
+    ],
+  },
+
+  {
+    id:'phish', cls:'c-phish', icon:'🎣', sev:'CRITICAL', sevCls:'sev-critical',
+    name:'Phishing',
+    tagline:'A fake message that steals your login',
+
+    // ── PHISHING — PASTE VIDEO URL BETWEEN THE QUOTES BELOW ──────
+    videoUrl: 'https://www.youtube.com/watch?v=9JD7E4-ITvM',
+    // ─────────────────────────────────────────────────────────────
+
+    intro:'Phishing is the #1 cause of data breaches worldwide. An attacker sends a convincing fake email or text. You click, land on a cloned site, and hand them your password without realizing it.',
+    analogy:'You get a letter that looks exactly like it\'s from your bank — same logo, same colors. It says your account is frozen and to call a number. <strong>The number is the attacker\'s phone.</strong> Everything looks real, but one detail is off.',
+    diagram:`<div class="d-node bad"><span class="d-ico">👾</span><div class="d-lbl">Attacker</div><div class="d-sub">sends fake email</div></div><div class="d-arrow"><div class="d-line danger"></div><div class="d-tag red">victim clicks</div></div><div class="d-node bad"><span class="d-ico">🌐</span><div class="d-lbl">Fake Site</div><div class="d-sub">paypa1.com</div></div><div class="d-arrow"><div class="d-line danger"></div><div class="d-tag red">types password</div></div><div class="d-node bad"><span class="d-ico">🗄️</span><div class="d-lbl">Attacker DB</div><div class="d-sub"><span class="pkt stolen">credentials!</span></div></div>`,
+    steps:[
+      {n:'01',title:'You receive an urgent email',desc:'"Your account has been compromised! Verify now or it will be deleted." Panic is the weapon — it stops you from thinking carefully.'},
+      {n:'02',title:'You click the link',desc:'It takes you to a website that looks identical to your bank or email provider. The URL is almost right — maybe <code>paypa1.com</code> instead of <code>paypal.com</code>.'},
+      {n:'03',title:'You type your login',desc:'Your real credentials go straight to the attacker\'s server. They log you in to the real site too, so you never suspect anything happened.'},
+    ],
+    conseqs:['🔑 Account taken over','💰 Money transferred out','📧 Contacts targeted next','🆔 Identity stolen'],
+    prots:[
+      {i:'🔍',t:'<strong>Check the URL carefully</strong> before entering any password. Real PayPal is only at <code>paypal.com</code> — nothing else.'},
+      {i:'🔐',t:'<strong>2-Factor Authentication (2FA)</strong> — even if they steal your password, they can\'t log in without your phone.'},
+      {i:'✉️',t:'<strong>Don\'t click email links.</strong> Type the address directly into your browser instead.'},
+    ],
+    realworld:'In 2016, a phishing email fooled <strong>Clinton campaign chairman John Podesta</strong> into giving up his Gmail password. The leaked emails changed the course of a US presidential election.',
+    sim:[
+      {t:'Read the fake email carefully — notice the sender address <code>paypa1.com</code> (a "1" not an "l") and the three <strong>red flags</strong> listed beneath it.'},
+      {t:'Click <strong>OPEN LINK</strong> to visit the spoofed PayPal page. Look at the browser bar — it shows no HTTPS padlock and a foreign <code>.ru</code> domain.'},
+      {t:'Type any email and password and hit Log In. The <strong>attacker\'s server log</strong> appears showing exactly what was captured — including your credentials in plain text.'},
+    ],
+  },
+
+  {
+    id:'social', cls:'c-social', icon:'🎭', sev:'HIGH', sevCls:'sev-high',
+    name:'Social Engineering',
+    tagline:'Hacking people, not computers',
+
+    // ── SOCIAL ENGINEERING — PASTE VIDEO URL BETWEEN THE QUOTES BELOW ──────
+    videoUrl: 'https://www.youtube.com/watch?v=sF0uBtavItI',
+    // ─────────────────────────────────────────────────────────────
+
+    intro:'The most powerful hacking tool isn\'t code — it\'s conversation. Social engineering manipulates people psychologically to give up passwords, open doors, or bypass security procedures without any technical exploit.',
+    analogy:'A stranger in a delivery uniform knocks and says <strong>"IT sent me to fix your computer — I just need your login for a second."</strong> No hacking needed. Just confidence and a convincing story.',
+    diagram:`<div class="d-node bad"><span class="d-ico">🎭</span><div class="d-lbl">Attacker</div><div class="d-sub">"I'm from IT"</div></div><div class="d-arrow"><div class="d-line danger"></div><div class="d-tag red">builds trust</div></div><div class="d-node"><span class="d-ico">😟</span><div class="d-lbl">Employee</div><div class="d-sub">feels pressured</div></div><div class="d-arrow"><div class="d-line danger"></div><div class="d-tag red">hands over info</div></div><div class="d-node bad"><span class="d-ico">🔑</span><div class="d-lbl">Access</div><div class="d-sub"><span class="pkt stolen">credentials</span></div></div>`,
+    steps:[
+      {n:'01',title:'The attacker researches their target',desc:'They check LinkedIn, company websites, and social media to learn names, job titles, and org structure before making contact.'},
+      {n:'02',title:'They build a believable story',desc:'Posing as IT support, HR, or a vendor — using real names and details they found. Urgency is added: "I need this now or the server will go down."'},
+      {n:'03',title:'The victim complies',desc:'Trained to be helpful, the employee gives the password, installs software, or bypasses security. No firewall can stop this.'},
+    ],
+    conseqs:['🔑 Passwords given away','🚪 Physical access granted','💸 Wire transfers approved','🖥️ Malware installed'],
+    prots:[
+      {i:'📞',t:'<strong>Verify identity independently.</strong> Hang up and call back on the official number from the company website — never the number they give you.'},
+      {i:'📚',t:'<strong>Security awareness training.</strong> Employees should know: real IT will never ask for your password. Ever.'},
+      {i:'🚦',t:'<strong>Verification procedures.</strong> Any request involving money, access, or credentials must go through a formal approval process.'},
+    ],
+    realworld:'In 2020, <strong>Twitter was hacked</strong> via a phone social engineering attack on employees. The attacker got employee credentials over the phone and tweeted from Obama, Biden, Elon Musk, and Apple\'s accounts.',
+    sim:[
+      {t:'Click <strong>NEXT</strong> to step through a scripted phone conversation. Watch how the attacker opens with a believable story and builds trust before asking for anything sensitive.'},
+      {t:'Each click reveals a new exchange. Notice how the victim gives up their <strong>employee ID</strong>, then partial SSN, then finally their <strong>full password</strong> — all just to be helpful.'},
+      {t:'At the end, a reveal shows exactly what the attacker collected in one call: enough to access company systems with zero technical hacking required.'},
+    ],
+  },
+
+  {
+    id:'mitm', cls:'c-mitm', icon:'↔', sev:'HIGH', sevCls:'sev-high',
+    name:'Man-in-the-Middle',
+    tagline:'Reading your mail before you receive it',
+
+    // ── MAN-IN-THE-MIDDLE — PASTE VIDEO URL BETWEEN THE QUOTES BELOW ──────
+    videoUrl: 'https://www.youtube.com/watch?v=EHCN1uzac_w',
+    // ─────────────────────────────────────────────────────────────
+
+    intro:'A MITM attack lets an attacker position themselves between you and a website, reading (or changing) everything you send and receive. On unencrypted connections, your passwords travel as plain readable text.',
+    analogy:'You send a letter. The postal worker opens it, reads it, copies it, reseals it, and delivers it. <strong>You never knew.</strong> The only protection is writing in a code only the recipient can read — that\'s what HTTPS does.',
+    diagram:`<div class="d-node good"><span class="d-ico">💻</span><div class="d-lbl">You</div><div class="d-sub"><span class="pkt safe">password</span></div></div><div class="d-arrow"><div class="d-line danger"></div><div class="d-tag red">unencrypted</div></div><div class="d-node bad"><span class="d-ico">👾</span><div class="d-lbl">Attacker</div><div class="d-sub">reads everything</div></div><div class="d-arrow"><div class="d-line danger"></div><div class="d-tag red">forwards on</div></div><div class="d-node"><span class="d-ico">🌐</span><div class="d-lbl">Server</div><div class="d-sub">unaware</div></div>`,
+    steps:[
+      {n:'01',title:'You connect to a network',desc:'A coffee shop WiFi, a hotel network, or even your home router if it\'s been compromised. The attacker is on the same network.'},
+      {n:'02',title:'Your traffic flows through them',desc:'On unencrypted HTTP sites, your data travels as readable text. The attacker intercepts it like reading an open postcard.'},
+      {n:'03',title:'They read, copy, or alter everything',desc:'They can see usernames, passwords, credit card numbers — or silently change the page you receive to include malware.'},
+    ],
+    conseqs:['🔑 Login credentials captured','💳 Payment details stolen','📨 Messages read & altered','🦠 Malware injected into pages'],
+    prots:[
+      {i:'🔒',t:'<strong>HTTPS</strong> encrypts everything between you and the server. Look for the padlock. Attackers see only scrambled noise.'},
+      {i:'📶',t:'<strong>Avoid public WiFi</strong> for sensitive tasks. Use your mobile data or a <strong>VPN</strong> instead.'},
+      {i:'⚠️',t:'<strong>Never ignore certificate warnings.</strong> If your browser says "Not Secure," leave immediately.'},
+    ],
+    realworld:'In 2015, <strong>Lenovo computers shipped with "Superfish" software</strong> that performed MITM attacks on every HTTPS connection — intercepting banking and shopping traffic from its own customers.',
+    sim:[
+      {t:'The mode starts on <strong>HTTP (unsafe)</strong>. Enter any username and password, then click SEND. The terminal shows your credentials captured as plain readable text.'},
+      {t:'Now toggle <strong>HTTPS</strong> mode and send again. The attacker intercepts the same traffic — but this time sees only scrambled ciphertext. Nothing useful.'},
+      {t:'Notice the attacker node fades when HTTPS is on — they\'re still in the middle, but <strong>encryption makes interception worthless</strong>.'},
+    ],
+  },
+
+  {
+    id:'ddos', cls:'c-ddos', icon:'⟳', sev:'CRITICAL', sevCls:'sev-critical',
+    name:'DDoS Attack',
+    tagline:'Flooding a server until it collapses',
+
+    // ── DDOS ATTACK — PASTE VIDEO URL BETWEEN THE QUOTES BELOW ──────
+    videoUrl: 'https://www.youtube.com/watch?v=bDAY-oUP0DQ',
+    // ─────────────────────────────────────────────────────────────
+
+    intro:'A Distributed Denial of Service attack doesn\'t steal data — it destroys availability. Thousands of hijacked computers (a botnet) all send requests to one server simultaneously until it\'s overwhelmed and crashes.',
+    analogy:'Imagine 10,000 people calling a pizza shop at the same time, all placing fake orders. <strong>The phone lines jam. Real customers can\'t get through. The shop is still standing — but it might as well not exist.</strong>',
+    diagram:`<div class="d-node bad"><span class="d-ico">🖥️🖥️🖥️</span><div class="d-lbl">Botnet</div><div class="d-sub">10,000+ devices</div></div><div class="d-arrow"><div class="d-line danger"></div><div class="d-tag red">flood of requests</div></div><div class="d-node bad"><span class="d-ico">🌐</span><div class="d-lbl">Target Server</div><div class="d-sub"><span class="pkt stolen">overloaded</span></div></div><div class="d-arrow"><div class="d-line"></div><div class="d-tag">blocked</div></div><div class="d-node"><span class="d-ico">😤</span><div class="d-lbl">Real Users</div><div class="d-sub">can't connect</div></div>`,
+    steps:[
+      {n:'01',title:'The attacker builds a botnet',desc:'They infect thousands of regular computers with malware — yours might be in one without your knowledge. These devices await instructions.'},
+      {n:'02',title:'The command goes out: attack',desc:'All infected devices simultaneously send millions of requests per second to the target. The server has to respond to each one.'},
+      {n:'03',title:'The server runs out of resources',desc:'Memory, bandwidth, and processing power are exhausted. The server slows down, then crashes. Legitimate users get error pages.'},
+    ],
+    conseqs:['🔴 Website goes offline','💸 Businesses lose revenue','📰 Reputation damage','🔓 Used as cover for other attacks'],
+    prots:[
+      {i:'☁️',t:'<strong>CDN & DDoS protection</strong> (Cloudflare, AWS Shield) — absorbs traffic across distributed global infrastructure before it reaches your server.'},
+      {i:'🚦',t:'<strong>Rate limiting</strong> — cap how many requests any single IP can make per second. Normal users won\'t notice. Bots get blocked.'},
+      {i:'🔥',t:'<strong>Web Application Firewall (WAF)</strong> — filters and blocks malicious traffic patterns automatically.'},
+    ],
+    realworld:'In 2016, the <strong>Mirai botnet</strong> took down Twitter, Netflix, Reddit, and PayPal simultaneously — by using 600,000 hijacked smart home devices (cameras, routers, baby monitors) as the attacking botnet.',
+    sim:[
+      {t:'Click <strong>LAUNCH ATTACK</strong>. Watch the req/sec counter climb, bots multiply, and the <strong>server health bar drain</strong> from green toward red in real time.'},
+      {t:'The log fills with incoming attack traffic. When health hits zero, the status flips to <strong>OFFLINE</strong> — real users can\'t connect to anything.'},
+      {t:'Click <strong>WAF ON</strong> then restart. The firewall absorbs the flood — health stabilizes and the log shows traffic being blocked instead of hitting the server.'},
+    ],
+  },
+
+  {
+    id:'dns', cls:'c-dns', icon:'◈', sev:'HIGH', sevCls:'sev-high',
+    name:'DNS Spoofing',
+    tagline:'Swapping the signs so you go to the wrong place',
+
+    // ── DNS SPOOFING — PASTE VIDEO URL BETWEEN THE QUOTES BELOW ──────
+    videoUrl: 'https://www.youtube.com/watch?v=g-XZpTxusS8',
+    // ─────────────────────────────────────────────────────────────
+
+    intro:'DNS is the internet\'s phonebook — it converts "google.com" into an IP address. DNS Spoofing plants a fake entry in that phonebook, so when you type a trusted website, you silently land on the attacker\'s server.',
+    analogy:'You look up "City Hospital" in the phonebook. Someone swapped the real number with a fake clinic. <strong>You call what you think is the hospital — but you\'re talking to someone who wants your insurance details.</strong>',
+    diagram:`<div class="d-node"><span class="d-ico">💻</span><div class="d-lbl">You</div><div class="d-sub">visit bank.com</div></div><div class="d-arrow"><div class="d-line danger"></div><div class="d-tag red">poisoned lookup</div></div><div class="d-node bad"><span class="d-ico">☠️</span><div class="d-lbl">Fake DNS</div><div class="d-sub">wrong IP!</div></div><div class="d-arrow"><div class="d-line danger"></div><div class="d-tag red">sent to attacker</div></div><div class="d-node bad"><span class="d-ico">👾</span><div class="d-lbl">Fake Server</div><div class="d-sub"><span class="pkt stolen">your login</span></div></div>`,
+    steps:[
+      {n:'01',title:'You type a website address',desc:'Before connecting, your computer asks a DNS resolver: "What\'s the IP address for bank.com?" This happens invisibly every time you browse.'},
+      {n:'02',title:'The attacker poisons the DNS cache',desc:'They inject a forged answer: "bank.com is at <em>my</em> IP address." The resolver caches this lie and serves it to everyone who asks.'},
+      {n:'03',title:'You land on the attacker\'s site',desc:'It looks identical to your bank. You log in. Your credentials go to the attacker — you never knew you were at the wrong address.'},
+    ],
+    conseqs:['🔑 Login credentials stolen','💰 Financial fraud','🦠 Malware from "trusted" sites','📡 Entire networks redirected'],
+    prots:[
+      {i:'🔏',t:'<strong>DNSSEC</strong> — digitally signs DNS records so forged answers are rejected by your device.'},
+      {i:'🔒',t:'<strong>Check for HTTPS + padlock.</strong> A fake server can\'t get a valid certificate for bank.com — the browser will warn you.'},
+      {i:'🌐',t:'<strong>DNS over HTTPS (DoH)</strong> — encrypts your DNS queries so attackers can\'t intercept or tamper with them.'},
+    ],
+    realworld:'In 2018, hackers compromised the DNS for <strong>MyEtherWallet</strong>, redirecting users to a fake site that stole ~$150,000 in cryptocurrency in just two hours before anyone noticed.',
+    sim:[
+      {t:'Click <strong>LOOKUP bank.com</strong> first. The diagram shows a normal DNS flow — your computer gets the correct IP and connects to the real server.'},
+      {t:'Click <strong>POISON CACHE</strong> — the DNS resolver icon turns into a skull. Now click Lookup again. The resolver returns the attacker\'s IP instead.'},
+      {t:'The diagram updates to show you landing on the <strong>fake server</strong>. The terminal confirms the forged record was served — you\'re on the wrong site without any warning.'},
+    ],
+  },
+
+  {
+    id:'brute', cls:'c-brute', icon:'⚙', sev:'MEDIUM', sevCls:'sev-medium',
+    name:'Brute Force Attack',
+    tagline:'Trying every key until one opens the lock',
+
+    // ── BRUTE FORCE — PASTE VIDEO URL BETWEEN THE QUOTES BELOW ──────
+    videoUrl: 'https://www.youtube.com/watch?v=tZlxdUoTlRM',
+    // ─────────────────────────────────────────────────────────────
+
+    intro:'No clever tricks needed — just a list of common passwords and a script that tries them one by one, automatically, thousands of times per minute. Without protection, a weak password falls in seconds.',
+    analogy:'A burglar stands at your door trying every key on a giant keychain. <strong>If your lock uses one of the 10 most common key shapes, they\'re in within minutes.</strong> A unique random key stops them cold.',
+    diagram:`<div class="d-node bad"><span class="d-ico">🤖</span><div class="d-lbl">Attack Bot</div><div class="d-sub">1000 tries/min</div></div><div class="d-arrow"><div class="d-line danger"></div><div class="d-tag red">password list</div></div><div class="d-node"><span class="d-ico">🔐</span><div class="d-lbl">Login Page</div><div class="d-sub">no lockout</div></div><div class="d-arrow"><div class="d-line danger"></div><div class="d-tag red">match found!</div></div><div class="d-node bad"><span class="d-ico">🔓</span><div class="d-lbl">Account</div><div class="d-sub"><span class="pkt stolen">compromised</span></div></div>`,
+    steps:[
+      {n:'01',title:'The attacker gets a password list',desc:'Lists of the most common passwords are freely available. "password", "123456", "qwerty" appear in billions of real accounts.'},
+      {n:'02',title:'A script tries them all automatically',desc:'The bot submits login attempt after login attempt, as fast as the server allows. A human can\'t do this — a computer can try millions.'},
+      {n:'03',title:'A match is found',desc:'If your password is on that list, the attack succeeds. The attacker logs in and you receive no alert.'},
+    ],
+    conseqs:['🔑 Account taken over','📧 Email used to reset other accounts','💳 Saved payment info stolen','🔗 Account used to attack others'],
+    prots:[
+      {i:'🔢',t:'<strong>Long, unique passwords</strong> — a random 16-character password would take billions of years to crack by brute force.'},
+      {i:'🔐',t:'<strong>Multi-Factor Authentication (MFA)</strong> — even with the right password, the attacker can\'t get in without your phone.'},
+      {i:'⏱️',t:'<strong>Account lockout</strong> — lock the account after 5 failed attempts. The bot can\'t keep trying.'},
+    ],
+    realworld:'In 2012, <strong>6.5 million LinkedIn passwords</strong> were cracked after a database breach. "password" and "123456" were among the most common — cracked in milliseconds.',
+    sim:[
+      {t:'Click <strong>START ATTACK</strong>. Watch the log scroll as the bot tries passwords from a real wordlist one by one. The elapsed timer shows how fast it moves.'},
+      {t:'The bot finds the target password <strong>"pass99"</strong> — it\'s cracked within seconds. Without lockout, nothing stops the bot from trying the entire list.'},
+      {t:'Click RESET, then toggle <strong>LOCKOUT ON</strong> and start again. After exactly 5 failed attempts the account freezes — the attack stops cold regardless of how many passwords remain.'},
+    ],
+  },
+
+  {
+    id:'spray', cls:'c-spray', icon:'⊹', sev:'MEDIUM', sevCls:'sev-medium',
+    name:'Password Spraying',
+    tagline:'One guess per account — stay under the radar',
+
+    // ── PASSWORD SPRAYING — PASTE VIDEO URL BETWEEN THE QUOTES BELOW ──────
+    videoUrl: 'https://www.youtube.com/watch?v=cV2PBtRzX5U',
+    // ─────────────────────────────────────────────────────────────
+
+    intro:'Brute force hammers one account with many passwords and triggers lockout. Password spraying is smarter: try one common password across thousands of accounts. No account ever locks, but some will match.',
+    analogy:'Instead of picking one house and trying every key, the burglar walks down the street trying <strong>one key per house</strong> — the most common key shape. Most won\'t open. But some will, and no alarm ever fires.',
+    diagram:`<div class="d-node bad"><span class="d-ico">👾</span><div class="d-lbl">Attacker</div><div class="d-sub">"Summer2024!"</div></div><div class="d-arrow"><div class="d-line danger"></div><div class="d-tag red">1 try each</div></div><div class="d-node"><span class="d-ico">👥</span><div class="d-lbl">1000 Accounts</div><div class="d-sub">each gets 1 try</div></div><div class="d-arrow"><div class="d-line danger"></div><div class="d-tag red">some match!</div></div><div class="d-node bad"><span class="d-ico">🔓</span><div class="d-lbl">Compromised</div><div class="d-sub"><span class="pkt stolen">3 accounts!</span></div></div>`,
+    steps:[
+      {n:'01',title:'The attacker collects a list of usernames',desc:'Often from company email formats (first.last@company.com) found on LinkedIn or leaked from past breaches.'},
+      {n:'02',title:'One common password is tried across all accounts',desc:'"Summer2024!" — complex enough to pass password rules, but common enough that some employees use it.'},
+      {n:'03',title:'A few accounts match — no lockout triggered',desc:'Each account only saw 1 failed attempt. Lockout requires 5+. The attack is invisible to standard monitoring.'},
+    ],
+    conseqs:['🔑 Multiple accounts compromised','🏢 Corporate network infiltrated','📊 Sensitive data accessed','🔍 Hard to detect until too late'],
+    prots:[
+      {i:'🔐',t:'<strong>MFA on every account</strong> — matching the password is only half the battle. The second factor stops the attacker.'},
+      {i:'📊',t:'<strong>Distributed failure monitoring</strong> — alert when many accounts each fail once, not just when one account fails many times.'},
+      {i:'🎯',t:'<strong>Banned password lists</strong> — prevent users from setting passwords that appear in known spray lists.'},
+    ],
+    realworld:'In 2019, a spraying campaign hit <strong>hundreds of US energy companies</strong> attempting to reach industrial control systems. Many were compromised using "Password1" and similar weak credentials.',
+    sim:[
+      {t:'Click <strong>SPRAY</strong>. Watch the attack try one password across all 8 employee accounts simultaneously. Each card highlights as it\'s being tested.'},
+      {t:'Two accounts turn red — they used "Summer2024!" as their password. The rest show "fail" with only 1 attempt each. <strong>No account ever hit the 5-attempt lockout threshold.</strong>'},
+      {t:'This is why standard brute-force detection misses spraying — look at each individual account and nothing looks wrong. Only a bird\'s-eye view reveals the pattern.'},
+    ],
+  },
+
+  {
+    id:'csrf', cls:'c-csrf', icon:'⇄', sev:'MEDIUM', sevCls:'sev-medium',
+    name:'CSRF Attack',
+    tagline:'A forged request sent with your identity',
+
+    // ── CSRF ATTACK — PASTE VIDEO URL BETWEEN THE QUOTES BELOW ──────
+    videoUrl: 'https://www.youtube.com/watch?v=rbP2jwEDlBM',
+    // ─────────────────────────────────────────────────────────────
+
+    intro:'You\'re logged into your bank. You visit another website — which secretly sends a request TO your bank using your active session cookie. The bank sees a valid request. You never sent it.',
+    analogy:'Someone forges a letter with your signature and sends it to your bank authorizing a transfer. <strong>The bank doesn\'t call to verify — they trust the signature.</strong> You never wrote the letter.',
+    diagram:`<div class="d-node"><span class="d-ico">💻</span><div class="d-lbl">You</div><div class="d-sub">logged into bank</div></div><div class="d-arrow"><div class="d-line danger"></div><div class="d-tag red">visit evil site</div></div><div class="d-node bad"><span class="d-ico">😈</span><div class="d-lbl">Evil Site</div><div class="d-sub">hidden form</div></div><div class="d-arrow"><div class="d-line danger"></div><div class="d-tag red">forged request</div></div><div class="d-node bad"><span class="d-ico">🏦</span><div class="d-lbl">Your Bank</div><div class="d-sub"><span class="pkt stolen">transfer done!</span></div></div>`,
+    steps:[
+      {n:'01',title:'You\'re logged into a site',desc:'Your browser stores a session cookie for your bank. Every request to the bank automatically includes that cookie.'},
+      {n:'02',title:'You visit a malicious page',desc:'It contains a hidden form: <code>&lt;form action="bank.com/transfer"&gt;</code> with an amount and destination pre-filled — auto-submitted on load.'},
+      {n:'03',title:'Your browser sends the request — with your cookie',desc:'The bank receives a valid transfer request with your real session cookie. It has no way to know you didn\'t send it.'},
+    ],
+    conseqs:['💸 Money transferred without consent','🔧 Account settings changed','📧 Password or email changed','🔑 Any logged-in action performed'],
+    prots:[
+      {i:'🎫',t:'<strong>CSRF tokens</strong> — a secret random value in every form that the malicious site can\'t know or guess. The bank rejects requests without it.'},
+      {i:'🍪',t:'<strong>SameSite cookie flag</strong> — tells the browser not to include your cookie when the request comes from another site.'},
+      {i:'✅',t:'<strong>Confirm sensitive actions</strong> — require a password re-entry or 2FA code for any transfer or account change.'},
+    ],
+    realworld:'In 2008, a CSRF vulnerability in the <strong>uTorrent web interface</strong> allowed malicious websites to add downloads and change settings on victims\' computers just by loading a web page.',
+    sim:[
+      {t:'You start "logged in" — the left panel shows your bank balance of $5,000 and your active session cookie. The right panel shows the evil site with a visible hidden form.'},
+      {t:'Notice the hidden form code targeting <code>bank.com/transfer</code> — this is invisible to you on a real site. Click <strong>CLAIM PRIZE</strong> on the evil site.'},
+      {t:'Watch the bank balance drop to <strong>$0</strong> and the terminal show the forged POST request. The bank accepted it because your session cookie was attached automatically.'},
+    ],
+  },
+
+  {
+    id:'cj', cls:'c-cj', icon:'◻', sev:'MEDIUM', sevCls:'sev-medium',
+    name:'Clickjacking',
+    tagline:'You clicked something — just not what you thought',
+
+    // ── CLICKJACKING — PASTE VIDEO URL BETWEEN THE QUOTES BELOW ──────
+    videoUrl: 'https://www.youtube.com/watch?v=Pdc5KJfOQpI',
+    // ─────────────────────────────────────────────────────────────
+
+    intro:'An attacker overlays a transparent invisible website on top of their decoy page. You think you\'re clicking something fun — but you\'re clicking a hidden "Confirm" button on a real site underneath.',
+    analogy:'A clear glass panel is placed over a big red button. On the glass is a sticker saying "Click here for a free cookie." <strong>When you press the sticker, you actually press the big red button underneath.</strong>',
+    diagram:`<div class="d-node bad"><span class="d-ico">🪟</span><div class="d-lbl">Fake Page</div><div class="d-sub">"WIN A PRIZE"</div></div><div style="display:flex;flex-direction:column;align-items:center;gap:.2rem"><div style="font-size:.65rem;color:#ff7070">transparent overlay</div><div style="font-size:1.5rem">⬇</div></div><div class="d-node bad"><span class="d-ico">🏦</span><div class="d-lbl">Hidden Page</div><div class="d-sub">real bank page</div></div><div class="d-arrow"><div class="d-line danger"></div><div class="d-tag red">user clicks</div></div><div class="d-node bad"><span class="d-ico">✅</span><div class="d-lbl">Confirmed!</div><div class="d-sub"><span class="pkt stolen">$500 sent</span></div></div>`,
+    steps:[
+      {n:'01',title:'The attacker builds a decoy page',desc:'A game, a prize claim, a viral video — anything that makes you want to click. Beneath it, invisible, is a real "Confirm Transfer" page.'},
+      {n:'02',title:'The invisible site is perfectly aligned',desc:'The real "Confirm" button is positioned under the fake "Click to Play" button. Transparency is set to zero — totally invisible.'},
+      {n:'03',title:'You click — and confirm the real action',desc:'Your click passes through the decoy and hits the real button. The bank sees a valid click from a logged-in user.'},
+    ],
+    conseqs:['💸 Payments confirmed','📷 Webcam access granted','📋 Permissions enabled','🔒 Security settings changed'],
+    prots:[
+      {i:'🛡️',t:'<strong>X-Frame-Options: DENY</strong> — a single HTTP header that prevents your site from being embedded in anyone else\'s iframe.'},
+      {i:'📋',t:'<strong>Content Security Policy</strong> — the <code>frame-ancestors \'none\'</code> rule stops clickjacking entirely.'},
+      {i:'✅',t:'<strong>Confirm critical actions</strong> with a CAPTCHA or 2FA — so a single invisible click isn\'t enough to approve them.'},
+    ],
+    realworld:'In 2008, researchers found a clickjacking vulnerability in <strong>Adobe Flash\'s settings panel</strong> that could silently enable a visitor\'s webcam and microphone without any indication to the user.',
+    sim:[
+      {t:'By default the iframe is hidden. The page looks like a simple "Win a Prize" site. Click <strong>REVEAL IFRAME</strong> to make the transparent overlay visible.'},
+      {t:'Now you can see the real bank page sitting beneath the fake one. The "CONFIRM" bank button is <strong>perfectly aligned</strong> under the "WIN PRIZE" decoy button.'},
+      {t:'Click <strong>WIN PRIZE</strong> — the result message confirms you actually clicked the bank\'s hidden button. On a real site, $500 would be transferred without you knowing.'},
+    ],
+  },
+
+  {
+    id:'ransom', cls:'c-ransom', icon:'🔒', sev:'CRITICAL', sevCls:'sev-critical',
+    name:'Ransomware',
+    tagline:'Your files locked — pay for the key',
+
+    // ── RANSOMWARE — PASTE VIDEO URL BETWEEN THE QUOTES BELOW ──────
+    videoUrl: 'https://www.youtube.com/watch?v=eyyogKy3tW0',
+    // ─────────────────────────────────────────────────────────────
+
+    intro:'Ransomware sneaks onto your computer, encrypts every file — documents, photos, databases — and deletes the originals. You get a ransom note demanding cryptocurrency for the decryption key.',
+    analogy:'You come home to find all your belongings in padlocked boxes. A note says <strong>"Pay us $500 and we\'ll send you the combination. You have 72 hours."</strong> This is exactly what ransomware does — digitally.',
+    diagram:`<div class="d-node bad"><span class="d-ico">📧</span><div class="d-lbl">Malicious Email</div><div class="d-sub">attachment opened</div></div><div class="d-arrow"><div class="d-line danger"></div><div class="d-tag red">malware runs</div></div><div class="d-node bad"><span class="d-ico">🔐</span><div class="d-lbl">Files Encrypted</div><div class="d-sub">all .locked</div></div><div class="d-arrow"><div class="d-line danger"></div><div class="d-tag red">ransom note</div></div><div class="d-node bad"><span class="d-ico">💰</span><div class="d-lbl">Demand</div><div class="d-sub"><span class="pkt stolen">0.5 BTC</span></div></div>`,
+    steps:[
+      {n:'01',title:'Malware gets onto your computer',desc:'Usually via a phishing email attachment, a malicious download, or an unpatched vulnerability. Once running, it works silently.'},
+      {n:'02',title:'It encrypts every file it can reach',desc:'Documents, photos, databases, backups — all locked with encryption only the attacker can reverse. This takes minutes.'},
+      {n:'03',title:'A ransom note appears',desc:'A countdown timer and instructions to pay in crypto. Pay and maybe get the key. Don\'t pay and lose everything. Sometimes they take the money anyway.'},
+    ],
+    conseqs:['📁 All files inaccessible','💸 Ransom payment demanded','🏥 Hospitals and cities shut down','📉 Business halted for weeks'],
+    prots:[
+      {i:'💾',t:'<strong>Offline backups (3-2-1 rule)</strong> — 3 copies, 2 different media, 1 offsite. Ransomware can\'t encrypt what it can\'t reach.'},
+      {i:'🔄',t:'<strong>Patch everything regularly</strong> — most ransomware exploits known vulnerabilities already fixed in updates.'},
+      {i:'📧',t:'<strong>Email filtering</strong> to block malicious attachments before they reach inboxes. Most ransomware arrives via email.'},
+    ],
+    realworld:'In 2021, <strong>Colonial Pipeline</strong> — supplying 45% of the US East Coast\'s fuel — was shut down by ransomware for 6 days. The company paid $4.4 million in ransom. Gas stations ran dry across the Southeast.',
+    sim:[
+      {t:'Click <strong>EXECUTE PAYLOAD</strong>. Watch each file in the explorer change one by one — the name gets a <code>.locked</code> extension and the icon goes grey as it\'s encrypted.'},
+      {t:'After all 12 files are encrypted the <strong>ransom note</strong> appears on the right: a Bitcoin wallet address, a dollar amount, and a live countdown timer ticking down.'},
+      {t:'Notice there\'s no undo button — that\'s the point. Without a prior offline backup, the only options are pay the ransom or lose everything. Click RESET to restore the files.'},
+    ],
+  },
+
+]; // ← END OF ATTACK DATA
+
+
+/* ── HELPERS ── */
+function getYouTubeId(url) {
+  try {
+    const u = new URL(url);
+    if (u.hostname.includes('youtube.com')) {
+      if (u.pathname === '/watch') return u.searchParams.get('v');
+      if (u.pathname.startsWith('/embed/'))  return u.pathname.split('/embed/')[1].split('?')[0];
+      if (u.pathname.startsWith('/shorts/')) return u.pathname.split('/shorts/')[1].split('?')[0];
+    }
+    if (u.hostname === 'youtu.be') return u.pathname.slice(1).split('?')[0];
+  } catch(_) {}
+  return null;
+}
+
+function buildVideoSection(videoUrl, col) {
+  if (!videoUrl) {
+    // No video set — show a subtle placeholder
+    return `
+      <div class="video-section">
+        <div class="video-section-header">
+          <div class="video-section-left">
+            <span class="video-section-icon">▶</span>
+            <div>
+              <div class="video-section-title">FURTHER LEARNING</div>
+              <div class="video-section-sub">Video resource</div>
+            </div>
+          </div>
+        </div>
+        <div class="video-placeholder">
+          <span class="vph-icon">🎬</span>
+          <div class="vph-text">No video added yet. Open the file and set <code>videoUrl</code> for this attack to link a video here.</div>
+        </div>
+      </div>`;
+  }
+
+  const ytId = getYouTubeId(videoUrl);
+
+  if (ytId) {
+    // YouTube — embed the player directly
+    return `
+      <div class="video-section">
+        <div class="video-section-header">
+          <div class="video-section-left">
+            <span class="video-section-icon">▶</span>
+            <div>
+              <div class="video-section-title">FURTHER LEARNING</div>
+              <div class="video-section-sub">Watch the video below to go deeper on this attack</div>
+            </div>
+          </div>
+        </div>
+        <div class="video-embed-wrap">
+          <iframe
+            src="https://www.youtube.com/embed/${ytId}?rel=0&modestbranding=1"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen>
+          </iframe>
+        </div>
+      </div>`;
+  } else {
+    // Non-YouTube URL — show as a styled clickable link
+    let display = videoUrl;
+    try { display = new URL(videoUrl).hostname; } catch(_) {}
+    return `
+      <div class="video-section">
+        <div class="video-section-header">
+          <div class="video-section-left">
+            <span class="video-section-icon">▶</span>
+            <div>
+              <div class="video-section-title">FURTHER LEARNING</div>
+              <div class="video-section-sub">External video resource</div>
+            </div>
+          </div>
+        </div>
+        <a class="video-ext-link" href="${videoUrl}" target="_blank" rel="noopener noreferrer">
+          <div class="video-ext-thumb">🎬</div>
+          <div class="video-ext-info">
+            <div class="video-ext-label">// EXTERNAL VIDEO</div>
+            <div class="video-ext-url">${display}</div>
+          </div>
+          <span class="video-ext-arrow">→</span>
+        </a>
+      </div>`;
+  }
+}
+
+/* ── RENDER CARDS ── */
+const grid = document.getElementById('card-grid');
+ATTACKS.forEach(a => {
+  const card = document.createElement('div');
+  card.className = `card ${a.cls}`;
+  card.innerHTML = `<div class="card-glow"></div><span class="card-sev ${a.sevCls}">${a.sev}</span><span class="card-icon">${a.icon}</span><div class="card-name">${a.name}</div><div class="card-tagline">${a.tagline}</div><span class="card-arrow">→</span>`;
+  card.addEventListener('click', () => openDetail(a.id));
+  grid.appendChild(card);
+});
+
+/* ── OPEN DETAIL ── */
+function openDetail(id) {
+  const idx = ATTACKS.findIndex(a => a.id === id);
+  const a = ATTACKS[idx];
+  document.getElementById('home').style.display = 'none';
+  document.getElementById('detail').style.display = 'block';
+  document.getElementById('det-head-title').textContent = a.name.toUpperCase();
+  window.scrollTo(0, 0);
+
+  const col = a.sevCls === 'sev-critical' ? '#ff5050' : a.sevCls === 'sev-high' ? '#ffb800' : '#00d4ff';
+  const prevAtk = idx > 0 ? ATTACKS[idx - 1] : null;
+  const nextAtk = idx < ATTACKS.length - 1 ? ATTACKS[idx + 1] : null;
+
+  document.getElementById('det-body').innerHTML = `
+    <div class="det-hero">
+      <div class="det-icon-wrap" style="border-color:${col};box-shadow:0 0 30px ${col}18">${a.icon}</div>
+      <div class="det-intro">
+        <span class="card-sev ${a.sevCls} det-sev">${a.sev}</span>
+        <h1 style="color:${col}">${a.name}</h1>
+        <p>${a.intro}</p>
+      </div>
+    </div>
+
+    <div class="analogy">
+      <div class="analogy-label">// THINK OF IT THIS WAY</div>
+      <div class="analogy-text">${a.analogy}</div>
+    </div>
+
+    <div class="diag-wrap">
+      <div class="diag-label">// HOW THE ATTACK FLOWS</div>
+      <div class="diagram">${a.diagram}</div>
+    </div>
+
+    <div class="section-title" style="color:${col}">HOW IT WORKS</div>
+    <div class="steps">
+      ${a.steps.map(s => `
+        <div class="step">
+          <div class="step-num" style="color:${col}">${s.n}</div>
+          <div class="step-body">
+            <div class="step-title">${s.title}</div>
+            <div class="step-desc">${s.desc}</div>
+          </div>
+        </div>`).join('')}
+    </div>
+
+    <div class="section-title" style="color:${col}">WHAT CAN HAPPEN</div>
+    <div class="conseqs">
+      ${a.conseqs.map(c => `<div class="conseq"><span class="cq-ico">${c.split(' ')[0]}</span><div class="cq-txt">${c.slice(c.indexOf(' ') + 1)}</div></div>`).join('')}
+    </div>
+
+    <div class="section-title" style="color:${col}">HOW TO STAY SAFE</div>
+    <div class="protections">
+      ${a.prots.map(p => `<div class="prot"><span class="prot-ico">${p.i}</span><div class="prot-text">${p.t}</div></div>`).join('')}
+    </div>
+
+    <div class="section-title" style="color:${col}">REAL-WORLD EXAMPLE</div>
+    <div class="rw-box">
+      <div class="rw-label">// THIS ACTUALLY HAPPENED</div>
+      <div class="rw-text">${a.realworld}</div>
+    </div>
+
+    <div class="section-title" style="color:${col}">TRY THE SIMULATION</div>
+    <div class="sim-box">
+      <div class="sim-box-header">
+        <span class="sim-box-icon">🧪</span>
+        <span class="sim-box-title">WHAT TO DO IN THE SIMULATOR</span>
+      </div>
+      <div class="sim-steps">
+        ${a.sim.map((s, i) => `<div class="sim-step"><span class="sim-step-num">${String(i + 1).padStart(2, '0')}</span><span>${s.t}</span></div>`).join('')}
+      </div>
+    </div>
+
+    <div class="section-title" style="color:${col}">FURTHER LEARNING</div>
+    ${buildVideoSection(a.videoUrl, col)}
+
+    <div class="det-nav">
+      <button onclick="openDetail('${prevAtk?.id}')" ${!prevAtk ? 'disabled style="opacity:.3;cursor:default"' : ''}>← ${prevAtk?.name || ''}</button>
+      <span class="dn-pos">${idx + 1} / ${ATTACKS.length}</span>
+      <button onclick="openDetail('${nextAtk?.id}')" ${!nextAtk ? 'disabled style="opacity:.3;cursor:default"' : ''}>${nextAtk?.name || ''} →</button>
+    </div>
+  `;
+}
+
+document.getElementById('back-btn').addEventListener('click', () => {
+  document.getElementById('detail').style.display = 'none';
+  document.getElementById('home').style.display = 'block';
+  window.scrollTo(0, 0);
+});
+</script>
+</body>
+</html>
